@@ -25,7 +25,7 @@ export class AuthService {
         this.usuarioActual = session.user;
         const currentUrl = this.router.url;
 
-        if (currentUrl === '/login' || currentUrl === '/registro' || currentUrl === '/') {
+        if (currentUrl === '/login' || currentUrl === '/registro' || currentUrl === '/registro/usuarios' || currentUrl === '/registro/especialistas' || currentUrl === '/') {
           //redigir al home
           this.router.navigateByUrl("/home");
         }

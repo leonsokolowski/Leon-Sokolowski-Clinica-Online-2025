@@ -25,6 +25,8 @@ export class RegistroUsuariosComponent {
   // Para manejo de imágenes
   imagenesSeleccionadas: File[] = [];
   previewUrls: string[] = [];
+  // Array para guardar los paths de las imágenes subidas (para poder eliminarlas si es necesario)
+  imagenesSubidas: string[] = [];
 
   constructor() {
     this.registroForm = this.fb.group({
@@ -63,6 +65,12 @@ export class RegistroUsuariosComponent {
         return;
       }
 
+      // Si ya había una imagen subida en este índice, eliminarla del servidor
+      if (this.imagenesSubidas[index]) {
+        this.eliminarImagenDelServidor(this.imagenesSubidas[index]);
+        this.imagenesSubidas[index] = '';
+      }
+
       // Actualizar array de imágenes
       this.imagenesSeleccionadas[index] = file;
 
@@ -78,9 +86,36 @@ export class RegistroUsuariosComponent {
   }
 
   // Remover imagen seleccionada
-  removeImage(index: number): void {
+  async removeImage(index: number): Promise<void> {
+    // Si hay una imagen subida en el servidor, eliminarla
+    if (this.imagenesSubidas[index]) {
+      try {
+        await this.eliminarImagenDelServidor(this.imagenesSubidas[index]);
+        this.imagenesSubidas[index] = '';
+      } catch (error) {
+        console.error('Error al eliminar imagen del servidor:', error);
+      }
+    }
+
+    // Limpiar los arrays locales
     this.imagenesSeleccionadas[index] = null as any;
     this.previewUrls[index] = '';
+    
+    // Limpiar el input file
+    const fileInput = document.getElementById(`imagen${index + 1}`) as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  }
+
+  // Método para eliminar imagen del servidor
+  private async eliminarImagenDelServidor(path: string): Promise<void> {
+    try {
+      await this.db.eliminarImagen(path);
+    } catch (error) {
+      console.error('Error al eliminar imagen:', error);
+      throw error;
+    }
   }
 
   async verificarUsuarioExistente(): Promise<boolean> {
@@ -95,15 +130,19 @@ export class RegistroUsuariosComponent {
 
   async subirImagenes(): Promise<{ imagen1: string, imagen2: string }> {
     const resultados = { imagen1: '', imagen2: '' };
+    const correo = this.registroForm.value.correo;
     
     // Subir primera imagen
     if (this.imagenesSeleccionadas[0]) {
       const timestamp = new Date().getTime();
-      const filename1 = `paciente_${timestamp}_1.${this.imagenesSeleccionadas[0].name.split('.').pop()}`;
-      const path1 = `usuarios/${filename1}`;
+      const extension = this.imagenesSeleccionadas[0].name.split('.').pop();
+      const filename1 = `imagen_1_${timestamp}.${extension}`;
+      // Usar el correo del usuario como carpeta
+      const path1 = `usuarios/${correo}/${filename1}`;
       
       try {
         resultados.imagen1 = await this.db.subirImagen(this.imagenesSeleccionadas[0], path1);
+        this.imagenesSubidas[0] = path1; // Guardar el path para posibles eliminaciones
       } catch (error) {
         console.error('Error al subir primera imagen:', error);
         throw new Error('Error al subir la primera imagen');
@@ -113,11 +152,14 @@ export class RegistroUsuariosComponent {
     // Subir segunda imagen
     if (this.imagenesSeleccionadas[1]) {
       const timestamp = new Date().getTime();
-      const filename2 = `paciente_${timestamp}_2.${this.imagenesSeleccionadas[1].name.split('.').pop()}`;
-      const path2 = `usuarios/${filename2}`;
+      const extension = this.imagenesSeleccionadas[1].name.split('.').pop();
+      const filename2 = `imagen_2_${timestamp}.${extension}`;
+      // Usar el correo del usuario como carpeta
+      const path2 = `usuarios/${correo}/${filename2}`;
       
       try {
         resultados.imagen2 = await this.db.subirImagen(this.imagenesSeleccionadas[1], path2);
+        this.imagenesSubidas[1] = path2; // Guardar el path para posibles eliminaciones
       } catch (error) {
         console.error('Error al subir segunda imagen:', error);
         throw new Error('Error al subir la segunda imagen');
@@ -186,9 +228,29 @@ export class RegistroUsuariosComponent {
       this.registroForm.reset();
       this.imagenesSeleccionadas = [];
       this.previewUrls = [];
+      this.imagenesSubidas = [];
+
+      // Limpiar también los inputs de archivos
+      const fileInput1 = document.getElementById('imagen1') as HTMLInputElement;
+      const fileInput2 = document.getElementById('imagen2') as HTMLInputElement;
+      if (fileInput1) fileInput1.value = '';
+      if (fileInput2) fileInput2.value = '';
 
     } catch (error: any) {
       console.error('Error en el registro:', error);
+      
+      // Si hubo error después de subir imágenes, intentar limpiarlas
+      if (this.imagenesSubidas.length > 0) {
+        this.imagenesSubidas.forEach(async (path, index) => {
+          if (path) {
+            try {
+              await this.eliminarImagenDelServidor(path);
+            } catch (cleanupError) {
+              console.error(`Error al limpiar imagen ${index + 1}:`, cleanupError);
+            }
+          }
+        });
+      }
       
       // Mejorar el manejo de errores específicos
       if (error.message?.includes('User already registered')) {
