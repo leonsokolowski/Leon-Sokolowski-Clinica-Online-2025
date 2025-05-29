@@ -1,14 +1,14 @@
 <div>
-  <!-- @if(auth.usuarioActual !== null)
-  { -->
+  @if(auth.usuarioActual !== null)
+  {
   <button  routerLink="/home" >Home</button>
   <!-- Aca debería haber un if que verifique si el tipo de usuario es admin -->
    <button  routerLink="/seccion-usuarios">Administración de Usuarios</button>
   <button (click)="logOut()">Cerrar Sesión</button>
-  <!-- }@else 
-  { -->
+  }@else 
+  {
     <button routerLink="/login">Login</button>
     <button routerLink="registro">Registro</button>
-  <!-- } -->
+  }
 </div>
 <router-outlet />

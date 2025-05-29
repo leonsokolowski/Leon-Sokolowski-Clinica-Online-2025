@@ -10,6 +10,7 @@ export class AuthService {
   sb = inject(SupabaseService)
   router = inject(Router)
   usuarioActual : User | null = null;
+  
   constructor() {
     //Saber si el usuario esta logeado o no
     this.sb.supabase.auth.onAuthStateChange((event, session) => {
@@ -33,22 +34,44 @@ export class AuthService {
    }
 
   //Crear un cuenta
-  async crearCuenta(correo:string, contraseña:string)
-  {
-    const {data, error} = await this.sb.supabase.auth.signUp({email: correo, password: contraseña});
-    console.log(data, error);
+  async crearCuenta(correo: string, contraseña: string) {
+    const { data, error } = await this.sb.supabase.auth.signUp({
+      email: correo, 
+      password: contraseña
+    });
+    
+    if (error) {
+      console.error('Error al crear cuenta:', error);
+      throw error;
+    }
+    
+    console.log('Cuenta creada exitosamente:', data);
+    return { data, error };
   }
 
   //Iniciar sesión
-  async iniciarSesion(correo:string, contraseña:string){
-    const {data, error} = await this.sb.supabase.auth.signInWithPassword({email: correo, password: contraseña});
-    console.log(data, error);
-    return {data, error}
+  async iniciarSesion(correo: string, contraseña: string) {
+    const { data, error } = await this.sb.supabase.auth.signInWithPassword({
+      email: correo, 
+      password: contraseña
+    });
+    
+    if (error) {
+      console.error('Error al iniciar sesión:', error);
+    }
+    
+    console.log('Inicio de sesión:', data, error);
+    return { data, error };
   }
+
   //Cerrar sesión
-  async cerrarSesion()
-  {
-    const {error} = await this.sb.supabase.auth.signOut();
-    console.log(error);
+  async cerrarSesion() {
+    const { error } = await this.sb.supabase.auth.signOut();
+    
+    if (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+    
+    console.log('Sesión cerrada');
   }
 }
