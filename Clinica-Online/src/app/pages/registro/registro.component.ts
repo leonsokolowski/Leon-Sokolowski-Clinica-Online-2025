@@ -4,7 +4,7 @@ import { Router, RouterLink, RouterOutlet } from '@angular/router';
 @Component({
   selector: 'app-registro',
   standalone : true,
-  imports: [RouterLink],
+  imports: [],
   templateUrl: './registro.component.html',
   styleUrl: './registro.component.css'
 })

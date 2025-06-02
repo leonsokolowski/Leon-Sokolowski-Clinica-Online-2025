@@ -2,7 +2,7 @@
 
 .container {
   min-height: 100vh;
-  background: var(--gradient-background);
+  background: linear-gradient(135deg, #9DD1F1 0%, #508AA8 100%);
   padding: 2rem;
   display: flex;
   align-items: center;
@@ -30,7 +30,7 @@
 
 .form-title {
   text-align: center;
-  color: var(--primary-dark);
+  color: #031927;
   font-size: 2.2rem;
   font-weight: 300;
   margin-bottom: 2.5rem;
@@ -49,7 +49,7 @@
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  color: var(--primary-dark);
+  color: #031927;
   font-weight: 600;
   font-size: 0.9rem;
 }
@@ -67,7 +67,7 @@
 
 .form-control:focus {
   outline: none;
-  border-color: var(--primary-medium-blue);
+  border-color: #508AA8;
   background: white;
   box-shadow: 0 0 0 3px rgba(80, 138, 168, 0.1);
 }
@@ -82,7 +82,7 @@
 }
 
 .error-container small {
-  color: var(--primary-red);
+  color: #DB504A;
   font-size: 0.85rem;
   display: block;
   font-weight: 500;
@@ -108,7 +108,7 @@
 
 .alert-danger {
   background: rgba(219, 80, 74, 0.1);
-  color: var(--primary-red);
+  color: #DB504A;
   border: 1px solid rgba(219, 80, 74, 0.3);
 }
 
@@ -128,7 +128,7 @@
 }
 
 .btn-primary {
-  background: var(--gradient-blue);
+  background: linear-gradient(135deg, #508AA8 0%, #9DD1F1 100%);
   color: white;
   width: 100%;
   box-shadow: 0 4px 15px rgba(80, 138, 168, 0.3);
@@ -138,7 +138,7 @@
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(80, 138, 168, 0.4);
-  background: var(--gradient-blue-reverse);
+  background: linear-gradient(135deg, #9DD1F1 0%, #508AA8 100%);
 }
 
 .btn-primary:disabled {
@@ -154,14 +154,14 @@
 }
 
 .register-link {
-  color: var(--primary-medium-blue);
+  color: #508AA8;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
 }
 
 .register-link:hover {
-  color: var(--primary-dark);
+  color: #031927;
   text-decoration: underline;
 }
 
@@ -216,7 +216,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--gradient-blue);
+  background: linear-gradient(135deg, #DB504A 0%, #031927 100%);
   border-radius: 50%;
   z-index: -1;
 }
@@ -234,7 +234,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #28a745 0%, #155724 100%);
   border-radius: 50%;
   z-index: -1;
 }
@@ -252,7 +252,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, #508AA8 0%, #031927 100%);
   border-radius: 50%;
   z-index: -1;
 }
@@ -270,14 +270,13 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--gradient-red);
+  background: linear-gradient(135deg, #ff4757 0%, #c44569 100%);
   border-radius: 50%;
   z-index: -1;
 }
 
 .profile-icon {
-  font-size: 22px;
-  margin-bottom: 2px;
+  font-size: 28px;
   position: relative;
   z-index: 1;
 }
@@ -321,8 +320,8 @@
   margin-bottom: 15px;
   font-size: 16px;
   font-weight: 600;
-  color: var(--primary-dark);
-  border-bottom: 2px solid var(--primary-light-blue);
+  color: #031927;
+  border-bottom: 2px solid #9DD1F1;
   padding-bottom: 8px;
 }
 
@@ -346,10 +345,27 @@
   transform: translateX(5px);
 }
 
-.user-button.selected {
-  background: var(--gradient-blue);
+/* Botón seleccionado - Admin (Rojo) */
+.admin-dropdown .user-button.selected {
+  background: linear-gradient(135deg, #DB504A 0%, #031927 100%);
   color: white;
-  border-color: var(--primary-medium-blue);
+  border-color: #DB504A;
+  box-shadow: 0 4px 15px rgba(219, 80, 74, 0.3);
+}
+
+/* Botón seleccionado - Especialista (Verde) */
+.especialista-dropdown .user-button.selected {
+  background: linear-gradient(135deg, #28a745 0%, #155724 100%);
+  color: white;
+  border-color: #28a745;
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+/* Botón seleccionado - Paciente (Azul) */
+.paciente-dropdown .user-button.selected {
+  background: linear-gradient(135deg, #508AA8 0%, #9DD1F1 100%);
+  color: white;
+  border-color: #508AA8;
   box-shadow: 0 4px 15px rgba(80, 138, 168, 0.3);
 }
 
@@ -377,7 +393,7 @@
   font-weight: 600;
   font-size: 15px;
   margin-bottom: 3px;
-  color: var(--primary-dark);
+  color: #031927;
 }
 
 .user-email {
@@ -392,19 +408,43 @@
 
 /* Estilos específicos para cada tipo de dropdown */
 .admin-dropdown {
-  border-top: 4px solid var(--primary-medium-blue);
+  border-top: 4px solid #DB504A;
 }
 
 .especialista-dropdown {
-  border-top: 4px solid #f5576c;
+  border-top: 4px solid #28a745;
 }
 
 .paciente-dropdown {
-  border-top: 4px solid #00f2fe;
+  border-top: 4px solid #508AA8;
 }
 
-/* Animaciones adicionales */
-@keyframes pulse {
+/* Animaciones específicas por perfil */
+@keyframes pulseAdmin {
+  0% {
+    box-shadow: 0 0 0 0 rgba(219, 80, 74, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(219, 80, 74, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(219, 80, 74, 0);
+  }
+}
+
+@keyframes pulseEspecialista {
+  0% {
+    box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+  }
+}
+
+@keyframes pulsePaciente {
   0% {
     box-shadow: 0 0 0 0 rgba(80, 138, 168, 0.7);
   }
@@ -416,8 +456,16 @@
   }
 }
 
-.user-button.selected {
-  animation: pulse 2s infinite;
+.admin-dropdown .user-button.selected {
+  animation: pulseAdmin 2s infinite;
+}
+
+.especialista-dropdown .user-button.selected {
+  animation: pulseEspecialista 2s infinite;
+}
+
+.paciente-dropdown .user-button.selected {
+  animation: pulsePaciente 2s infinite;
 }
 
 /* Flecha indicadora del dropdown */
@@ -448,7 +496,7 @@
   }
   
   .profile-icon {
-    font-size: 18px;
+    font-size: 20px;
   }
   
   .profile-label {
@@ -488,7 +536,7 @@
   }
   
   .profile-icon {
-    font-size: 16px;
+    font-size: 18px;
   }
   
   .profile-label {

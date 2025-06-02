@@ -19,8 +19,20 @@ export class AuthService {
       if (session === null) //Se cierra sesión o no hay sesion
       {
         this.usuarioActual = null;
-        //redirigir al login
-        this.router.navigateByUrl("/login");
+        const currentUrl = this.router.url;
+        if (currentUrl === '/' || currentUrl === '/login')
+        {
+          this.router.navigateByUrl("/login");
+        }else if(currentUrl === '/registro')
+        {
+          this.router.navigateByUrl("/registro");
+        }else if(currentUrl === '/registro-usuarios')
+        {
+          this.router.navigateByUrl("/registro-usuarios");
+        }else if(currentUrl === '/registro-especialistas')
+        {
+          this.router.navigateByUrl("/registro-especialistas");
+        }
       }else{ //si hay sesion
         this.usuarioActual = session.user;
         const currentUrl = this.router.url;

@@ -1,26 +1,22 @@
 <div class="registro-container">
   <div class="registro-header">
-    <h1>Bienvenido a Clínica Online</h1>
-    <p>Elige el tipo de registro que necesitas</p>
+    <h1>Clínica Online</h1>
+    <p>Selecciona tu tipo de registro</p>
   </div>
   
-  <div class="registro-options">
-    <div class="registro-card usuario-card" (click)="navigateToUsuarios()">
-      <div class="registro-card-icon">
-        <i class="icon-paciente">👤</i>
-      </div>
-      <h3>Registro de Paciente</h3>
-      <p>Regístrate como paciente para solicitar turnos y consultar con nuestros especialistas</p>
-      <button class="btn-registro">Registrarse como Paciente</button>
+  <div class="registro-buttons">
+    <div class="registro-option" (click)="navigateToUsuarios()">
+      <button class="btn-circular usuario-btn">
+        <img src="assets/registro/usuario.png" alt="Paciente" class="btn-image">
+      </button>
+      <h3>Paciente</h3>
     </div>
     
-    <div class="registro-card especialista-card" (click)="navigateToEspecialistas()">
-      <div class="registro-card-icon">
-        <i class="icon-especialista">⚕️</i>
-      </div>
-      <h3>Registro de Especialista</h3>
-      <p>Únete a nuestro equipo médico y brinda atención de calidad a nuestros pacientes</p>
-      <button class="btn-registro">Registrarse como Especialista</button>
+    <div class="registro-option" (click)="navigateToEspecialistas()">
+      <button class="btn-circular especialista-btn">
+        <img src="assets/registro/especialista.png" alt="Especialista" class="btn-image">
+      </button>
+      <h3>Especialista</h3>
     </div>
   </div>
 </div>

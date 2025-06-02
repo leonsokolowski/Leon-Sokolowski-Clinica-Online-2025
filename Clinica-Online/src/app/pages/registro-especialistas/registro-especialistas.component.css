@@ -2,52 +2,106 @@
 
 .container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #DB504A 0%, #031927 50%, #508AA8 100%);
-  padding: 2rem;
+  background: var(--gradient-background);
+  padding: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.form-title {
-  text-align: center;
-  color: white;
-  font-size: 2rem;
-  font-weight: 300;
-  margin-bottom: 2rem;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+.registration-wrapper {
+  display: flex;
+  max-width: 1100px;
+  width: 100%;
+  gap: 1.5rem;
+  max-height: 95vh;
+  overflow: hidden;
 }
 
-form {
+/* Tarjeta izquierda */
+.left-card {
+  flex: 1;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(15px);
-  border-radius: 20px;
-  padding: 2.5rem;
-  max-width: 600px;
-  width: 100%;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  border-radius: 15px;
+  padding: 1.8rem;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.1);
   border: 1px solid rgba(255,255,255,0.2);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* Tarjeta derecha */
+.right-card {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(15px);
+  border-radius: 15px;
+  padding: 1.8rem;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.form-title {
+  text-align: center;
+  color: var(--primary-dark);
+  font-size: 1.8rem;
+  font-weight: 300;
+  margin-bottom: 1.2rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-section-title {
+  color: var(--primary-green);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-align: center;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid var(--primary-light-green);
+}
+
+.form-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Nuevos estilos para filas de formulario */
+.form-row {
+  display: flex;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.form-group-half {
+  flex: 1;
+  margin-bottom: 0;
 }
 
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #031927;
+  color: var(--primary-dark);
   font-weight: 600;
   font-size: 0.9rem;
 }
 
 .form-control {
   width: 100%;
-  padding: 12px 16px;
+  padding: 10px 14px;
   border: 2px solid #e1e5e9;
-  border-radius: 10px;
-  font-size: 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
   transition: all 0.3s ease;
   background: rgba(255,255,255,0.8);
   box-sizing: border-box;
@@ -55,9 +109,9 @@ form {
 
 .form-control:focus {
   outline: none;
-  border-color: #DB504A;
+  border-color: var(--primary-green);
   background: white;
-  box-shadow: 0 0 0 3px rgba(219, 80, 74, 0.1);
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
 }
 
 .form-control::placeholder {
@@ -70,8 +124,8 @@ form {
 }
 
 .error-container small {
-  color: #DB504A;
-  font-size: 0.85rem;
+  color: var(--primary-red);
+  font-size: 0.75rem;
   display: block;
   font-weight: 500;
 }
@@ -79,13 +133,13 @@ form {
 /* Estilos específicos para especialidades */
 .especialidades-predefinidas {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 0.5rem;
   margin-bottom: 1rem;
   padding: 1rem;
-  background: rgba(157, 209, 241, 0.1);
+  background: rgba(40, 167, 69, 0.1);
   border-radius: 10px;
-  border: 1px solid rgba(157, 209, 241, 0.3);
+  border: 1px solid rgba(40, 167, 69, 0.3);
 }
 
 .especialidad-checkbox {
@@ -97,7 +151,7 @@ form {
 .especialidad-checkbox input[type="checkbox"] {
   width: 18px;
   height: 18px;
-  accent-color: #DB504A;
+  accent-color: var(--primary-green);
   cursor: pointer;
 }
 
@@ -105,8 +159,8 @@ form {
   margin: 0;
   cursor: pointer;
   font-weight: 500;
-  color: #031927;
-  font-size: 0.9rem;
+  color: var(--primary-dark);
+  font-size: 0.8rem;
 }
 
 .especialidad-personalizada {
@@ -120,11 +174,11 @@ form {
 }
 
 .btn-secondary {
-  background: linear-gradient(135deg, #508AA8 0%, #9DD1F1 100%);
+  background: var(--gradient-green);
   color: white;
   border: none;
-  padding: 12px 20px;
-  border-radius: 10px;
+  padding: 10px 16px;
+  border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -132,7 +186,7 @@ form {
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #9DD1F1 0%, #508AA8 100%);
+  background: var(--gradient-green-reverse);
   transform: translateY(-1px);
 }
 
@@ -144,14 +198,14 @@ form {
 .especialidades-seleccionadas {
   margin-top: 1rem;
   padding: 1rem;
-  background: rgba(219, 80, 74, 0.1);
+  background: rgba(40, 167, 69, 0.1);
   border-radius: 10px;
-  border: 1px solid rgba(219, 80, 74, 0.3);
+  border: 1px solid rgba(40, 167, 69, 0.3);
 }
 
 .especialidades-seleccionadas h4 {
   margin: 0 0 1rem 0;
-  color: #031927;
+  color: var(--primary-dark);
   font-size: 1rem;
   font-weight: 600;
 }
@@ -160,7 +214,7 @@ form {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, #DB504A 0%, #031927 100%);
+  background: var(--gradient-green);
   color: white;
   padding: 6px 12px;
   border-radius: 20px;
@@ -190,41 +244,54 @@ form {
   background: rgba(255,255,255,0.2);
 }
 
-/* Estilos para upload de imagen */
+/* Estilos para upload de imágenes - altura compacta */
+.images-section {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 .image-upload-container {
   position: relative;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
 }
 
 .image-upload-label {
   display: block;
   cursor: pointer;
-  border: 2px dashed #DB504A;
-  border-radius: 15px;
-  padding: 2rem;
+  border: 2px dashed var(--primary-green);
+  border-radius: 12px;
+  padding: 1.2rem;
   text-align: center;
   transition: all 0.3s ease;
-  background: rgba(219, 80, 74, 0.1);
+  background: rgba(40, 167, 69, 0.1);
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .image-upload-label:hover {
-  border-color: #031927;
-  background: rgba(219, 80, 74, 0.2);
+  border-color: var(--primary-light-green);
+  background: rgba(40, 167, 69, 0.2);
 }
 
 .upload-placeholder {
-  color: #DB504A;
+  color: var(--primary-green);
 }
 
 .upload-placeholder span {
-  font-size: 2rem;
+  font-size: 1.5rem;
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
 }
 
 .upload-placeholder p {
   margin: 0;
   font-weight: 500;
+  font-size: 0.8rem;
 }
 
 .file-input {
@@ -233,45 +300,46 @@ form {
 
 .image-preview {
   max-width: 100%;
-  max-height: 200px;
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  max-height: 120px;
+  border-radius: 8px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.1);
 }
 
 .remove-image-btn {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background: #DB504A;
+  top: 8px;
+  right: 8px;
+  background: var(--primary-red);
   color: white;
   border: none;
   border-radius: 50%;
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
 .remove-image-btn:hover {
-  background: #031927;
+  background: var(--primary-dark);
   transform: scale(1.1);
 }
 
 /* Alertas */
 .alert-container {
-  margin: 1.5rem 0;
+  margin: 1rem 0;
 }
 
 .alert {
-  padding: 12px 16px;
-  border-radius: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
   font-weight: 500;
   text-align: center;
+  font-size: 0.9rem;
 }
 
 .alert-success {
@@ -282,16 +350,22 @@ form {
 
 .alert-danger {
   background: rgba(219, 80, 74, 0.1);
-  color: #DB504A;
+  color: var(--primary-red);
   border: 1px solid rgba(219, 80, 74, 0.3);
+}
+
+/* Sección del botón - se empuja hacia abajo */
+.button-section {
+  margin-top: auto;
+  padding-top: 1rem;
 }
 
 /* Botones */
 .btn {
-  padding: 14px 30px;
+  padding: 12px 26px;
   border: none;
-  border-radius: 25px;
-  font-size: 1rem;
+  border-radius: 20px;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -302,16 +376,16 @@ form {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #DB504A 0%, #031927 100%);
+  background: var(--gradient-green);
   color: white;
   width: 100%;
-  box-shadow: 0 4px 15px rgba(219, 80, 74, 0.3);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
 }
 
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(219, 80, 74, 0.4);
-  background: linear-gradient(135deg, #031927 0%, #DB504A 100%);
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+  background: var(--gradient-green-reverse);
 }
 
 .btn-primary:disabled {
@@ -323,33 +397,76 @@ form {
 /* Enlaces */
 .links-container {
   text-align: center;
-  margin-top: 2rem;
+  margin-top: 1rem;
 }
 
 .login-link {
-  color: #DB504A;
+  color: var(--primary-green);
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
 }
 
 .login-link:hover {
-  color: #031927;
+  color: var(--primary-dark);
   text-decoration: underline;
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 1366px) {
   .container {
-    padding: 1rem;
+    padding: 0.5rem;
   }
   
-  form {
+  .registration-wrapper {
+    max-height: 98vh;
+  }
+  
+  .left-card,
+  .right-card {
     padding: 1.5rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .registration-wrapper {
+    flex-direction: column;
+    max-width: 600px;
+    max-height: none;
+  }
+  
+  .left-card,
+  .right-card {
+    min-height: auto;
+    overflow-y: visible;
   }
   
   .form-title {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0.5rem;
+  }
+  
+  .left-card,
+  .right-card {
+    padding: 1.2rem;
+  }
+  
+  .form-title {
+    font-size: 1.4rem;
+  }
+  
+  .form-section-title {
+    font-size: 1rem;
+  }
+  
+  .image-upload-label {
+    padding: 1rem;
+    min-height: 80px;
   }
   
   .especialidades-predefinidas {
@@ -358,5 +475,16 @@ form {
   
   .especialidad-personalizada {
     flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  /* En móvil, los campos vuelven a apilarse verticalmente */
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .form-group-half {
+    margin-bottom: 1rem;
   }
 }

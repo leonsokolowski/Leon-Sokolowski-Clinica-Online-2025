@@ -46,6 +46,7 @@ export class RegistroEspecialistasComponent {
   ];
 
   especialidadesSeleccionadas: string[] = [];
+  especialidadesAgregadas: string[] = []; // Nueva propiedad para especialidades personalizadas
   nuevaEspecialidad: string = '';
   mostrarErrorEspecialidades: boolean = false;
   mostrarErrorImagen: boolean = false;
@@ -92,14 +93,28 @@ export class RegistroEspecialistasComponent {
   agregarEspecialidadPersonalizada(): void {
     const especialidadTrimmed = this.nuevaEspecialidad.trim();
     
-    if (especialidadTrimmed && !this.especialidadesSeleccionadas.includes(especialidadTrimmed)) {
+    if (especialidadTrimmed && 
+        !this.especialidadesSeleccionadas.includes(especialidadTrimmed) &&
+        !this.especialidadesAgregadas.includes(especialidadTrimmed)) {
+      this.especialidadesAgregadas.push(especialidadTrimmed);
       this.especialidadesSeleccionadas.push(especialidadTrimmed);
       this.nuevaEspecialidad = '';
       this.mostrarErrorEspecialidades = false;
     }
   }
 
-  // Remover especialidad seleccionada
+  // Remover especialidad agregada personalmente
+  removerEspecialidadAgregada(especialidad: string): void {
+    this.especialidadesAgregadas = this.especialidadesAgregadas.filter(
+      esp => esp !== especialidad
+    );
+    
+    this.especialidadesSeleccionadas = this.especialidadesSeleccionadas.filter(
+      esp => esp !== especialidad
+    );
+  }
+
+  // Remover especialidad seleccionada (mantener para compatibilidad, pero ya no se usa en el HTML)
   removerEspecialidad(especialidad: string): void {
     this.especialidadesSeleccionadas = this.especialidadesSeleccionadas.filter(
       esp => esp !== especialidad
@@ -314,6 +329,7 @@ export class RegistroEspecialistasComponent {
     this.previewUrl = '';
     this.imagenSubida = '';
     this.especialidadesSeleccionadas = [];
+    this.especialidadesAgregadas = []; // Limpiar también las especialidades agregadas
     this.nuevaEspecialidad = '';
     this.mostrarErrorEspecialidades = false;
     this.mostrarErrorImagen = false;

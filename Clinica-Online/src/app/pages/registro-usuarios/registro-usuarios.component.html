@@ -22,51 +22,82 @@
             </div>
           </div>
 
-          <!-- Contraseña -->
-          <div class="form-group">
-            <label for="contraseña">Contraseña:</label>
-            <input id="contraseña" formControlName="contraseña" type="password" class="form-control" 
-                   placeholder="Mínimo 6 caracteres, una mayúscula y un número" />
-            <div *ngIf="f['contraseña'].touched && f['contraseña'].invalid" class="error-container">
-              <small *ngIf="f['contraseña'].errors?.['required']">La contraseña es obligatoria.</small>
-              <small *ngIf="f['contraseña'].errors?.['minlength']">La contraseña debe tener al menos 6 caracteres.</small>
-              <small *ngIf="f['contraseña'].errors?.['pattern']">La contraseña debe tener al menos una letra mayúscula y un número.</small>
+          <!-- Contraseñas lado a lado -->
+          <div class="form-row">
+            <!-- Contraseña -->
+            <div class="form-group form-group-half">
+              <label for="contraseña">Contraseña:</label>
+              <input id="contraseña" formControlName="contraseña" type="password" class="form-control" 
+                     placeholder="Mín. 6 caracteres" />
+              <div *ngIf="f['contraseña'].touched && f['contraseña'].invalid" class="error-container">
+                <small *ngIf="f['contraseña'].errors?.['required']">La contraseña es obligatoria.</small>
+                <small *ngIf="f['contraseña'].errors?.['minlength']">Mínimo 6 caracteres.</small>
+                <small *ngIf="f['contraseña'].errors?.['pattern']">Debe tener mayúscula y número.</small>
+              </div>
             </div>
-          </div>
 
-          <!-- Confirmar Contraseña -->
-          <div class="form-group">
-            <label for="confirmarContraseña">Confirmar Contraseña:</label>
-            <input id="confirmarContraseña" formControlName="confirmarContraseña" type="password" class="form-control" 
-                   placeholder="Repite tu contraseña" />
-            <div *ngIf="f['confirmarContraseña'].touched && f['confirmarContraseña'].invalid" class="error-container">
-              <small *ngIf="f['confirmarContraseña'].errors?.['required']">La confirmación de la contraseña es obligatoria.</small>
-              <small *ngIf="f['confirmarContraseña'].errors?.['noMatch']">Las contraseñas no coinciden.</small>
+            <!-- Confirmar Contraseña -->
+            <div class="form-group form-group-half">
+              <label for="confirmarContraseña">Confirmar Contraseña:</label>
+              <input id="confirmarContraseña" formControlName="confirmarContraseña" type="password" class="form-control" 
+                     placeholder="Repite contraseña" />
+              <div *ngIf="f['confirmarContraseña'].touched && f['confirmarContraseña'].invalid" class="error-container">
+                <small *ngIf="f['confirmarContraseña'].errors?.['required']">Confirmación obligatoria.</small>
+                <small *ngIf="f['confirmarContraseña'].errors?.['noMatch']">Las contraseñas no coinciden.</small>
+              </div>
             </div>
           </div>
 
           <!-- Sección de Datos Personales -->
           <h3 class="form-section-title">Datos Personales</h3>
 
-          <!-- Nombre -->
-          <div class="form-group">
-            <label for="nombre">Nombre:</label>
-            <input id="nombre" formControlName="nombre" type="text" class="form-control" 
-                   placeholder="Tu nombre" />
-            <div *ngIf="f['nombre'].touched && f['nombre'].invalid" class="error-container">
-              <small *ngIf="f['nombre'].errors?.['required']">El nombre es obligatorio.</small>
-              <small *ngIf="f['nombre'].errors?.['minlength']">El nombre debe tener al menos 2 caracteres.</small>
+          <!-- Nombre y Apellido lado a lado -->
+          <div class="form-row">
+            <!-- Nombre -->
+            <div class="form-group form-group-half">
+              <label for="nombre">Nombre:</label>
+              <input id="nombre" formControlName="nombre" type="text" class="form-control" 
+                     placeholder="Tu nombre" />
+              <div *ngIf="f['nombre'].touched && f['nombre'].invalid" class="error-container">
+                <small *ngIf="f['nombre'].errors?.['required']">El nombre es obligatorio.</small>
+                <small *ngIf="f['nombre'].errors?.['minlength']">Mínimo 2 caracteres.</small>
+              </div>
+            </div>
+
+            <!-- Apellido -->
+            <div class="form-group form-group-half">
+              <label for="apellido">Apellido:</label>
+              <input id="apellido" formControlName="apellido" type="text" class="form-control" 
+                     placeholder="Tu apellido" />
+              <div *ngIf="f['apellido'].touched && f['apellido'].invalid" class="error-container">
+                <small *ngIf="f['apellido'].errors?.['required']">El apellido es obligatorio.</small>
+                <small *ngIf="f['apellido'].errors?.['minlength']">Mínimo 2 caracteres.</small>
+              </div>
             </div>
           </div>
 
-          <!-- Apellido -->
-          <div class="form-group">
-            <label for="apellido">Apellido:</label>
-            <input id="apellido" formControlName="apellido" type="text" class="form-control" 
-                   placeholder="Tu apellido" />
-            <div *ngIf="f['apellido'].touched && f['apellido'].invalid" class="error-container">
-              <small *ngIf="f['apellido'].errors?.['required']">El apellido es obligatorio.</small>
-              <small *ngIf="f['apellido'].errors?.['minlength']">El apellido debe tener al menos 2 caracteres.</small>
+          <!-- Edad y DNI lado a lado -->
+          <div class="form-row">
+            <!-- Edad -->
+            <div class="form-group form-group-half">
+              <label for="edad">Edad:</label>
+              <input id="edad" formControlName="edad" type="number" class="form-control" 
+                     placeholder="Tu edad" min="1" max="120" />
+              <div *ngIf="f['edad'].touched && f['edad'].invalid" class="error-container">
+                <small *ngIf="f['edad'].errors?.['required']">La edad es obligatoria.</small>
+                <small *ngIf="f['edad'].errors?.['min']">Mínimo 1 año.</small>
+              </div>
+            </div>
+
+            <!-- DNI -->
+            <div class="form-group form-group-half">
+              <label for="dni">DNI:</label>
+              <input id="dni" formControlName="dni" type="text" class="form-control" 
+                     placeholder="12345678" maxlength="8" />
+              <div *ngIf="f['dni'].touched && f['dni'].invalid" class="error-container">
+                <small *ngIf="f['dni'].errors?.['required']">El DNI es obligatorio.</small>
+                <small *ngIf="f['dni'].errors?.['pattern']">Entre 7 y 8 dígitos.</small>
+              </div>
             </div>
           </div>
         </form>
@@ -78,30 +109,8 @@
       <div class="form-content">
         <form [formGroup]="registroForm" (ngSubmit)="registrar()">
           
-          <!-- Continuación de Datos Personales -->
+          <!-- Información Adicional -->
           <h3 class="form-section-title">Información Adicional</h3>
-
-          <!-- Edad -->
-          <div class="form-group">
-            <label for="edad">Edad:</label>
-            <input id="edad" formControlName="edad" type="number" class="form-control" 
-                   placeholder="Tu edad" min="1" max="120" />
-            <div *ngIf="f['edad'].touched && f['edad'].invalid" class="error-container">
-              <small *ngIf="f['edad'].errors?.['required']">La edad es obligatoria.</small>
-              <small *ngIf="f['edad'].errors?.['min']">Debes tener al menos 1 año.</small>
-            </div>
-          </div>
-
-          <!-- DNI -->
-          <div class="form-group">
-            <label for="dni">DNI:</label>
-            <input id="dni" formControlName="dni" type="text" class="form-control" 
-                   placeholder="12345678" maxlength="8" />
-            <div *ngIf="f['dni'].touched && f['dni'].invalid" class="error-container">
-              <small *ngIf="f['dni'].errors?.['required']">El DNI es obligatorio.</small>
-              <small *ngIf="f['dni'].errors?.['pattern']">El DNI debe tener entre 7 y 8 dígitos.</small>
-            </div>
-          </div>
 
           <!-- Obra Social -->
           <div class="form-group">
@@ -110,7 +119,7 @@
                    placeholder="Nombre de tu obra social" />
             <div *ngIf="f['obraSocial'].touched && f['obraSocial'].invalid" class="error-container">
               <small *ngIf="f['obraSocial'].errors?.['required']">La obra social es obligatoria.</small>
-              <small *ngIf="f['obraSocial'].errors?.['minlength']">La obra social debe tener al menos 2 caracteres.</small>
+              <small *ngIf="f['obraSocial'].errors?.['minlength']">Mínimo 2 caracteres.</small>
             </div>
           </div>
 

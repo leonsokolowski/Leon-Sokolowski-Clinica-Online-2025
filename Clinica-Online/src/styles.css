@@ -8,7 +8,7 @@
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #C8E0F4 0%, #9DD1F1 100%);
+  background: linear-gradient(135deg, #9DD1F1 0%, #508AA8 100%);
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -21,10 +21,19 @@ body {
   --primary-medium-blue: #508AA8;
   --primary-very-light: #C8E0F4;
   
+  /* Nuevos colores verdes para especialistas */
+  --primary-green: #28a745;
+  --primary-light-green: #a8e6a3;
+  --primary-dark-green: #1e7e34;
+  
   /* Gradientes comunes */
-  --gradient-background: linear-gradient(135deg, #C8E0F4 0%, #9DD1F1 100%);
+  --gradient-background: linear-gradient(135deg, #9DD1F1 0%, #508AA8 100%);
   --gradient-blue: linear-gradient(135deg, #9DD1F1 0%, #508AA8 100%);
   --gradient-red: linear-gradient(135deg, #DB504A 0%, #031927 100%);
   --gradient-blue-reverse: linear-gradient(135deg, #508AA8 0%, #9DD1F1 100%);
   --gradient-red-reverse: linear-gradient(135deg, #031927 0%, #DB504A 100%);
+  
+  /* Nuevos gradientes verdes */
+  --gradient-green: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+  --gradient-green-reverse: linear-gradient(135deg, #1e7e34 0%, #28a745 100%);
 }
