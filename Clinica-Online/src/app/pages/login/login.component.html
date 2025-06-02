@@ -1,1 +1,140 @@
-<p>login works!</p>
+<div class="container">
+  <div class="login-wrapper">
+    <div class="login-card">
+      <h1 class="form-title">Iniciar Sesión</h1>
+      
+      <div class="form-content">
+        <form [formGroup]="registroForm" (ngSubmit)="ingresar()">
+          
+          <!-- Correo -->
+          <div class="form-group">
+            <label for="correo">Correo Electrónico:</label>
+            <input id="correo" formControlName="correo" type="email" class="form-control" 
+                   placeholder="ejemplo@correo.com" />
+            <div *ngIf="f['correo'].touched && f['correo'].invalid" class="error-container">
+              <small *ngIf="f['correo'].errors?.['required']">El correo es obligatorio.</small>
+              <small *ngIf="f['correo'].errors?.['email']">El formato de correo no es válido.</small>
+            </div>
+          </div>
+
+          <!-- Contraseña -->
+          <div class="form-group">
+            <label for="contraseña">Contraseña:</label>
+            <input id="contraseña" formControlName="contraseña" type="password" class="form-control" 
+                   placeholder="Ingresa tu contraseña" />
+            <div *ngIf="f['contraseña'].touched && f['contraseña'].invalid" class="error-container">
+              <small *ngIf="f['contraseña'].errors?.['required']">La contraseña es obligatoria.</small>
+              <small *ngIf="f['contraseña'].errors?.['minlength']">La contraseña debe tener al menos 8 caracteres.</small>
+              <small *ngIf="f['contraseña'].errors?.['pattern']">La contraseña debe tener al menos una letra mayúscula y un número.</small>
+            </div>
+          </div>
+
+          <!-- Mensajes de error y éxito -->
+          <div *ngIf="successMessage || errorMessage" class="alert-container">
+            <div *ngIf="successMessage" class="alert alert-success">
+              {{ successMessage }}
+            </div>
+            <div *ngIf="errorMessage" class="alert alert-danger">
+              {{ errorMessage }}
+            </div>
+          </div>
+
+          <!-- Botón de login -->
+          <button type="submit" class="btn btn-primary" [disabled]="registroForm.invalid">
+            Iniciar Sesión
+          </button>
+
+          <!-- Enlaces -->
+          <div class="links-container">
+            <a routerLink="/registro" class="register-link">¿No tenés una cuenta? Registrate</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botones de acceso rápido -->
+  <div class="quick-access-container">
+    
+    <!-- Botón Admin -->
+    <div class="quick-access-group admin-group">
+      <div class="main-button admin-button">
+        <span class="profile-icon">👨‍💼</span>
+        <span class="profile-label">Admin</span>
+      </div>
+      
+      <div class="dropdown-menu admin-dropdown">
+        <h4 class="dropdown-title">Administradores</h4>
+        <div *ngFor="let usuario of obtenerUsuariosPorPerfil('admin')" 
+             class="user-button"
+             [class.selected]="usuarioSeleccionado === usuario.email"
+             (click)="completarCredenciales(usuario)">
+          <img [src]="obtenerUrlImagen(usuario.imagen)" 
+               [alt]="usuario.nombre + ' ' + usuario.apellido"
+               class="user-avatar">
+          <div class="user-info">
+            <span class="user-name">{{usuario.nombre}} {{usuario.apellido}}</span>
+            <span class="user-email">{{usuario.email}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botón Especialistas -->
+    <div class="quick-access-group especialista-group">
+      <div class="main-button especialista-button">
+        <span class="profile-icon">👨‍⚕️</span>
+        <span class="profile-label">Especialistas</span>
+      </div>
+      
+      <div class="dropdown-menu especialista-dropdown">
+        <h4 class="dropdown-title">Especialistas</h4>
+        <div *ngFor="let usuario of obtenerUsuariosPorPerfil('especialista')" 
+             class="user-button"
+             [class.selected]="usuarioSeleccionado === usuario.email"
+             (click)="completarCredenciales(usuario)">
+          <img [src]="obtenerUrlImagen(usuario.imagen)" 
+               [alt]="usuario.nombre + ' ' + usuario.apellido"
+               class="user-avatar">
+          <div class="user-info">
+            <span class="user-name">{{usuario.nombre}} {{usuario.apellido}}</span>
+            <span class="user-email">{{usuario.email}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botón Pacientes -->
+    <div class="quick-access-group paciente-group">
+      <div class="main-button paciente-button">
+        <span class="profile-icon">👤</span>
+        <span class="profile-label">Pacientes</span>
+      </div>
+      
+      <div class="dropdown-menu paciente-dropdown">
+        <h4 class="dropdown-title">Pacientes</h4>
+        <div *ngFor="let usuario of obtenerUsuariosPorPerfil('paciente')" 
+             class="user-button"
+             [class.selected]="usuarioSeleccionado === usuario.email"
+             (click)="completarCredenciales(usuario)">
+          <img [src]="obtenerUrlImagen(usuario.imagen)" 
+               [alt]="usuario.nombre + ' ' + usuario.apellido"
+               class="user-avatar">
+          <div class="user-info">
+            <span class="user-name">{{usuario.nombre}} {{usuario.apellido}}</span>
+            <span class="user-email">{{usuario.email}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botón limpiar campos -->
+    <div class="quick-access-group clear-group">
+      <div class="main-button clear-button" (click)="limpiarCampos()">
+        <span class="profile-icon">🗑️</span>
+        <span class="profile-label">Limpiar</span>
+      </div>
+    </div>
+
+  </div>
+</div>

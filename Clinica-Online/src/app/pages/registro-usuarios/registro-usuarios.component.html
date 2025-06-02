@@ -1,147 +1,182 @@
 <div class="container">
-  <h1 class="form-title">Registro de Paciente</h1>
-  
-  <form [formGroup]="registroForm" (ngSubmit)="registrar()">
-    <!-- Correo -->
-    <div class="form-group">
-      <label for="correo">Correo Electrónico:</label>
-      <input id="correo" formControlName="correo" type="email" class="form-control" 
-             placeholder="ejemplo@correo.com" />
-      <div *ngIf="f['correo'].touched && f['correo'].invalid" class="error-container">
-        <small *ngIf="f['correo'].errors?.['required']">El correo es obligatorio.</small>
-        <small *ngIf="f['correo'].errors?.['email']">El correo no es válido.</small>
-      </div>
-    </div>
-
-    <!-- Contraseña -->
-    <div class="form-group">
-      <label for="contraseña">Contraseña:</label>
-      <input id="contraseña" formControlName="contraseña" type="password" class="form-control" 
-             placeholder="Mínimo 6 caracteres, una mayúscula y un número" />
-      <div *ngIf="f['contraseña'].touched && f['contraseña'].invalid" class="error-container">
-        <small *ngIf="f['contraseña'].errors?.['required']">La contraseña es obligatoria.</small>
-        <small *ngIf="f['contraseña'].errors?.['minlength']">La contraseña debe tener al menos 6 caracteres.</small>
-        <small *ngIf="f['contraseña'].errors?.['pattern']">La contraseña debe tener al menos una letra mayúscula y un número.</small>
-      </div>
-    </div>
-
-    <!-- Confirmar Contraseña -->
-    <div class="form-group">
-      <label for="confirmarContraseña">Confirmar Contraseña:</label>
-      <input id="confirmarContraseña" formControlName="confirmarContraseña" type="password" class="form-control" 
-             placeholder="Repite tu contraseña" />
-      <div *ngIf="f['confirmarContraseña'].touched && f['confirmarContraseña'].invalid" class="error-container">
-        <small *ngIf="f['confirmarContraseña'].errors?.['required']">La confirmación de la contraseña es obligatoria.</small>
-        <small *ngIf="f['confirmarContraseña'].errors?.['noMatch']">Las contraseñas no coinciden.</small>
-      </div>
-    </div>
-
-    <!-- Nombre -->
-    <div class="form-group">
-      <label for="nombre">Nombre:</label>
-      <input id="nombre" formControlName="nombre" type="text" class="form-control" 
-             placeholder="Tu nombre" />
-      <div *ngIf="f['nombre'].touched && f['nombre'].invalid" class="error-container">
-        <small *ngIf="f['nombre'].errors?.['required']">El nombre es obligatorio.</small>
-        <small *ngIf="f['nombre'].errors?.['minlength']">El nombre debe tener al menos 2 caracteres.</small>
-      </div>
-    </div>
-
-    <!-- Apellido -->
-    <div class="form-group">
-      <label for="apellido">Apellido:</label>
-      <input id="apellido" formControlName="apellido" type="text" class="form-control" 
-             placeholder="Tu apellido" />
-      <div *ngIf="f['apellido'].touched && f['apellido'].invalid" class="error-container">
-        <small *ngIf="f['apellido'].errors?.['required']">El apellido es obligatorio.</small>
-        <small *ngIf="f['apellido'].errors?.['minlength']">El apellido debe tener al menos 2 caracteres.</small>
-      </div>
-    </div>
-
-    <!-- Edad -->
-    <div class="form-group">
-      <label for="edad">Edad:</label>
-      <input id="edad" formControlName="edad" type="number" class="form-control" 
-             placeholder="Tu edad" min="18" max="120" />
-      <div *ngIf="f['edad'].touched && f['edad'].invalid" class="error-container">
-        <small *ngIf="f['edad'].errors?.['required']">La edad es obligatoria.</small>
-        <small *ngIf="f['edad'].errors?.['min']">Debes tener al menos 18 años.</small>
-      </div>
-    </div>
-
-    <!-- DNI -->
-    <div class="form-group">
-      <label for="dni">DNI:</label>
-      <input id="dni" formControlName="dni" type="text" class="form-control" 
-             placeholder="12345678" maxlength="8" />
-      <div *ngIf="f['dni'].touched && f['dni'].invalid" class="error-container">
-        <small *ngIf="f['dni'].errors?.['required']">El DNI es obligatorio.</small>
-        <small *ngIf="f['dni'].errors?.['pattern']">El DNI debe tener entre 7 y 8 dígitos.</small>
-      </div>
-    </div>
-
-    <!-- Obra Social -->
-    <div class="form-group">
-      <label for="obraSocial">Obra Social:</label>
-      <input id="obraSocial" formControlName="obraSocial" type="text" class="form-control" 
-             placeholder="Nombre de tu obra social" />
-      <div *ngIf="f['obraSocial'].touched && f['obraSocial'].invalid" class="error-container">
-        <small *ngIf="f['obraSocial'].errors?.['required']">La obra social es obligatoria.</small>
-        <small *ngIf="f['obraSocial'].errors?.['minlength']">La obra social debe tener al menos 2 caracteres.</small>
-      </div>
-    </div>
-
-    <!-- Imágenes de Perfil -->
-    <div class="form-group">
-      <label>Imágenes de Perfil (2 requeridas):</label>
+  <div class="registration-wrapper">
+    
+    <!-- Tarjeta Izquierda -->
+    <div class="left-card">
+      <h1 class="form-title">Registro de Paciente</h1>
       
-      <!-- Primera imagen -->
-      <div class="image-upload-container">
-        <label for="imagen1" class="image-upload-label">
-          <div class="upload-placeholder" *ngIf="!previewUrls[0]">
-            <span>📷</span>
-            <p>Subir primera imagen</p>
+      <div class="form-content">
+        <form [formGroup]="registroForm" (ngSubmit)="registrar()">
+          
+          <!-- Sección de Datos de Acceso -->
+          <h3 class="form-section-title">Datos de Acceso</h3>
+          
+          <!-- Correo -->
+          <div class="form-group">
+            <label for="correo">Correo Electrónico:</label>
+            <input id="correo" formControlName="correo" type="email" class="form-control" 
+                   placeholder="ejemplo@correo.com" />
+            <div *ngIf="f['correo'].touched && f['correo'].invalid" class="error-container">
+              <small *ngIf="f['correo'].errors?.['required']">El correo es obligatorio.</small>
+              <small *ngIf="f['correo'].errors?.['email']">El correo no es válido.</small>
+            </div>
           </div>
-          <img *ngIf="previewUrls[0]" [src]="previewUrls[0]" alt="Preview 1" class="image-preview" />
-        </label>
-        <input id="imagen1" type="file" accept="image/*" 
-               (change)="onFileSelected($event, 0)" class="file-input" />
-        <button *ngIf="previewUrls[0]" type="button" class="remove-image-btn" 
-                (click)="removeImage(0)">✕</button>
-      </div>
 
-      <!-- Segunda imagen -->
-      <div class="image-upload-container">
-        <label for="imagen2" class="image-upload-label">
-          <div class="upload-placeholder" *ngIf="!previewUrls[1]">
-            <span>📷</span>
-            <p>Subir segunda imagen</p>
+          <!-- Contraseña -->
+          <div class="form-group">
+            <label for="contraseña">Contraseña:</label>
+            <input id="contraseña" formControlName="contraseña" type="password" class="form-control" 
+                   placeholder="Mínimo 6 caracteres, una mayúscula y un número" />
+            <div *ngIf="f['contraseña'].touched && f['contraseña'].invalid" class="error-container">
+              <small *ngIf="f['contraseña'].errors?.['required']">La contraseña es obligatoria.</small>
+              <small *ngIf="f['contraseña'].errors?.['minlength']">La contraseña debe tener al menos 6 caracteres.</small>
+              <small *ngIf="f['contraseña'].errors?.['pattern']">La contraseña debe tener al menos una letra mayúscula y un número.</small>
+            </div>
           </div>
-          <img *ngIf="previewUrls[1]" [src]="previewUrls[1]" alt="Preview 2" class="image-preview" />
-        </label>
-        <input id="imagen2" type="file" accept="image/*" 
-               (change)="onFileSelected($event, 1)" class="file-input" />
-        <button *ngIf="previewUrls[1]" type="button" class="remove-image-btn" 
-                (click)="removeImage(1)">✕</button>
+
+          <!-- Confirmar Contraseña -->
+          <div class="form-group">
+            <label for="confirmarContraseña">Confirmar Contraseña:</label>
+            <input id="confirmarContraseña" formControlName="confirmarContraseña" type="password" class="form-control" 
+                   placeholder="Repite tu contraseña" />
+            <div *ngIf="f['confirmarContraseña'].touched && f['confirmarContraseña'].invalid" class="error-container">
+              <small *ngIf="f['confirmarContraseña'].errors?.['required']">La confirmación de la contraseña es obligatoria.</small>
+              <small *ngIf="f['confirmarContraseña'].errors?.['noMatch']">Las contraseñas no coinciden.</small>
+            </div>
+          </div>
+
+          <!-- Sección de Datos Personales -->
+          <h3 class="form-section-title">Datos Personales</h3>
+
+          <!-- Nombre -->
+          <div class="form-group">
+            <label for="nombre">Nombre:</label>
+            <input id="nombre" formControlName="nombre" type="text" class="form-control" 
+                   placeholder="Tu nombre" />
+            <div *ngIf="f['nombre'].touched && f['nombre'].invalid" class="error-container">
+              <small *ngIf="f['nombre'].errors?.['required']">El nombre es obligatorio.</small>
+              <small *ngIf="f['nombre'].errors?.['minlength']">El nombre debe tener al menos 2 caracteres.</small>
+            </div>
+          </div>
+
+          <!-- Apellido -->
+          <div class="form-group">
+            <label for="apellido">Apellido:</label>
+            <input id="apellido" formControlName="apellido" type="text" class="form-control" 
+                   placeholder="Tu apellido" />
+            <div *ngIf="f['apellido'].touched && f['apellido'].invalid" class="error-container">
+              <small *ngIf="f['apellido'].errors?.['required']">El apellido es obligatorio.</small>
+              <small *ngIf="f['apellido'].errors?.['minlength']">El apellido debe tener al menos 2 caracteres.</small>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
 
-    <!-- Mensajes de error y éxito -->
-    <div *ngIf="successMessage || errorMessage" class="alert-container">
-      <div *ngIf="successMessage" class="alert alert-success">
-        {{ successMessage }}
-      </div>
-      <div *ngIf="errorMessage" class="alert alert-danger">
-        {{ errorMessage }}
+    <!-- Tarjeta Derecha -->
+    <div class="right-card">
+      <div class="form-content">
+        <form [formGroup]="registroForm" (ngSubmit)="registrar()">
+          
+          <!-- Continuación de Datos Personales -->
+          <h3 class="form-section-title">Información Adicional</h3>
+
+          <!-- Edad -->
+          <div class="form-group">
+            <label for="edad">Edad:</label>
+            <input id="edad" formControlName="edad" type="number" class="form-control" 
+                   placeholder="Tu edad" min="1" max="120" />
+            <div *ngIf="f['edad'].touched && f['edad'].invalid" class="error-container">
+              <small *ngIf="f['edad'].errors?.['required']">La edad es obligatoria.</small>
+              <small *ngIf="f['edad'].errors?.['min']">Debes tener al menos 1 año.</small>
+            </div>
+          </div>
+
+          <!-- DNI -->
+          <div class="form-group">
+            <label for="dni">DNI:</label>
+            <input id="dni" formControlName="dni" type="text" class="form-control" 
+                   placeholder="12345678" maxlength="8" />
+            <div *ngIf="f['dni'].touched && f['dni'].invalid" class="error-container">
+              <small *ngIf="f['dni'].errors?.['required']">El DNI es obligatorio.</small>
+              <small *ngIf="f['dni'].errors?.['pattern']">El DNI debe tener entre 7 y 8 dígitos.</small>
+            </div>
+          </div>
+
+          <!-- Obra Social -->
+          <div class="form-group">
+            <label for="obraSocial">Obra Social:</label>
+            <input id="obraSocial" formControlName="obraSocial" type="text" class="form-control" 
+                   placeholder="Nombre de tu obra social" />
+            <div *ngIf="f['obraSocial'].touched && f['obraSocial'].invalid" class="error-container">
+              <small *ngIf="f['obraSocial'].errors?.['required']">La obra social es obligatoria.</small>
+              <small *ngIf="f['obraSocial'].errors?.['minlength']">La obra social debe tener al menos 2 caracteres.</small>
+            </div>
+          </div>
+
+          <!-- Imágenes de Perfil -->
+          <div class="images-section">
+            <div class="form-group">
+              <label>Imágenes de Perfil (2 requeridas):</label>
+              
+              <!-- Primera imagen -->
+              <div class="image-upload-container">
+                <label for="imagen1" class="image-upload-label">
+                  <div class="upload-placeholder" *ngIf="!previewUrls[0]">
+                    <span>📷</span>
+                    <p>Subir primera imagen</p>
+                  </div>
+                  <img *ngIf="previewUrls[0]" [src]="previewUrls[0]" alt="Preview 1" class="image-preview" />
+                </label>
+                <input id="imagen1" type="file" accept="image/*" 
+                       (change)="onFileSelected($event, 0)" class="file-input" />
+                <button *ngIf="previewUrls[0]" type="button" class="remove-image-btn" 
+                        (click)="removeImage(0)">✕</button>
+              </div>
+
+              <!-- Segunda imagen -->
+              <div class="image-upload-container">
+                <label for="imagen2" class="image-upload-label">
+                  <div class="upload-placeholder" *ngIf="!previewUrls[1]">
+                    <span>📷</span>
+                    <p>Subir segunda imagen</p>
+                  </div>
+                  <img *ngIf="previewUrls[1]" [src]="previewUrls[1]" alt="Preview 2" class="image-preview" />
+                </label>
+                <input id="imagen2" type="file" accept="image/*" 
+                       (change)="onFileSelected($event, 1)" class="file-input" />
+                <button *ngIf="previewUrls[1]" type="button" class="remove-image-btn" 
+                        (click)="removeImage(1)">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mensajes de error y éxito -->
+          <div *ngIf="successMessage || errorMessage" class="alert-container">
+            <div *ngIf="successMessage" class="alert alert-success">
+              {{ successMessage }}
+            </div>
+            <div *ngIf="errorMessage" class="alert alert-danger">
+              {{ errorMessage }}
+            </div>
+          </div>
+
+          <!-- Sección del botón - se empuja hacia abajo -->
+          <div class="button-section">
+            <!-- Botón de registro -->
+            <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+              <span *ngIf="!isLoading">Registrar</span>
+              <span *ngIf="isLoading">Registrando...</span>
+            </button>
+
+            <!-- Enlaces -->
+            <div class="links-container">
+              <a routerLink="/login" class="login-link">¿Ya tenés una cuenta? Iniciá Sesión</a>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
-
-    <!-- Botón de registro -->
-    <button type="submit" class="btn btn-primary">Registrar</button>
-
-    <!-- Enlaces -->
-    <div class="links-container">
-      <a routerLink="/login" class="login-link">¿Ya tenés una cuenta? Iniciá Sesión</a>
-    </div>
-  </form>
+    
+  </div>
 </div>

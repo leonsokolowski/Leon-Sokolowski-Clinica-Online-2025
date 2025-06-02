@@ -1,1 +1,30 @@
 /* You can add global styles to this file, and also import other style files */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #C8E0F4 0%, #9DD1F1 100%);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Variables CSS para la paleta de colores */
+:root {
+  --primary-red: #DB504A;
+  --primary-dark: #031927;
+  --primary-light-blue: #9DD1F1;
+  --primary-medium-blue: #508AA8;
+  --primary-very-light: #C8E0F4;
+  
+  /* Gradientes comunes */
+  --gradient-background: linear-gradient(135deg, #C8E0F4 0%, #9DD1F1 100%);
+  --gradient-blue: linear-gradient(135deg, #9DD1F1 0%, #508AA8 100%);
+  --gradient-red: linear-gradient(135deg, #DB504A 0%, #031927 100%);
+  --gradient-blue-reverse: linear-gradient(135deg, #508AA8 0%, #9DD1F1 100%);
+  --gradient-red-reverse: linear-gradient(135deg, #031927 0%, #DB504A 100%);
+}

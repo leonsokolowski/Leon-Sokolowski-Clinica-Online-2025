@@ -1,6 +1,5 @@
 import { inject, Injectable } from '@angular/core';
 import { SupabaseService } from './supabase.service';
-import { AuthService } from './auth.service';
 import { Usuario, Paciente, Especialista } from '../clases/usuario';
 
 @Injectable({
@@ -9,7 +8,6 @@ import { Usuario, Paciente, Especialista } from '../clases/usuario';
 export class DatabaseService {
 
   sb = inject(SupabaseService);
-  auth = inject(AuthService);
   
   async listarUsuarios(): Promise<Usuario[]> {
     const { data, error } = await this.sb.supabase.from('usuarios').select('*');
@@ -92,7 +90,7 @@ export class DatabaseService {
   }
 
   async registrarEspecialista(especialista: Especialista): Promise<void> {
-    // Preparar datos para insertar
+    // Preparar datos para insertar - los especialistas se registran con habilitado: false por defecto
     const userData = {
       nombre: especialista.nombre,
       apellido: especialista.apellido,
@@ -102,7 +100,7 @@ export class DatabaseService {
       perfil: especialista.perfil,
       especialidades: especialista.especialidades, // Array de especialidades
       imagen_perfil_1: especialista.imagen_perfil_1,
-      habilitado: especialista.habilitado
+      habilitado: false // Los especialistas se registran como no habilitados por defecto
     };
 
     const { data, error } = await this.sb.supabase
@@ -114,8 +112,58 @@ export class DatabaseService {
       throw error;
     }
     
-    console.log('Especialista registrado exitosamente:', data);
+    console.log('Especialista registrado exitosamente (pendiente de habilitación):', data);
   }
+
+  // Método para habilitar un especialista (solo para admins)
+  async habilitarEspecialista(email: string): Promise<void> {
+    const { data, error } = await this.sb.supabase
+      .from('usuarios')
+      .update({ habilitado: true })
+      .eq('email', email)
+      .eq('perfil', 'especialista');
+    
+    if (error) {
+      console.error('Error al habilitar especialista:', error);
+      throw error;
+    }
+    
+    console.log('Especialista habilitado exitosamente:', data);
+  }
+
+  // Método para deshabilitar un especialista (solo para admins)
+  async deshabilitarEspecialista(email: string): Promise<void> {
+    const { data, error } = await this.sb.supabase
+      .from('usuarios')
+      .update({ habilitado: false })
+      .eq('email', email)
+      .eq('perfil', 'especialista');
+    
+    if (error) {
+      console.error('Error al deshabilitar especialista:', error);
+      throw error;
+    }
+    
+    console.log('Especialista deshabilitado exitosamente:', data);
+  }
+
+  // Obtener todos los especialistas pendientes de habilitación
+  async obtenerEspecialistasPendientes(): Promise<Usuario[]> {
+    const { data, error } = await this.sb.supabase
+      .from('usuarios')
+      .select('*')
+      .eq('perfil', 'especialista')
+      .eq('habilitado', false);
+    
+    if (error) {
+      console.error('Error al obtener especialistas pendientes:', error);
+      throw error;
+    }
+    
+    return data as Usuario[];
+  }
+
+
 
   // Subir imagen al storage de Supabase
   async subirImagen(file: File, path: string): Promise<string> {

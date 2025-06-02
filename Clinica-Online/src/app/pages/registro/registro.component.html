@@ -1,8 +1,26 @@
-<p>Registro</p>
-<button routerLink="usuarios">Usuario</button>
-<button routerLink="especialistas">Especialista</button>
-<router-outlet />
-
-
-
-
+<div class="registro-container">
+  <div class="registro-header">
+    <h1>Bienvenido a Clínica Online</h1>
+    <p>Elige el tipo de registro que necesitas</p>
+  </div>
+  
+  <div class="registro-options">
+    <div class="registro-card usuario-card" (click)="navigateToUsuarios()">
+      <div class="registro-card-icon">
+        <i class="icon-paciente">👤</i>
+      </div>
+      <h3>Registro de Paciente</h3>
+      <p>Regístrate como paciente para solicitar turnos y consultar con nuestros especialistas</p>
+      <button class="btn-registro">Registrarse como Paciente</button>
+    </div>
+    
+    <div class="registro-card especialista-card" (click)="navigateToEspecialistas()">
+      <div class="registro-card-icon">
+        <i class="icon-especialista">⚕️</i>
+      </div>
+      <h3>Registro de Especialista</h3>
+      <p>Únete a nuestro equipo médico y brinda atención de calidad a nuestros pacientes</p>
+      <button class="btn-registro">Registrarse como Especialista</button>
+    </div>
+  </div>
+</div>

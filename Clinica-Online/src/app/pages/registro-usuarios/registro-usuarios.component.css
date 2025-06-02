@@ -1,0 +1,321 @@
+/* registro-usuarios.component.css */
+
+.container {
+  min-height: 100vh;
+  background: var(--gradient-background);
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.registration-wrapper {
+  display: flex;
+  max-width: 1200px;
+  width: 100%;
+  gap: 2rem;
+  min-height: 80vh;
+}
+
+/* Tarjeta izquierda */
+.left-card {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(15px);
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Tarjeta derecha */
+.right-card {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(15px);
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.form-title {
+  text-align: center;
+  color: var(--primary-dark);
+  font-size: 2.2rem;
+  font-weight: 300;
+  margin-bottom: 2rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-section-title {
+  color: var(--primary-medium-blue);
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--primary-light-blue);
+}
+
+.form-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--primary-dark);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e1e5e9;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: rgba(255,255,255,0.8);
+  box-sizing: border-box;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary-medium-blue);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(80, 138, 168, 0.1);
+}
+
+.form-control::placeholder {
+  color: #999;
+  font-style: italic;
+}
+
+.error-container {
+  margin-top: 0.5rem;
+}
+
+.error-container small {
+  color: var(--primary-red);
+  font-size: 0.85rem;
+  display: block;
+  font-weight: 500;
+}
+
+/* Estilos para upload de imágenes */
+.images-section {
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.image-upload-container {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.image-upload-label {
+  display: block;
+  cursor: pointer;
+  border: 2px dashed var(--primary-medium-blue);
+  border-radius: 15px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  background: rgba(157, 209, 241, 0.1);
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-upload-label:hover {
+  border-color: var(--primary-light-blue);
+  background: rgba(157, 209, 241, 0.2);
+}
+
+.upload-placeholder {
+  color: var(--primary-medium-blue);
+}
+
+.upload-placeholder span {
+  font-size: 1.8rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.upload-placeholder p {
+  margin: 0;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.file-input {
+  display: none;
+}
+
+.image-preview {
+  max-width: 100%;
+  max-height: 150px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.remove-image-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--primary-red);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.remove-image-btn:hover {
+  background: var(--primary-dark);
+  transform: scale(1.1);
+}
+
+/* Alertas */
+.alert-container {
+  margin: 1.5rem 0;
+}
+
+.alert {
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.alert-success {
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.alert-danger {
+  background: rgba(219, 80, 74, 0.1);
+  color: var(--primary-red);
+  border: 1px solid rgba(219, 80, 74, 0.3);
+}
+
+/* Sección del botón - se empuja hacia abajo */
+.button-section {
+  margin-top: auto;
+  padding-top: 1.5rem;
+}
+
+/* Botones */
+.btn {
+  padding: 14px 30px;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.btn-primary {
+  background: var(--gradient-blue);
+  color: white;
+  width: 100%;
+  box-shadow: 0 4px 15px rgba(80, 138, 168, 0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(80, 138, 168, 0.4);
+  background: var(--gradient-blue-reverse);
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Enlaces */
+.links-container {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.login-link {
+  color: var(--primary-medium-blue);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.login-link:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .registration-wrapper {
+    flex-direction: column;
+    max-width: 600px;
+  }
+  
+  .left-card,
+  .right-card {
+    min-height: auto;
+  }
+  
+  .form-title {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  .left-card,
+  .right-card {
+    padding: 1.5rem;
+  }
+  
+  .form-title {
+    font-size: 1.5rem;
+  }
+  
+  .form-section-title {
+    font-size: 1.1rem;
+  }
+  
+  .image-upload-label {
+    padding: 1rem;
+    min-height: 100px;
+  }
+}

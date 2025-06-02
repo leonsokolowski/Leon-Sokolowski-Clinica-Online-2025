@@ -1,0 +1,362 @@
+/* registro-especialistas.component.css */
+
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #DB504A 0%, #031927 50%, #508AA8 100%);
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.form-title {
+  text-align: center;
+  color: white;
+  font-size: 2rem;
+  font-weight: 300;
+  margin-bottom: 2rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+form {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(15px);
+  border-radius: 20px;
+  padding: 2.5rem;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #031927;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e1e5e9;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: rgba(255,255,255,0.8);
+  box-sizing: border-box;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #DB504A;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(219, 80, 74, 0.1);
+}
+
+.form-control::placeholder {
+  color: #999;
+  font-style: italic;
+}
+
+.error-container {
+  margin-top: 0.5rem;
+}
+
+.error-container small {
+  color: #DB504A;
+  font-size: 0.85rem;
+  display: block;
+  font-weight: 500;
+}
+
+/* Estilos específicos para especialidades */
+.especialidades-predefinidas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: rgba(157, 209, 241, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(157, 209, 241, 0.3);
+}
+
+.especialidad-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.especialidad-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #DB504A;
+  cursor: pointer;
+}
+
+.especialidad-checkbox label {
+  margin: 0;
+  cursor: pointer;
+  font-weight: 500;
+  color: #031927;
+  font-size: 0.9rem;
+}
+
+.especialidad-personalizada {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.especialidad-personalizada input {
+  flex: 1;
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #508AA8 0%, #9DD1F1 100%);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #9DD1F1 0%, #508AA8 100%);
+  transform: translateY(-1px);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.especialidades-seleccionadas {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(219, 80, 74, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(219, 80, 74, 0.3);
+}
+
+.especialidades-seleccionadas h4 {
+  margin: 0 0 1rem 0;
+  color: #031927;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.especialidad-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #DB504A 0%, #031927 100%);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  margin: 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.remove-especialidad {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.remove-especialidad:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* Estilos para upload de imagen */
+.image-upload-container {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.image-upload-label {
+  display: block;
+  cursor: pointer;
+  border: 2px dashed #DB504A;
+  border-radius: 15px;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  background: rgba(219, 80, 74, 0.1);
+}
+
+.image-upload-label:hover {
+  border-color: #031927;
+  background: rgba(219, 80, 74, 0.2);
+}
+
+.upload-placeholder {
+  color: #DB504A;
+}
+
+.upload-placeholder span {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.upload-placeholder p {
+  margin: 0;
+  font-weight: 500;
+}
+
+.file-input {
+  display: none;
+}
+
+.image-preview {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.remove-image-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #DB504A;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.remove-image-btn:hover {
+  background: #031927;
+  transform: scale(1.1);
+}
+
+/* Alertas */
+.alert-container {
+  margin: 1.5rem 0;
+}
+
+.alert {
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.alert-success {
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.alert-danger {
+  background: rgba(219, 80, 74, 0.1);
+  color: #DB504A;
+  border: 1px solid rgba(219, 80, 74, 0.3);
+}
+
+/* Botones */
+.btn {
+  padding: 14px 30px;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #DB504A 0%, #031927 100%);
+  color: white;
+  width: 100%;
+  box-shadow: 0 4px 15px rgba(219, 80, 74, 0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(219, 80, 74, 0.4);
+  background: linear-gradient(135deg, #031927 0%, #DB504A 100%);
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Enlaces */
+.links-container {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.login-link {
+  color: #DB504A;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.login-link:hover {
+  color: #031927;
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  form {
+    padding: 1.5rem;
+  }
+  
+  .form-title {
+    font-size: 1.5rem;
+  }
+  
+  .especialidades-predefinidas {
+    grid-template-columns: 1fr;
+  }
+  
+  .especialidad-personalizada {
+    flex-direction: column;
+  }
+}

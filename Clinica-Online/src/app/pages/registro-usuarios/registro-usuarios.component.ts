@@ -39,7 +39,7 @@ export class RegistroUsuariosComponent {
       confirmarContraseña: ['', [Validators.required]],
       nombre: ['', [Validators.required, Validators.minLength(2)]],
       apellido: ['', [Validators.required, Validators.minLength(2)]],
-      edad: ['', [Validators.required, Validators.min(18)]],
+      edad: ['', [Validators.required, Validators.min(1)]],
       dni: ['', [Validators.required, Validators.pattern(/^\d{7,8}$/)]],
       obraSocial: ['', [Validators.required, Validators.minLength(2)]]
     });
