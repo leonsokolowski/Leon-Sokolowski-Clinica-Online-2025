@@ -7,6 +7,8 @@ import { RegistroEspecialistasComponent } from './pages/registro-especialistas/r
 import { SeccionUsuariosComponent } from './pages/seccion-usuarios/seccion-usuarios.component';
 import { ErrorComponent } from './pages/error/error.component';
 import { EsperandoHabilitacionComponent } from './pages/esperando-habilitacion/esperando-habilitacion.component';
+import { RegistroAdminsComponent } from './pages/registro-admins/registro-admins.component';
+import { AdministracionEspecialistasComponent } from './pages/administracion-especialistas/administracion-especialistas.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -32,6 +34,16 @@ export const routes: Routes = [
     path: 'seccion-usuarios',
     component: SeccionUsuariosComponent,
     title: 'Sección Usuarios',
+  },
+  {
+    path: 'registro-admins',
+    component: RegistroAdminsComponent,
+    title: 'Registro admins',
+  },
+  {
+    path: 'administracion-especialistas',
+    component: AdministracionEspecialistasComponent,
+    title: 'Administración Especialistas',
   },
   { path: '**', component: ErrorComponent, title: 'ERROR' },
 ];

@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-seccion-usuarios',
@@ -7,5 +8,13 @@ import { Component } from '@angular/core';
   styleUrl: './seccion-usuarios.component.css'
 })
 export class SeccionUsuariosComponent {
+  router = inject(Router);
 
+  navigateToRegistroAdmins() {
+    this.router.navigateByUrl('/registro-admins');
+  }
+
+  navigateToAdministracionEspecialistas() {
+    this.router.navigateByUrl('/administracion-especialistas');
+  }
 }

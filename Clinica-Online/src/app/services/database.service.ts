@@ -163,7 +163,60 @@ export class DatabaseService {
     return data as Usuario[];
   }
 
+  // NUEVO: Método para eliminar usuario de la base de datos
+  async eliminarUsuario(email: string): Promise<void> {
+    const { error } = await this.sb.supabase
+      .from('usuarios')
+      .delete()
+      .eq('email', email);
+    
+    if (error) {
+      console.error('Error al eliminar usuario:', error);
+      throw error;
+    }
+    
+    console.log('Usuario eliminado exitosamente de la base de datos');
+  }
 
+  // NUEVO: Método para obtener usuarios por perfil
+  async obtenerUsuariosPorPerfil(perfil: string): Promise<Usuario[]> {
+    const { data, error } = await this.sb.supabase
+      .from('usuarios')
+      .select('*')
+      .eq('perfil', perfil);
+    
+    if (error) {
+      console.error(`Error al obtener usuarios con perfil ${perfil}:`, error);
+      throw error;
+    }
+    
+    return data as Usuario[];
+  }
+
+  // NUEVO: Método para obtener pacientes
+  async obtenerPacientes(): Promise<Paciente[]> {
+    return await this.obtenerUsuariosPorPerfil('paciente') as Paciente[];
+  }
+
+  // NUEVO: Método para obtener especialistas
+  async obtenerEspecialistas(): Promise<Especialista[]> {
+    return await this.obtenerUsuariosPorPerfil('especialista') as Especialista[];
+  }
+
+  // NUEVO: Método para actualizar datos de usuario
+  async actualizarUsuario(email: string, datosActualizados: Partial<Usuario>): Promise<void> {
+    const { data, error } = await this.sb.supabase
+      .from('usuarios')
+      .update(datosActualizados)
+      .eq('email', email);
+    
+    if (error) {
+      console.error('Error al actualizar usuario:', error);
+      throw error;
+    }
+    
+    console.log('Usuario actualizado exitosamente:', data);
+  }
 
   // Subir imagen al storage de Supabase
   async subirImagen(file: File, path: string): Promise<string> {

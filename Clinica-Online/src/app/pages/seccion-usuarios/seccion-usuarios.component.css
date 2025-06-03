@@ -1,0 +1,215 @@
+/* seccion-usuarios.component.css */
+
+.seccion-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #9DD1F1 0%, #508AA8 100%);
+}
+
+.seccion-header {
+  text-align: center;
+  margin-bottom: 4rem;
+  color: white;
+}
+
+.seccion-header h1 {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.seccion-header p {
+  font-size: 1.4rem;
+  opacity: 0.9;
+  font-weight: 300;
+}
+
+.seccion-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 4rem;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.seccion-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.seccion-option:hover {
+  transform: translateY(-5px);
+}
+
+.btn-circular {
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-circular::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transform: scale(0);
+  transition: transform 0.3s ease;
+}
+
+.btn-circular:hover::before {
+  transform: scale(1);
+}
+
+.btn-circular:hover {
+  transform: scale(1.1);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+}
+
+.admin-btn {
+  background: linear-gradient(135deg, #dc3545 0%, #721c24 100%);
+}
+
+.admin-btn:hover {
+  background: linear-gradient(135deg, #721c24 0%, #dc3545 100%);
+}
+
+.especialista-admin-btn {
+  background: linear-gradient(135deg, #6f42c1 0%, #3d1e5c 100%);
+}
+
+.especialista-admin-btn:hover {
+  background: linear-gradient(135deg, #3d1e5c 0%, #6f42c1 100%);
+}
+
+.btn-image {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+  border-radius: 50%;
+}
+
+.btn-circular:hover .btn-image {
+  transform: scale(1.1);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.seccion-option h3 {
+  color: white;
+  font-size: 1.6rem;
+  margin-top: 1.5rem;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  text-align: center;
+  max-width: 240px;
+}
+
+.seccion-option:hover h3 {
+  transform: translateY(-2px);
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Responsive Design */
+@media (max-width: 1366px) {
+  .seccion-container {
+    padding: 1.5rem;
+  }
+  
+  .seccion-header h1 {
+    font-size: 2.8rem;
+  }
+  
+  .seccion-header p {
+    font-size: 1.2rem;
+  }
+  
+  .btn-circular {
+    width: 200px;
+    height: 200px;
+    padding: 0;
+  }
+  
+  .btn-image {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .seccion-buttons {
+    gap: 3rem;
+  }
+  
+  .seccion-option h3 {
+    font-size: 1.4rem;
+    max-width: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .seccion-buttons {
+    flex-direction: column;
+    gap: 3rem;
+  }
+  
+  .seccion-header h1 {
+    font-size: 2.5rem;
+  }
+  
+  .seccion-header p {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .seccion-header h1 {
+    font-size: 2.2rem;
+  }
+  
+  .seccion-header p {
+    font-size: 1rem;
+  }
+  
+  .btn-circular {
+    width: 170px;
+    height: 170px;
+    padding: 0;
+  }
+  
+  .btn-image {
+    width: 130px;
+    height: 130px;
+  }
+  
+  .seccion-option h3 {
+    font-size: 1.2rem;
+    max-width: 170px;
+  }
+}

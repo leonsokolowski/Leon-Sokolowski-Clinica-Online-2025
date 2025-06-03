@@ -1,1 +1,22 @@
-<p>seccion-usuarios works!</p>
+<div class="seccion-container">
+  <div class="seccion-header">
+    <h1>Administración</h1>
+    <p>Selecciona la opción que deseas gestionar</p>
+  </div>
+  
+  <div class="seccion-buttons">
+    <div class="seccion-option" (click)="navigateToRegistroAdmins()">
+      <button class="btn-circular admin-btn">
+        <img src="assets/seccion-usuarios/registro-admins.png" alt="Registro Administradores" class="btn-image">
+      </button>
+      <h3>Registro Administradores</h3>
+    </div>
+    
+    <div class="seccion-option" (click)="navigateToAdministracionEspecialistas()">
+      <button class="btn-circular especialista-admin-btn">
+        <img src="assets/seccion-usuarios/administracion-especialistas.png" alt="Administración Especialistas" class="btn-image">
+      </button>
+      <h3>Administración Usuarios</h3>
+    </div>
+  </div>
+</div>

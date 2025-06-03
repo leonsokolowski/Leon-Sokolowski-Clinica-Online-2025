@@ -1,0 +1,172 @@
+<div class="admin-container">
+  <h1 class="titulo-principal">Administración de Usuarios</h1>
+  
+  <!-- Botones de navegación -->
+  <div class="botones-navegacion">
+    <button 
+      class="btn-nav" 
+      [class.activo]="vistaActual === 'pacientes'"
+      (click)="cambiarVista('pacientes')"
+      [disabled]="cargando">
+      Pacientes
+    </button>
+    <button 
+      class="btn-nav" 
+      [class.activo]="vistaActual === 'especialistas'"
+      (click)="cambiarVista('especialistas')"
+      [disabled]="cargando">
+      Especialistas
+    </button>
+  </div>
+
+  <!-- Indicador de carga -->
+  <div *ngIf="cargando" class="loading">
+    <div class="spinner"></div>
+    <p>Cargando usuarios...</p>
+  </div>
+
+  <!-- Tabla de Pacientes -->
+  <div *ngIf="!cargando && vistaActual === 'pacientes'" class="tabla-container">
+    <h2 class="subtitulo">Lista de Pacientes ({{usuariosFiltrados.length}})</h2>
+    
+    <div *ngIf="usuariosFiltrados.length === 0" class="sin-datos">
+      No hay pacientes registrados
+    </div>
+    
+    <table *ngIf="usuariosFiltrados.length > 0" class="tabla-usuarios">
+      <thead>
+        <tr>
+          <th>Imagen</th>
+          <th>Nombre</th>
+          <th>Apellido</th>
+          <th>Edad</th>
+          <th>DNI</th>
+          <th>Obra Social</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let usuario of usuariosFiltrados" class="fila-usuario">
+          <td class="celda-imagen">
+            <img 
+              [src]="usuario.imagen_perfil_1" 
+              [alt]="usuario.nombre + ' ' + usuario.apellido"
+              class="imagen-perfil"
+              (error)="onImageError($event)"
+              >
+          </td>
+          <td>{{usuario.nombre}}</td>
+          <td>{{usuario.apellido}}</td>
+          <td>{{usuario.edad}}</td>
+          <td>{{usuario.dni}}</td>
+          <td>{{getPacienteObraSocial(usuario)}}</td>
+          <td class="celda-acciones">
+            <button 
+              class="btn-eliminar"
+              (click)="abrirModalEliminar(usuario)"
+              title="Eliminar usuario">
+              ❌
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Tabla de Especialistas -->
+  <div *ngIf="!cargando && vistaActual === 'especialistas'" class="tabla-container">
+    <h2 class="subtitulo">Lista de Especialistas ({{usuariosFiltrados.length}})</h2>
+    
+    <div *ngIf="usuariosFiltrados.length === 0" class="sin-datos">
+      No hay especialistas registrados
+    </div>
+    
+    <table *ngIf="usuariosFiltrados.length > 0" class="tabla-usuarios">
+      <thead>
+        <tr>
+          <th>Imagen</th>
+          <th>Nombre</th>
+          <th>Apellido</th>
+          <th>Edad</th>
+          <th>DNI</th>
+          <th>Especialidades</th>
+          <th>Habilitado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let usuario of usuariosFiltrados" class="fila-usuario">
+          <td class="celda-imagen">
+            <img 
+              [src]="usuario.imagen_perfil_1" 
+              [alt]="usuario.nombre + ' ' + usuario.apellido"
+              class="imagen-perfil"
+              (error)="onImageError($event)"
+              >
+          </td>
+          <td>{{usuario.nombre}}</td>
+          <td>{{usuario.apellido}}</td>
+          <td>{{usuario.edad}}</td>
+          <td>{{usuario.dni}}</td>
+          <td class="celda-especialidades">
+            <span *ngFor="let especialidad of getEspecialistaEspecialidades(usuario); let last = last" class="especialidad">
+              {{especialidad}}<span *ngIf="!last">, </span>
+            </span>
+          </td>
+          <td class="celda-habilitado">
+            <button 
+              class="btn-toggle-habilitado"
+              (click)="toggleHabilitacionEspecialista(usuario)"
+              [title]="usuario.habilitado ? 'Deshabilitar especialista' : 'Habilitar especialista'">
+              {{usuario.habilitado ? '✅' : '❌'}}
+            </button>
+          </td>
+          <td class="celda-acciones">
+            <button 
+              class="btn-eliminar"
+              (click)="abrirModalEliminar(usuario)"
+              title="Eliminar usuario">
+              ❌
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal de Confirmación -->
+<div *ngIf="mostrarModal" class="modal-overlay" (click)="cerrarModal()">
+  <div class="modal-contenido" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Confirmar Eliminación</h3>
+      <button class="btn-cerrar" (click)="cerrarModal()">×</button>
+    </div>
+    
+    <div class="modal-body">
+      <p>¿Estás seguro de que deseas eliminar al siguiente usuario?</p>
+      <div *ngIf="usuarioAEliminar" class="usuario-info">
+        <img 
+          [src]="usuarioAEliminar.imagen_perfil_1" 
+          [alt]="usuarioAEliminar.nombre"
+          class="imagen-modal"
+          (error)="onImageError($event)"
+          >
+        <div>
+          <p><strong>{{usuarioAEliminar.nombre}} {{usuarioAEliminar.apellido}}</strong></p>
+          <p>DNI: {{usuarioAEliminar.dni}}</p>
+          <p>Email: {{usuarioAEliminar.email}}</p>
+          <p>Perfil: {{usuarioAEliminar.perfil}}</p>
+        </div>
+      </div>
+      <p class="advertencia">Esta acción no se puede deshacer.</p>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn-confirmar" (click)="confirmarEliminacion()" [disabled]="cargando">
+        {{cargando ? 'Eliminando...' : 'Eliminar'}}
+      </button>
+    </div>
+  </div>
+</div>
