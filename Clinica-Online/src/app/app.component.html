@@ -5,12 +5,13 @@
     
     <div class="nav-buttons">
         <button routerLink="/home" class="nav-btn btn-home">Home</button>
-        <!-- Verificar si el tipo de usuario es admin -->
-        <button routerLink="/seccion-usuarios" class="nav-btn btn-admin">Administración</button>
+        @if(perfil_usuario === "admin")
+        {
+          <button routerLink="/seccion-usuarios" class="nav-btn btn-admin">Administración</button>
+        }
         <button (click)="logOut()" class="nav-btn btn-logout">Cerrar Sesión</button>
     </div>
   </div>
 </div>
 }
 <router-outlet />
-

@@ -10,20 +10,20 @@ export class AuthService {
   sb = inject(SupabaseService)
   router = inject(Router)
   usuarioActual : User | null = null;
+  perfilUsuario: string = ""; // Nueva propiedad para el perfil
   
   constructor() {
     //Saber si el usuario esta logeado o no
     this.sb.supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log(event, session);
+      console.log('Auth state change:', event, session);
 
       if (session === null) //Se cierra sesión o no hay sesion
       {
         this.usuarioActual = null;
+        this.perfilUsuario = ""; // Limpiar perfil al cerrar sesión
+        
         const currentUrl = this.router.url;
-        if (currentUrl === '/' || currentUrl === '/login')
-        {
-          this.router.navigateByUrl("/login");
-        }else if(currentUrl === '/registro')
+        if(currentUrl === '/registro')
         {
           this.router.navigateByUrl("/registro");
         }else if(currentUrl === '/registro-usuarios')
@@ -32,9 +32,16 @@ export class AuthService {
         }else if(currentUrl === '/registro-especialistas')
         {
           this.router.navigateByUrl("/registro-especialistas");
+        }else
+        {
+          this.router.navigateByUrl("/login");
         }
       }else{ //si hay sesion
         this.usuarioActual = session.user;
+        
+        // Obtener el perfil del usuario
+        await this.obtenerPerfilUsuario(session.user.email!);
+        
         const currentUrl = this.router.url;
 
         if (currentUrl === '/login' || currentUrl === '/registro' || currentUrl === '/registro/usuarios' || currentUrl === '/registro/especialistas' || currentUrl === '/') {
@@ -52,6 +59,29 @@ export class AuthService {
       }
     });
    }
+
+  // Nuevo método para obtener el perfil del usuario
+  private async obtenerPerfilUsuario(email: string): Promise<void> {
+    try {
+      const { data, error } = await this.sb.supabase
+        .from('usuarios')
+        .select('perfil')
+        .eq('email', email)
+        .single();
+      
+      if (error) {
+        console.error('Error al obtener perfil del usuario:', error);
+        this.perfilUsuario = "";
+        return;
+      }
+
+      this.perfilUsuario = data?.perfil || "";
+      console.log('Perfil del usuario:', this.perfilUsuario);
+    } catch (error) {
+      console.error('Error al obtener perfil:', error);
+      this.perfilUsuario = "";
+    }
+  }
 
   // Verificar si el usuario puede acceder al home
   private async verificarAccesoHome(email: string): Promise<boolean> {
@@ -131,13 +161,14 @@ export class AuthService {
 
   //Cerrar sesión
   async cerrarSesion() {
+    console.log('Iniciando cierre de sesión...');
     const { error } = await this.sb.supabase.auth.signOut();
     
     if (error) {
       console.error('Error al cerrar sesión:', error);
+    } else {
+      console.log('Sesión cerrada exitosamente');
     }
-    
-    console.log('Sesión cerrada');
   }
 
   // Método auxiliar para verificar si un usuario está habilitado
