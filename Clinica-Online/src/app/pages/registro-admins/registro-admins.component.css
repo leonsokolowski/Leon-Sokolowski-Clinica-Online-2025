@@ -1,0 +1,465 @@
+/* registro-admins.component.css */
+
+.container {
+  min-height: calc(100vh - 60px); /* Reducido para ubicar más arriba */
+  margin-top: 60px; /* Reducido espacio superior */
+  padding: 0.5rem; /* Reducido padding */
+  display: flex;
+  align-items: flex-start; /* Cambio: alinear arriba en lugar de centro */
+  justify-content: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.registration-wrapper {
+  display: flex;
+  max-width: 1000px;
+  width: 100%;
+  gap: 1.5rem;
+  max-height: calc(100vh - 80px); /* Optimizado */
+  overflow: hidden;
+  margin-top: 1rem; /* Pequeño margen superior */
+}
+
+/* Tarjeta Izquierda */
+.left-card {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(15px);
+  border-radius: 15px;
+  padding: 1.8rem; /* Reducido padding */
+  box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.2);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  max-height: calc(100vh - 120px); /* Altura máxima optimizada */
+}
+
+/* Tarjeta Derecha */
+.right-card {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(15px);
+  border-radius: 15px;
+  padding: 1.8rem; /* Reducido padding */
+  box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.2);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  max-height: calc(100vh - 120px); /* Altura máxima optimizada */
+}
+
+/* Mantener compatibilidad con main-card para el HTML existente */
+.main-card {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(15px);
+  border-radius: 15px;
+  padding: 1.8rem;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.2);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  max-height: calc(100vh - 120px);
+}
+
+.form-title {
+  text-align: center;
+  color: #031927;
+  font-size: 1.8rem; /* Reducido ligeramente */
+  font-weight: 300;
+  margin-bottom: 1.2rem; /* Reducido */
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-section-title {
+  color: #DB504A;
+  font-size: 1.1rem; /* Reducido */
+  font-weight: 600;
+  margin-bottom: 1rem; /* Reducido */
+  text-align: center;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid rgba(219, 80, 74, 0.3);
+}
+
+.form-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Estilos para filas de formulario */
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem; /* Reducido */
+}
+
+.form-group {
+  margin-bottom: 1rem; /* Reducido */
+}
+
+.form-group-half {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem; /* Reducido */
+  color: #031927;
+  font-weight: 600;
+  font-size: 0.9rem; /* Reducido */
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px 14px; /* Reducido */
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 0.9rem; /* Reducido */
+  transition: all 0.3s ease;
+  background: rgba(255,255,255,0.9);
+  box-sizing: border-box;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #DB504A;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(219, 80, 74, 0.1);
+}
+
+.form-control::placeholder {
+  color: #999;
+  font-style: italic;
+}
+
+.error-container {
+  margin-top: 0.4rem; /* Reducido */
+}
+
+.error-container small {
+  color: #DB504A;
+  font-size: 0.75rem; /* Reducido */
+  display: block;
+  font-weight: 500;
+}
+
+/* Estilos para upload de imagen */
+.images-section {
+  margin-top: 0.8rem; /* Reducido */
+  padding-top: 0.8rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.image-upload-container {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.image-upload-label {
+  display: block;
+  cursor: pointer;
+  border: 2px dashed #DB504A;
+  border-radius: 12px;
+  padding: 1.2rem; /* Reducido */
+  text-align: center;
+  transition: all 0.3s ease;
+  background: rgba(219, 80, 74, 0.1);
+  min-height: 100px; /* Reducido */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-upload-label:hover {
+  border-color: #031927;
+  background: rgba(219, 80, 74, 0.2);
+}
+
+.upload-placeholder {
+  color: #DB504A;
+}
+
+.upload-placeholder span {
+  font-size: 1.6rem; /* Reducido */
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.upload-placeholder p {
+  margin: 0;
+  font-weight: 500;
+  font-size: 0.85rem; /* Reducido */
+}
+
+.file-input {
+  display: none;
+}
+
+.image-preview {
+  max-width: 100%;
+  max-height: 120px; /* Reducido */
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.remove-image-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #DB504A;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.remove-image-btn:hover {
+  background: #031927;
+  transform: scale(1.1);
+}
+
+/* Alertas */
+.alert-container {
+  margin: 1rem 0; /* Reducido */
+}
+
+.alert {
+  padding: 10px 14px; /* Reducido */
+  border-radius: 8px;
+  font-weight: 500;
+  text-align: center;
+  font-size: 0.9rem; /* Reducido */
+}
+
+.alert-success {
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.alert-danger {
+  background: rgba(219, 80, 74, 0.1);
+  color: #DB504A;
+  border: 1px solid rgba(219, 80, 74, 0.3);
+}
+
+.alert-warning {
+  background: rgba(255, 193, 7, 0.1);
+  color: #856404;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+/* Modal de confirmación */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.modal-title {
+  color: #DB504A;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.modal-message {
+  color: #031927;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+/* Sección del botón - se empuja hacia abajo */
+.button-section {
+  margin-top: auto;
+  padding-top: 1.2rem; /* Reducido */
+}
+
+/* Botones */
+.btn {
+  padding: 12px 24px; /* Reducido */
+  border: none;
+  border-radius: 25px;
+  font-size: 0.95rem; /* Reducido */
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #DB504A 0%, #031927 100%);
+  color: white;
+  width: 100%;
+  box-shadow: 0 4px 15px rgba(219, 80, 74, 0.4);
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(219, 80, 74, 0.5);
+  background: linear-gradient(135deg, #031927 0%, #DB504A 100%);
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+}
+
+.btn-confirm {
+  background: #DB504A;
+  color: white;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+}
+
+.btn-confirm:hover {
+  background: #031927;
+}
+
+/* Enlaces */
+.links-container {
+  text-align: center;
+  margin-top: 1rem; /* Reducido */
+}
+
+.login-link {
+  color: #DB504A;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.login-link:hover {
+  color: #031927;
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 1366px) {
+  .container {
+    padding: 0.5rem;
+    margin-top: 60px;
+  }
+  
+  .registration-wrapper {
+    max-height: calc(100vh - 80px);
+  }
+  
+  .left-card, .right-card, .main-card {
+    padding: 1.6rem;
+    max-height: calc(100vh - 100px);
+  }
+}
+
+@media (max-width: 1024px) {
+  .registration-wrapper {
+    flex-direction: column;
+    max-width: 600px;
+    max-height: none;
+  }
+  
+  .left-card, .right-card, .main-card {
+    min-height: auto;
+    overflow-y: visible;
+    max-height: none;
+  }
+  
+  .form-title {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0.5rem;
+    margin-top: 60px;
+  }
+  
+  .left-card, .right-card, .main-card {
+    padding: 1.4rem;
+  }
+  
+  .form-title {
+    font-size: 1.4rem;
+  }
+  
+  .form-section-title {
+    font-size: 1rem;
+  }
+  
+  .image-upload-label {
+    padding: 1rem;
+    min-height: 80px;
+  }
+  
+  /* En móvil, los campos vuelven a apilarse verticalmente */
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .form-group-half {
+    margin-bottom: 1rem;
+  }
+  
+  .modal-content {
+    padding: 1.5rem;
+  }
+  
+  .modal-buttons {
+    flex-direction: column;
+  }
+}

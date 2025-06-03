@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { SupabaseService } from './supabase.service';
-import { Usuario, Paciente, Especialista } from '../clases/usuario';
+import { Usuario, Paciente, Especialista, Admin } from '../clases/usuario';
 
 @Injectable({
   providedIn: 'root'
@@ -248,4 +248,30 @@ export class DatabaseService {
       throw error;
     }
   }
+
+  async registrarAdmin(admin: Admin): Promise<void> {
+    // Preparar datos para insertar con los campos correctos de la BD
+    const userData = {
+      nombre: admin.nombre,
+      apellido: admin.apellido,
+      edad: admin.edad,
+      dni: admin.dni,
+      email: admin.email,
+      perfil: admin.perfil, // 'admin'
+      imagen_perfil_1: admin.imagen_perfil_1,
+      habilitado: admin.habilitado // true por defecto para admins
+    };
+
+    const { data, error } = await this.sb.supabase
+      .from('usuarios')
+      .insert(userData);
+    
+    if (error) {
+      console.error('Error al registrar admin:', error);
+      throw error;
+    }
+    
+    console.log('Administrador registrado exitosamente:', data);
+  }
+  
 }

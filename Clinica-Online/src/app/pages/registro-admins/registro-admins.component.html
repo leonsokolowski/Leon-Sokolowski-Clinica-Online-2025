@@ -1,1 +1,191 @@
-<p>registro-admins works!</p>
+<div class="container">
+  <div class="registration-wrapper">
+    
+    <!-- Tarjeta Izquierda -->
+    <div class="left-card">
+      <h1 class="form-title">Registro de Administrador</h1>
+      
+      <div class="form-content">
+        <form [formGroup]="registroForm" (ngSubmit)="confirmarRegistro()">
+          
+          <!-- Sección de Datos de Acceso -->
+          <h3 class="form-section-title">Datos de Acceso</h3>
+          
+          <!-- Correo -->
+          <div class="form-group">
+            <label for="correo">Correo Electrónico:</label>
+            <input id="correo" formControlName="correo" type="email" class="form-control" 
+                   placeholder="ejemplo@correo.com" />
+            <div *ngIf="f['correo'].touched && f['correo'].invalid" class="error-container">
+              <small *ngIf="f['correo'].errors?.['required']">El correo es obligatorio.</small>
+              <small *ngIf="f['correo'].errors?.['email']">El correo no es válido.</small>
+            </div>
+          </div>
+
+          <!-- Contraseñas lado a lado -->
+          <div class="form-row">
+            <!-- Contraseña -->
+            <div class="form-group form-group-half">
+              <label for="contraseña">Contraseña:</label>
+              <input id="contraseña" formControlName="contraseña" type="password" class="form-control" 
+                     placeholder="Mín. 6 caracteres" />
+              <div *ngIf="f['contraseña'].touched && f['contraseña'].invalid" class="error-container">
+                <small *ngIf="f['contraseña'].errors?.['required']">La contraseña es obligatoria.</small>
+                <small *ngIf="f['contraseña'].errors?.['minlength']">Mínimo 6 caracteres.</small>
+                <small *ngIf="f['contraseña'].errors?.['pattern']">Debe tener mayúscula y número.</small>
+              </div>
+            </div>
+
+            <!-- Confirmar Contraseña -->
+            <div class="form-group form-group-half">
+              <label for="confirmarContraseña">Confirmar Contraseña:</label>
+              <input id="confirmarContraseña" formControlName="confirmarContraseña" type="password" class="form-control" 
+                     placeholder="Repite contraseña" />
+              <div *ngIf="f['confirmarContraseña'].touched && f['confirmarContraseña'].invalid" class="error-container">
+                <small *ngIf="f['confirmarContraseña'].errors?.['required']">Confirmación obligatoria.</small>
+                <small *ngIf="f['confirmarContraseña'].errors?.['noMatch']">Las contraseñas no coinciden.</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección de Datos Personales -->
+          <h3 class="form-section-title">Datos Personales</h3>
+
+          <!-- Nombre y Apellido lado a lado -->
+          <div class="form-row">
+            <!-- Nombre -->
+            <div class="form-group form-group-half">
+              <label for="nombre">Nombre:</label>
+              <input id="nombre" formControlName="nombre" type="text" class="form-control" 
+                     placeholder="Tu nombre" />
+              <div *ngIf="f['nombre'].touched && f['nombre'].invalid" class="error-container">
+                <small *ngIf="f['nombre'].errors?.['required']">El nombre es obligatorio.</small>
+                <small *ngIf="f['nombre'].errors?.['minlength']">Mínimo 2 caracteres.</small>
+              </div>
+            </div>
+
+            <!-- Apellido -->
+            <div class="form-group form-group-half">
+              <label for="apellido">Apellido:</label>
+              <input id="apellido" formControlName="apellido" type="text" class="form-control" 
+                     placeholder="Tu apellido" />
+              <div *ngIf="f['apellido'].touched && f['apellido'].invalid" class="error-container">
+                <small *ngIf="f['apellido'].errors?.['required']">El apellido es obligatorio.</small>
+                <small *ngIf="f['apellido'].errors?.['minlength']">Mínimo 2 caracteres.</small>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Tarjeta Derecha -->
+    <div class="right-card">
+      <div class="form-content">
+        <form [formGroup]="registroForm" (ngSubmit)="confirmarRegistro()">
+          
+          <!-- Sección de Datos Adicionales -->
+          <h3 class="form-section-title">Datos Adicionales</h3>
+
+          <!-- Edad y DNI lado a lado -->
+          <div class="form-row">
+            <!-- Edad -->
+            <div class="form-group form-group-half">
+              <label for="edad">Edad:</label>
+              <input id="edad" formControlName="edad" type="number" class="form-control" 
+                     placeholder="Tu edad" min="18" max="120" />
+              <div *ngIf="f['edad'].touched && f['edad'].invalid" class="error-container">
+                <small *ngIf="f['edad'].errors?.['required']">La edad es obligatoria.</small>
+                <small *ngIf="f['edad'].errors?.['min']">Mínimo 18 años.</small>
+              </div>
+            </div>
+
+            <!-- DNI -->
+            <div class="form-group form-group-half">
+              <label for="dni">DNI:</label>
+              <input id="dni" formControlName="dni" type="text" class="form-control" 
+                     placeholder="12345678" maxlength="8" />
+              <div *ngIf="f['dni'].touched && f['dni'].invalid" class="error-container">
+                <small *ngIf="f['dni'].errors?.['required']">El DNI es obligatorio.</small>
+                <small *ngIf="f['dni'].errors?.['pattern']">Entre 7 y 8 dígitos.</small>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Imagen de Perfil -->
+          <div class="images-section">
+            <h3 class="form-section-title">Imagen de Perfil</h3>
+            
+            <div class="form-group">
+              <label>Imagen de Perfil (requerida):</label>
+              
+              <!-- Imagen de perfil -->
+              <div class="image-upload-container">
+                <label for="imagen1" class="image-upload-label">
+                  <div class="upload-placeholder" *ngIf="!previewUrl">
+                    <span>🔐</span>
+                    <p>Subir imagen de perfil</p>
+                  </div>
+                  <img *ngIf="previewUrl" [src]="previewUrl" alt="Preview" class="image-preview" />
+                </label>
+                <input id="imagen1" type="file" accept="image/*" 
+                       (change)="onFileSelected($event)" class="file-input" />
+                <button *ngIf="previewUrl" type="button" class="remove-image-btn" 
+                        (click)="removeImage()">✕</button>
+              </div>
+
+              <!-- Error de imagen -->
+              <div *ngIf="!imagenSeleccionada && mostrarErrorImagen" class="error-container">
+                <small>Debes seleccionar una imagen de perfil.</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mensajes de error y éxito -->
+          <div *ngIf="successMessage || errorMessage" class="alert-container">
+            <div *ngIf="successMessage" class="alert alert-success">
+              {{ successMessage }}
+            </div>
+            <div *ngIf="errorMessage" class="alert alert-danger">
+              {{ errorMessage }}
+            </div>
+          </div>
+
+          <!-- Sección del botón - se empuja hacia abajo -->
+          <div class="button-section">
+            <!-- Botón de registro -->
+            <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+              <span *ngIf="!isLoading">Registrar Administrador</span>
+              <span *ngIf="isLoading">Registrando...</span>
+            </button>
+
+            <!-- Enlaces -->
+            <div class="links-container">
+              <a routerLink="/login" class="login-link">¿Ya tenés una cuenta? Iniciá Sesión</a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<!-- Modal de confirmación -->
+<div *ngIf="mostrarModal" class="modal-overlay" (click)="cancelarRegistro()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h3 class="modal-title">⚠️ Advertencia</h3>
+    <p class="modal-message">
+      Al registrar un nuevo administrador, tu sesión actual se cerrará automáticamente. 
+      ¿Estás seguro de que deseas continuar?
+    </p>
+    <div class="modal-buttons">
+      <button type="button" class="btn btn-secondary" (click)="cancelarRegistro()">
+        Cancelar
+      </button>
+      <button type="button" class="btn btn-confirm" (click)="procederConRegistro()">
+        Continuar
+      </button>
+    </div>
+  </div>
+</div>
