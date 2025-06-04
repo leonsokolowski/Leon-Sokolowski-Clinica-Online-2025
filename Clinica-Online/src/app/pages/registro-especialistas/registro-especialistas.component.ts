@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { DatabaseService } from '../../services/database.service';
 import { Especialista } from '../../clases/usuario';
@@ -16,6 +16,8 @@ export class RegistroEspecialistasComponent {
   private auth = inject(AuthService);
   private db = inject(DatabaseService);
   private fb = inject(FormBuilder);
+  private router = inject(Router);
+
 
   registroForm: FormGroup;
   errorMessage: string = '';
@@ -270,11 +272,11 @@ export class RegistroEspecialistasComponent {
         return;
       }
 
-      // 1. Primero crear la cuenta de autenticación
+      // 1. Crear la cuenta de autenticación sin redirecciones
       const { correo, nombre, apellido, edad, dni } = this.registroForm.value;
-      await this.auth.crearCuenta(correo, contraseña);
+      await this.auth.crearCuentaParaRegistro(correo, contraseña);
 
-      // 2. Luego subir la imagen
+      // 2. Subir la imagen
       const urlImagen = await this.subirImagen();
 
       // 3. Crear objeto Especialista
@@ -288,12 +290,37 @@ export class RegistroEspecialistasComponent {
         urlImagen
       );
 
-      // 4. Finalmente registrar en la base de datos
+      // 4. Registrar en la base de datos
       await this.db.registrarEspecialista(especialista);
 
-      this.successMessage = 'Especialista registrado exitosamente.';
-      this.limpiarFormulario();
-      this.auth.cerrarSesion();
+      // 5. Cerrar la sesión creada automáticamente
+      await this.auth.cerrarSesionParaRegistro();
+
+      this.successMessage = 'Especialista registrado exitosamente. El administrador debe habilitarlo antes de que pueda acceder al sistema.';
+      this.registroForm.reset();
+      this.especialidadesSeleccionadas = [];
+      this.especialidadesAgregadas = [];
+      this.imagenSeleccionada = null;
+      this.previewUrl = '';
+      this.imagenSubida = '';
+
+      // Limpiar el input de archivo
+      const fileInput = document.getElementById('imagen1') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
+
+      // Desmarcar todos los checkboxes
+      this.especialidadesPredefinidas.forEach(esp => {
+        const checkbox = document.getElementById('esp-' + esp) as HTMLInputElement;
+        if (checkbox) {
+          checkbox.checked = false;
+        }
+      });
+
+      setTimeout(() => {
+        this.router.navigate(['/login']);
+      }, 3000);
 
     } catch (error: any) {
       console.error('Error en el registro:', error);
@@ -321,28 +348,6 @@ export class RegistroEspecialistasComponent {
     } finally {
       this.isLoading = false;
     }
-  }
-
-  private limpiarFormulario(): void {
-    this.registroForm.reset();
-    this.imagenSeleccionada = null;
-    this.previewUrl = '';
-    this.imagenSubida = '';
-    this.especialidadesSeleccionadas = [];
-    this.especialidadesAgregadas = []; // Limpiar también las especialidades agregadas
-    this.nuevaEspecialidad = '';
-    this.mostrarErrorEspecialidades = false;
-    this.mostrarErrorImagen = false;
-
-    // Limpiar también el input de archivo
-    const fileInput = document.getElementById('imagen1') as HTMLInputElement;
-    if (fileInput) fileInput.value = '';
-
-    // Desmarcar todos los checkboxes
-    this.especialidadesPredefinidas.forEach(esp => {
-      const checkbox = document.getElementById('esp-' + esp) as HTMLInputElement;
-      if (checkbox) checkbox.checked = false;
-    });
   }
 
   private marcarCamposComoTocados(): void {

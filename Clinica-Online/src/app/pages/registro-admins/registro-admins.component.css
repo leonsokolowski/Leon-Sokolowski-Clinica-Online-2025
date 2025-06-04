@@ -369,12 +369,6 @@
   background: #031927;
 }
 
-/* Enlaces */
-.links-container {
-  text-align: center;
-  margin-top: 1rem; /* Reducido */
-}
-
 .login-link {
   color: #DB504A;
   text-decoration: none;

@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { DatabaseService } from '../../services/database.service';
 import { Paciente } from '../../clases/usuario';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-registro-usuarios',
@@ -16,6 +17,7 @@ export class RegistroUsuariosComponent {
   private auth = inject(AuthService);
   private db = inject(DatabaseService);
   private fb = inject(FormBuilder);
+  private router = inject(Router);
 
   registroForm: FormGroup;
   errorMessage: string = '';
@@ -202,11 +204,11 @@ export class RegistroUsuariosComponent {
         return;
       }
 
-      // 1. Primero crear la cuenta de autenticación
+      // 1. Crear la cuenta de autenticación (los pacientes pueden usar crearCuenta normal)
       const { correo, nombre, apellido, edad, dni, obraSocial } = this.registroForm.value;
       await this.auth.crearCuenta(correo, contraseña);
 
-      // 2. Luego subir las imágenes
+      // 2. Subir las imágenes
       const urlsImagenes = await this.subirImagenes();
 
       // 3. Crear objeto Paciente con las URLs por separado
@@ -221,10 +223,13 @@ export class RegistroUsuariosComponent {
         urlsImagenes.imagen2
       );
 
-      // 4. Finalmente registrar en la base de datos
+      // 4. Registrar en la base de datos
       await this.db.registrarPaciente(paciente);
 
-      this.successMessage = 'Paciente registrado exitosamente. Revisa tu correo para verificar tu cuenta.';
+      // 5. Cerrar la sesión (los pacientes también necesitan verificar email)
+      await this.auth.cerrarSesionParaRegistro();
+
+      this.successMessage = 'Paciente registrado exitosamente. Ahora puedes iniciar sesión.';
       this.registroForm.reset();
       this.imagenesSeleccionadas = [];
       this.previewUrls = [];
@@ -235,6 +240,10 @@ export class RegistroUsuariosComponent {
       const fileInput2 = document.getElementById('imagen2') as HTMLInputElement;
       if (fileInput1) fileInput1.value = '';
       if (fileInput2) fileInput2.value = '';
+
+      setTimeout(() => {
+        this.router.navigate(['/login']);
+      }, 3000);
 
     } catch (error: any) {
       console.error('Error en el registro:', error);

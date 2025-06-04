@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { DatabaseService } from '../../services/database.service';
 import { Admin } from '../../clases/usuario';
@@ -10,12 +10,13 @@ import { Admin } from '../../clases/usuario';
   selector: 'app-registro-admins',
   templateUrl: './registro-admins.component.html',
   styleUrl: './registro-admins.component.css',
-  imports: [ReactiveFormsModule, CommonModule, RouterLink]
+  imports: [ReactiveFormsModule, CommonModule]
 })
 export class RegistroAdminsComponent {
   private auth = inject(AuthService);
   private db = inject(DatabaseService);
   private fb = inject(FormBuilder);
+  private router = inject(Router);
 
   registroForm: FormGroup;
   errorMessage: string = '';
@@ -188,16 +189,6 @@ export class RegistroAdminsComponent {
   // Proceder con el registro después de la confirmación
   async procederConRegistro(): Promise<void> {
     this.mostrarModal = false;
-    
-    // Cerrar sesión antes de registrar
-    try {
-      await this.auth.cerrarSesion();
-    } catch (error) {
-      console.error('Error al cerrar sesión:', error);
-      // Continuar con el registro aunque falle el cierre de sesión
-    }
-    
-    // Proceder con el registro
     await this.registrar();
   }
 
@@ -215,14 +206,14 @@ export class RegistroAdminsComponent {
         return;
       }
 
-      // 1. Primero crear la cuenta de autenticación
+      // 1. Primero crear la cuenta de autenticación (sin redirecciones automáticas)
       const { correo, contraseña, nombre, apellido, edad, dni } = this.registroForm.value;
-      await this.auth.crearCuenta(correo, contraseña);
+      await this.auth.crearCuentaParaRegistro(correo, contraseña);
 
       // 2. Luego subir la imagen
       const urlImagen = await this.subirImagen();
 
-      // 3. Crear objeto Admin - CORRECCIÓN AQUÍ
+      // 3. Crear objeto Admin
       const admin = new Admin(
         nombre,
         apellido,
@@ -232,20 +223,18 @@ export class RegistroAdminsComponent {
         urlImagen
       );
 
-      // 4. Finalmente registrar en la base de datos
+      // 4. Registrar en la base de datos
       await this.db.registrarAdmin(admin);
+
+      // 5. Cerrar sesión inmediatamente después del registro exitoso
+      await this.auth.cerrarSesionParaRegistro();
 
       this.successMessage = 'Administrador registrado exitosamente. La sesión se ha cerrado.';
       this.limpiarFormulario();
-      
-      // Asegurar que la sesión esté cerrada después del registro exitoso
-      setTimeout(async () => {
-        try {
-          await this.auth.cerrarSesion();
-        } catch (error) {
-          console.error('Error al cerrar sesión después del registro:', error);
-        }
-      }, 2000);
+
+      setTimeout(() => {
+        this.router.navigate(['/login']);
+      }, 3000);
 
     } catch (error: any) {
       console.error('Error en el registro:', error);
@@ -257,6 +246,13 @@ export class RegistroAdminsComponent {
         } catch (cleanupError) {
           console.error('Error al limpiar imagen:', cleanupError);
         }
+      }
+      
+      // Asegurar que la sesión esté cerrada incluso si hay error
+      try {
+        await this.auth.cerrarSesionParaRegistro();
+      } catch (logoutError) {
+        console.error('Error al cerrar sesión después de error:', logoutError);
       }
       
       // Mejorar el manejo de errores específicos
