@@ -9,6 +9,7 @@ import { ErrorComponent } from './pages/error/error.component';
 import { RegistroAdminsComponent } from './pages/registro-admins/registro-admins.component';
 import { AdministracionEspecialistasComponent } from './pages/administracion-especialistas/administracion-especialistas.component';
 import { MiPerfilComponent } from './pages/mi-perfil/mi-perfil.component';
+import { SolicitarTurnoComponent } from './pages/solicitar-turno/solicitar-turno.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -41,5 +42,6 @@ export const routes: Routes = [
     title: 'Administración Especialistas',
   },
   { path: 'mi-perfil', component: MiPerfilComponent, title: 'Mi perfil' },
+  { path: 'solicitar-turno', component: SolicitarTurnoComponent, title: 'Solicitar Turno' },
   { path: '**', component: ErrorComponent, title: 'ERROR' },
 ];

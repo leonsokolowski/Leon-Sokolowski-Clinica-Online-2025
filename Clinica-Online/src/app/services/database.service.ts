@@ -438,4 +438,140 @@ export class DatabaseService {
     
     return true;
   } 
+  // Método mejorado para obtener turnos existentes (ya lo tienes en el componente, pero es mejor tenerlo en el service)
+async obtenerTurnosExistentes(especialistaId: number, fecha: string): Promise<any[]> {
+  try {
+    const { data, error } = await this.sb.supabase
+      .from('turnos')
+      .select('*')
+      .eq('especialista_id', especialistaId)
+      .eq('fecha', fecha)
+      .in('estado', ['pendiente', 'aceptado']); // Solo turnos activos
+    
+    if (error) {
+      console.error('Error al obtener turnos existentes:', error);
+      return [];
+    }
+    
+    return data || [];
+    
+  } catch (error) {
+    console.error('Error al obtener turnos existentes:', error);
+    return [];
+  }
+}
+
+// Método para guardar turno
+async guardarTurno(turno: any): Promise<void> {
+  const { data, error } = await this.sb.supabase
+    .from('turnos')
+    .insert(turno);
+  
+  if (error) {
+    console.error('Error al guardar turno:', error);
+    throw error;
+  }
+  
+  console.log('Turno guardado exitosamente:', data);
+}
+
+// Método para obtener turnos de un paciente
+async obtenerTurnosPaciente(pacienteId: number): Promise<any[]> {
+  const { data, error } = await this.sb.supabase
+    .from('turnos')
+    .select(`
+      *,
+      especialista:usuarios!turnos_especialista_id_fkey(nombre, apellido, imagen_perfil_1)
+    `)
+    .eq('paciente_id', pacienteId)
+    .order('fecha', { ascending: true })
+    .order('hora', { ascending: true });
+  
+  if (error) {
+    console.error('Error al obtener turnos del paciente:', error);
+    throw error;
+  }
+  
+  return data || [];
+}
+
+// Método para obtener turnos de un especialista
+async obtenerTurnosEspecialista(especialistaId: number): Promise<any[]> {
+  const { data, error } = await this.sb.supabase
+    .from('turnos')
+    .select(`
+      *,
+      paciente:usuarios!turnos_paciente_id_fkey(nombre, apellido, imagen_perfil_1, obra_social)
+    `)
+    .eq('especialista_id', especialistaId)
+    .order('fecha', { ascending: true })
+    .order('hora', { ascending: true });
+  
+  if (error) {
+    console.error('Error al obtener turnos del especialista:', error);
+    throw error;
+  }
+  
+  return data || [];
+}
+
+// Método para actualizar estado de turno
+async actualizarEstadoTurno(turnoId: number, nuevoEstado: string, comentario?: string): Promise<void> {
+  const updateData: any = { estado: nuevoEstado };
+  
+  if (comentario) {
+    if (nuevoEstado === 'cancelado') {
+      updateData.comentario_cancelacion = comentario;
+    } else if (nuevoEstado === 'rechazado') {
+      updateData.comentario_rechazo = comentario;
+    }
+  }
+  
+  const { data, error } = await this.sb.supabase
+    .from('turnos')
+    .update(updateData)
+    .eq('id', turnoId);
+  
+  if (error) {
+    console.error('Error al actualizar estado del turno:', error);
+    throw error;
+  }
+  
+  console.log('Estado del turno actualizado exitosamente:', data);
+}
+
+// Método para completar turno con diagnóstico y comentario
+async completarTurno(turnoId: number, diagnostico: string, comentario: string, puntaje?: number): Promise<void> {
+  const { data, error } = await this.sb.supabase
+    .from('turnos')
+    .update({
+      estado: 'realizado',
+      diagnostico: diagnostico,
+      comentario_especialista: comentario,
+      puntaje: puntaje
+    })
+    .eq('id', turnoId);
+  
+  if (error) {
+    console.error('Error al completar turno:', error);
+    throw error;
+  }
+  
+  console.log('Turno completado exitosamente:', data);
+}
+
+// Método para obtener estadísticas de turnos (útil para admins)
+async obtenerEstadisticasTurnos(): Promise<any> {
+  const { data, error } = await this.sb.supabase
+    .from('turnos')
+    .select('estado, especialidad, fecha')
+    .gte('fecha', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]); // Últimos 30 días
+  
+  if (error) {
+    console.error('Error al obtener estadísticas:', error);
+    throw error;
+  }
+  
+  return data || [];
+}
 }

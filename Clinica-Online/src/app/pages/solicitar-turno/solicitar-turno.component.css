@@ -1,0 +1,534 @@
+/* Variables CSS para consistencia */
+:root {
+  --primary-color: #007bff;
+  --primary-hover: #0056b3;
+  --secondary-color: #6c757d;
+  --secondary-hover: #5a6268;
+  --success-color: #28a745;
+  --success-hover: #218838;
+  --danger-color: #dc3545;
+  --light-gray: #f8f9fa;
+  --border-color: #e9ecef;
+  --text-color: #333;
+  --shadow: 0 2px 10px rgba(0,0,0,0.1);
+  --shadow-hover: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+/* Contenedor principal */
+.solicitar-turno-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #f5f7fa;
+  min-height: 100vh;
+}
+
+/* Loading spinner */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: var(--shadow);
+}
+
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+.loading-container p {
+  color: var(--secondary-color);
+  font-size: 16px;
+  margin: 0;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  background: white;
+  padding: 25px 30px;
+  border-radius: 15px;
+  box-shadow: var(--shadow);
+}
+
+.header h2 {
+  margin: 0;
+  color: var(--text-color);
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.btn-volver {
+  background: linear-gradient(135deg, var(--secondary-color), var(--secondary-hover));
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-volver:hover {
+  background: linear-gradient(135deg, var(--secondary-hover), #495057);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+/* Selección de Paciente */
+.seleccion-paciente {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: var(--shadow);
+  margin-bottom: 30px;
+}
+
+.seleccion-paciente h3 {
+  color: var(--text-color);
+  margin-bottom: 25px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+/* Grids */
+.pacientes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.especialidades-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 25px;
+  padding: 30px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: var(--shadow);
+}
+
+.especialistas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 25px;
+  padding: 30px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: var(--shadow);
+}
+
+.fechas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 20px;
+  padding: 30px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: var(--shadow);
+}
+
+.horarios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 15px;
+  padding: 30px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: var(--shadow);
+  margin-bottom: 30px;
+}
+
+/* Botones de Pacientes */
+.btn-paciente {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: white;
+  border: 3px solid var(--border-color);
+  border-radius: 15px;
+  padding: 20px 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  min-height: 120px;
+}
+
+.btn-paciente:hover {
+  border-color: var(--primary-color);
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-hover);
+}
+
+.btn-paciente.selected {
+  border-color: var(--primary-color);
+  background: linear-gradient(135deg, #e3f2fd, #f0f8ff);
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+}
+
+.paciente-imagen {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 10px;
+  border: 3px solid var(--border-color);
+}
+
+.btn-paciente.selected .paciente-imagen {
+  border-color: var(--primary-color);
+}
+
+.paciente-nombre {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-color);
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* Botones de Especialidades - REDONDOS SIN TEXTO */
+.btn-especialidad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  border: 3px solid var(--border-color);
+  border-radius: 50%;
+  width: 130px;
+  height: 130px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  justify-self: center;
+}
+
+.btn-especialidad:hover {
+  border-color: var(--primary-color);
+  background: linear-gradient(135deg, #e3f2fd, #f0f8ff);
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: var(--shadow-hover);
+}
+
+.especialidad-imagen {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.btn-especialidad:hover .especialidad-imagen {
+  transform: scale(1.1);
+}
+
+.especialidad-info {
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--primary-color);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.btn-especialidad:hover .especialidad-info {
+  bottom: -35px;
+  opacity: 1;
+}
+
+/* Botones de Especialistas - REDONDOS CON NOMBRE */
+.btn-especialista {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  border: 3px solid var(--border-color);
+  border-radius: 20px;
+  padding: 25px 15px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  min-height: 180px;
+}
+
+.btn-especialista:hover {
+  border-color: var(--primary-color);
+  background: linear-gradient(135deg, #e3f2fd, #f0f8ff);
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-hover);
+}
+
+.especialista-imagen {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 15px;
+  border: 4px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.btn-especialista:hover .especialista-imagen {
+  border-color: var(--primary-color);
+  transform: scale(1.05);
+}
+
+.especialista-nombre {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-color);
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* Botones de Fechas - RECTANGULARES */
+.btn-fecha {
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: 18px 15px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-color);
+  transition: all 0.3s ease;
+  text-align: center;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-fecha:hover {
+  border-color: var(--primary-color);
+  background: linear-gradient(135deg, #e3f2fd, #f0f8ff);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.2);
+}
+
+/* Botones de Horarios - RECTANGULARES */
+.btn-horario {
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  padding: 15px 12px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-color);
+  transition: all 0.3s ease;
+  text-align: center;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-horario:hover {
+  border-color: var(--primary-color);
+  background: linear-gradient(135deg, #e3f2fd, #f0f8ff);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+}
+
+.btn-horario.selected {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  border-color: var(--primary-hover);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
+}
+
+/* Resumen del turno */
+.confirmar-container {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: var(--shadow);
+  margin-top: 30px;
+}
+
+.resumen-turno {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  padding: 25px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  border-left: 5px solid var(--primary-color);
+}
+
+.resumen-turno h3 {
+  color: var(--text-color);
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.resumen-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  font-size: 16px;
+}
+
+.resumen-item:last-child {
+  border-bottom: none;
+}
+
+.resumen-item strong {
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.resumen-item span {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+/* Botón confirmar */
+.btn-confirmar {
+  background: linear-gradient(135deg, var(--success-color), var(--success-hover));
+  color: white;
+  border: none;
+  padding: 15px 40px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  display: block;
+}
+
+.btn-confirmar:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--success-hover), #1e7e34);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+}
+
+.btn-confirmar:disabled {
+  background: linear-gradient(135deg, var(--secondary-color), var(--secondary-hover));
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Mensaje sin datos */
+.no-data {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: var(--shadow);
+  color: var(--secondary-color);
+  font-size: 18px;
+}
+
+.no-data p {
+  margin: 0;
+  font-style: italic;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .solicitar-turno-container {
+    padding: 15px;
+  }
+  
+  .header {
+    padding: 20px;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .header h2 {
+    font-size: 24px;
+    text-align: center;
+  }
+  
+  .especialidades-grid,
+  .especialistas-grid,
+  .fechas-grid,
+  .horarios-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 15px;
+    padding: 20px;
+  }
+  
+  .pacientes-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+  
+  .btn-especialidad {
+    width: 110px;
+    height: 110px;
+  }
+  
+  .especialidad-imagen {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .btn-especialista {
+    min-height: 160px;
+    padding: 20px 10px 15px;
+  }
+  
+  .especialista-imagen {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .resumen-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .especialidades-grid,
+  .especialistas-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .fechas-grid,
+  .horarios-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
