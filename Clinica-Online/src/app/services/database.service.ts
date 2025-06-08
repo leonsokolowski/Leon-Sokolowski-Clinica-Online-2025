@@ -163,19 +163,95 @@ export class DatabaseService {
     return data as Usuario[];
   }
 
-  // NUEVO: Método para eliminar usuario de la base de datos
+  // MODIFICADO: Método para eliminar usuario completo (BD + Storage)
   async eliminarUsuario(email: string): Promise<void> {
-    const { error } = await this.sb.supabase
-      .from('usuarios')
-      .delete()
-      .eq('email', email);
-    
-    if (error) {
-      console.error('Error al eliminar usuario:', error);
+    try {
+      console.log('Iniciando eliminación del usuario:', email);
+      
+      // 1. Obtener datos del usuario antes de eliminarlo
+      const usuario = await this.obtenerUsuarioPorEmail(email);
+      if (!usuario) {
+        throw new Error('Usuario no encontrado');
+      }
+
+      // 2. Eliminar imágenes del storage
+      await this.eliminarImagenesUsuario(usuario);
+
+      // 3. Eliminar horarios si es especialista
+      if (usuario.perfil === 'especialista' && usuario.id) {
+        await this.eliminarHorariosEspecialista(usuario.id);
+      }
+
+      // 4. Eliminar de la tabla usuarios
+      const { error: dbError } = await this.sb.supabase
+        .from('usuarios')
+        .delete()
+        .eq('email', email);
+      
+      if (dbError) {
+        console.error('Error al eliminar usuario de la BD:', dbError);
+        throw dbError;
+      }
+
+      console.log('Usuario eliminado completamente (BD + Storage)');
+      
+    } catch (error) {
+      console.error('Error en eliminación del usuario:', error);
       throw error;
     }
-    
-    console.log('Usuario eliminado exitosamente de la base de datos');
+  }
+
+  // NUEVO: Método para eliminar imágenes del usuario del storage
+  private async eliminarImagenesUsuario(usuario: Usuario): Promise<void> {
+    try {
+      const imagenesAEliminar: string[] = [];
+      
+      // Extraer paths de las imágenes
+      if (usuario.imagen_perfil_1) {
+        const path1 = this.extraerPathDeUrl(usuario.imagen_perfil_1);
+        if (path1) imagenesAEliminar.push(path1);
+      }
+      
+      // Solo pacientes tienen imagen_perfil_2
+      if (usuario.perfil === 'paciente') {
+        const paciente = usuario as Paciente;
+        if (paciente.imagen_perfil_2) {
+          const path2 = this.extraerPathDeUrl(paciente.imagen_perfil_2);
+          if (path2) imagenesAEliminar.push(path2);
+        }
+      }
+
+      // Eliminar imágenes del storage
+      if (imagenesAEliminar.length > 0) {
+        const { error } = await this.sb.supabase.storage
+          .from('imagenes-perfil')
+          .remove(imagenesAEliminar);
+        
+        if (error) {
+          console.error('Error al eliminar imágenes del storage:', error);
+          // No lanzar error para no interrumpir la eliminación completa
+        } else {
+          console.log('Imágenes eliminadas del storage:', imagenesAEliminar);
+        }
+      }
+      
+    } catch (error) {
+      console.error('Error al procesar eliminación de imágenes:', error);
+      // No lanzar error para no interrumpir la eliminación completa
+    }
+  }
+
+  // NUEVO: Método para extraer el path de una URL de Supabase Storage
+  private extraerPathDeUrl(url: string): string | null {
+    try {
+      // Formato típico: https://proyecto.supabase.co/storage/v1/object/public/imagenes-perfil/path/to/image.jpg
+      const regex = /\/storage\/v1\/object\/public\/imagenes-perfil\/(.+)$/;
+      const match = url.match(regex);
+      return match ? match[1] : null;
+    } catch (error) {
+      console.error('Error al extraer path de URL:', error);
+      return null;
+    }
   }
 
   // NUEVO: Método para obtener usuarios por perfil

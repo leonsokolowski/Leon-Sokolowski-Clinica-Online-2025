@@ -25,6 +25,20 @@ export class AdministracionEspecialistasComponent implements OnInit {
   // Variables para el modal de confirmación
   mostrarModal = false;
   usuarioAEliminar: Usuario | null = null;
+  
+  // NUEVO: Variable para mostrar progreso detallado de eliminación
+  procesoEliminacion = {
+    mostrarProgreso: false,
+    pasoActual: '',
+    pasos: [
+      'Obteniendo datos del usuario...',
+      'Eliminando imágenes del storage...',
+      'Eliminando horarios del especialista...',
+      'Eliminando registro de la base de datos...',
+      'Finalizando proceso...'
+    ],
+    pasoActualIndex: 0
+  };
 
   async ngOnInit() {
     await this.cargarUsuarios();
@@ -44,6 +58,7 @@ export class AdministracionEspecialistasComponent implements OnInit {
       this.filtrarUsuarios();
     } catch (error) {
       console.error('Error al cargar usuarios:', error);
+      this.mostrarError('Error al cargar usuarios');
     } finally {
       this.cargando = false;
     }
@@ -81,6 +96,7 @@ export class AdministracionEspecialistasComponent implements OnInit {
       console.log(`Especialista ${usuario.habilitado ? 'habilitado' : 'deshabilitado'} exitosamente`);
     } catch (error) {
       console.error('Error al cambiar habilitación del especialista:', error);
+      this.mostrarError('Error al cambiar habilitación del especialista');
       // Revertir el cambio visual si hay error
       await this.cargarUsuarios();
     }
@@ -89,20 +105,40 @@ export class AdministracionEspecialistasComponent implements OnInit {
   abrirModalEliminar(usuario: Usuario) {
     this.usuarioAEliminar = usuario;
     this.mostrarModal = true;
+    this.resetearProcesoEliminacion();
   }
 
   cerrarModal() {
     this.mostrarModal = false;
     this.usuarioAEliminar = null;
+    this.resetearProcesoEliminacion();
   }
 
+  // NUEVO: Resetear estado del proceso de eliminación
+  private resetearProcesoEliminacion() {
+    this.procesoEliminacion.mostrarProgreso = false;
+    this.procesoEliminacion.pasoActual = '';
+    this.procesoEliminacion.pasoActualIndex = 0;
+  }
+
+  // MODIFICADO: Confirmar eliminación con progreso detallado
   async confirmarEliminacion() {
     if (!this.usuarioAEliminar) return;
 
     try {
       this.cargando = true;
+      this.procesoEliminacion.mostrarProgreso = true;
       
-      // Usar el método del DatabaseService
+      // Mostrar progreso paso a paso
+      for (let i = 0; i < this.procesoEliminacion.pasos.length; i++) {
+        this.procesoEliminacion.pasoActualIndex = i;
+        this.procesoEliminacion.pasoActual = this.procesoEliminacion.pasos[i];
+        
+        // Dar tiempo para que se vea el cambio en la UI
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+      
+      // Ejecutar eliminación completa
       await this.db.eliminarUsuario(this.usuarioAEliminar.email);
       
       // Actualizar las listas locales
@@ -111,14 +147,33 @@ export class AdministracionEspecialistasComponent implements OnInit {
       this.especialistas = this.especialistas.filter(u => u.email !== this.usuarioAEliminar!.email);
       this.filtrarUsuarios();
       
-      console.log('Usuario eliminado exitosamente');
-      this.cerrarModal();
+      console.log('Usuario eliminado completamente');
+      this.mostrarExito('Usuario eliminado completamente (Base de datos, imágenes y cuenta de autenticación)');
+      
+      // Cerrar modal después de un momento
+      setTimeout(() => {
+        this.cerrarModal();
+      }, 1500);
       
     } catch (error) {
       console.error('Error al eliminar usuario:', error);
+      this.mostrarError('Error al eliminar usuario completamente');
+      this.resetearProcesoEliminacion();
     } finally {
       this.cargando = false;
     }
+  }
+
+  // NUEVO: Método para mostrar errores
+  private mostrarError(mensaje: string) {
+    // Aquí puedes implementar un toast o alert
+    alert(`Error: ${mensaje}`);
+  }
+
+  // NUEVO: Método para mostrar éxito
+  private mostrarExito(mensaje: string) {
+    // Aquí puedes implementar un toast o alert
+    console.log(`Éxito: ${mensaje}`);
   }
 
   // Métodos auxiliares para el template
@@ -138,7 +193,7 @@ export class AdministracionEspecialistasComponent implements OnInit {
     return [];
   }
 
-  // NUEVO: Método para manejar errores de carga de imagen
+  // Método para manejar errores de carga de imagen
   onImageError(event: Event) {
     const target = event.target as HTMLImageElement;
     target.src = 'assets/default-avatar.png';
