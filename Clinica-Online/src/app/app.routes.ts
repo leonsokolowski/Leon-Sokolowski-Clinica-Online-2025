@@ -6,7 +6,6 @@ import { RegistroUsuariosComponent } from './pages/registro-usuarios/registro-us
 import { RegistroEspecialistasComponent } from './pages/registro-especialistas/registro-especialistas.component';
 import { SeccionUsuariosComponent } from './pages/seccion-usuarios/seccion-usuarios.component';
 import { ErrorComponent } from './pages/error/error.component';
-import { EsperandoHabilitacionComponent } from './pages/esperando-habilitacion/esperando-habilitacion.component';
 import { RegistroAdminsComponent } from './pages/registro-admins/registro-admins.component';
 import { AdministracionEspecialistasComponent } from './pages/administracion-especialistas/administracion-especialistas.component';
 import { MiPerfilComponent } from './pages/mi-perfil/mi-perfil.component';
@@ -24,11 +23,6 @@ export const routes: Routes = [
     path: 'registro-especialistas',
     component: RegistroEspecialistasComponent,
     title: 'Registro Especialista',
-  },
-  {
-    path: 'esperando-habilitacion',
-    component: EsperandoHabilitacionComponent,
-    title: 'Esperando habilitación...',
   },
   { path: 'home', component: HomeComponent, title: 'Home' },
   {

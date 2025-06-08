@@ -12,6 +12,9 @@ export class AuthService {
   usuarioActual : User | null = null;
   perfilUsuario: string = ""; // Nueva propiedad para el perfil
   
+  // Flag para controlar si se debe hacer redirección automática
+  private permitirRedireccionAutomatica: boolean = true;
+  
   constructor() {
     //Saber si el usuario esta logeado o no
     this.sb.supabase.auth.onAuthStateChange(async (event, session) => {
@@ -22,19 +25,22 @@ export class AuthService {
         this.usuarioActual = null;
         this.perfilUsuario = ""; // Limpiar perfil al cerrar sesión
         
-        const currentUrl = this.router.url;
-        if(currentUrl === '/registro')
-        {
-          this.router.navigateByUrl("/registro");
-        }else if(currentUrl === '/registro-usuarios')
-        {
-          this.router.navigateByUrl("/registro-usuarios");
-        }else if(currentUrl === '/registro-especialistas')
-        {
-          this.router.navigateByUrl("/registro-especialistas");
-        }else
-        {
-          this.router.navigateByUrl("/login");
+        // Solo redirigir si está permitido
+        if (this.permitirRedireccionAutomatica) {
+          const currentUrl = this.router.url;
+          if(currentUrl === '/registro')
+          {
+            this.router.navigateByUrl("/registro");
+          }else if(currentUrl === '/registro-usuarios')
+          {
+            this.router.navigateByUrl("/registro-usuarios");
+          }else if(currentUrl === '/registro-especialistas')
+          {
+            this.router.navigateByUrl("/registro-especialistas");
+          }else
+          {
+            this.router.navigateByUrl("/login");
+          }
         }
       }else{ //si hay sesion
         this.usuarioActual = session.user;
@@ -42,18 +48,18 @@ export class AuthService {
         // Obtener el perfil del usuario
         await this.obtenerPerfilUsuario(session.user.email!);
         
-        const currentUrl = this.router.url;
+        // Solo redirigir si está permitido
+        if (this.permitirRedireccionAutomatica) {
+          const currentUrl = this.router.url;
 
-        if (currentUrl === '/login' || currentUrl === '/registro' || currentUrl === '/registro/usuarios' || currentUrl === '/registro/especialistas' || currentUrl === '/') {
-          // Verificar si el usuario puede acceder al home
-          const puedeAccederHome = await this.verificarAccesoHome(session.user.email!);
-          
-          if (puedeAccederHome) {
-            //redigir al home
-            this.router.navigateByUrl("/home");
-          } else {
-            // Si es especialista no habilitado, redirigir a página de espera
-            this.router.navigateByUrl("/esperando-habilitacion");
+          if (currentUrl === '/login' || currentUrl === '/registro' || currentUrl === '/registro/usuarios' || currentUrl === '/registro/especialistas' || currentUrl === '/') {
+            // Verificar si el usuario puede acceder al home
+            const puedeAccederHome = await this.verificarAccesoHome(session.user.email!);
+            
+            if (puedeAccederHome) {
+              //redigir al home
+              this.router.navigateByUrl("/home");
+            }
           }
         }
       }
@@ -115,6 +121,16 @@ export class AuthService {
     }
   }
 
+  // Método para deshabilitar temporalmente la redirección automática
+  deshabilitarRedireccionAutomatica(): void {
+    this.permitirRedireccionAutomatica = false;
+  }
+
+  // Método para rehabilitar la redirección automática
+  habilitarRedireccionAutomatica(): void {
+    this.permitirRedireccionAutomatica = true;
+  }
+
   //Crear un cuenta
   async crearCuenta(correo: string, contraseña: string) {
     const { data, error } = await this.sb.supabase.auth.signUp({
@@ -129,6 +145,32 @@ export class AuthService {
     
     console.log('Cuenta creada exitosamente:', data);
     return { data, error };
+  }
+
+  //Crear cuenta para registro de admins/especialistas (sin redirecciones automáticas)
+  async crearCuentaParaRegistro(correo: string, contraseña: string) {
+    // Deshabilitar redirecciones automáticas temporalmente
+    this.deshabilitarRedireccionAutomatica();
+    
+    try {
+      const { data, error } = await this.sb.supabase.auth.signUp({
+        email: correo, 
+        password: contraseña
+      });
+      
+      if (error) {
+        console.error('Error al crear cuenta:', error);
+        throw error;
+      }
+      
+      console.log('Cuenta creada exitosamente para registro:', data);
+      return { data, error };
+    } finally {
+      // Rehabilitar redirecciones automáticas después de un pequeño delay
+      setTimeout(() => {
+        this.habilitarRedireccionAutomatica();
+      }, 1000);
+    }
   }
 
   //Iniciar sesión
@@ -147,10 +189,10 @@ export class AuthService {
     if (data.user) {
       const puedeAccederHome = await this.verificarAccesoHome(data.user.email!);
       
-      if (!puedeAccederHome) {
-        // Si no puede acceder, redirigir a página de espera
+      if (puedeAccederHome) {
+        // Redirigir al home si puede acceder
         setTimeout(() => {
-          this.router.navigateByUrl("/esperando-habilitacion");
+          this.router.navigateByUrl("/home");
         }, 100);
       }
     }
@@ -166,8 +208,21 @@ export class AuthService {
     
     if (error) {
       console.error('Error al cerrar sesión:', error);
+      throw error;
     } else {
       console.log('Sesión cerrada exitosamente');
+    }
+  }
+
+  // Cerrar sesión para registros (sin esperar y sin lanzar errores)
+  async cerrarSesionParaRegistro(): Promise<void> {
+    try {
+      console.log('Cerrando sesión para registro...');
+      await this.sb.supabase.auth.signOut();
+      console.log('Sesión cerrada exitosamente para registro');
+    } catch (error) {
+      console.error('Error al cerrar sesión para registro:', error);
+      // No lanzar el error para no interrumpir el proceso de registro
     }
   }
 
