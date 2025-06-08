@@ -1,0 +1,395 @@
+.mi-perfil-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 50px;
+}
+
+.datos-usuario {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+/* Título "Mi Perfil" con margen izquierdo para especialistas */
+.datos-usuario h2 {
+  margin-left: 20px;
+  margin-bottom: 20px;
+}
+
+.info-personal {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+/* Estilos específicos para especialistas */
+.info-personal.especialista {
+  align-items: stretch;
+}
+
+.info-personal.especialista .imagenes-perfil {
+  height: 100%;
+  min-height: 250px;
+}
+
+.info-personal.especialista .imagen-perfil {
+  width: 180px;
+  height: 100%;
+  min-height: 250px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #ddd;
+}
+
+/* Layout para datos del especialista */
+.datos-especialista {
+  display: flex;
+  gap: 30px;
+  flex: 1;
+}
+
+.datos-basicos-especialista {
+  flex: 1;
+  min-width: 200px;
+}
+
+.especialidades-columna {
+  flex: 1;
+  min-width: 200px;
+}
+
+.especialidades-columna h4 {
+  margin-top: 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* Estilos para pacientes y admin - imágenes lado a lado con altura completa */
+.imagenes-perfil {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.imagenes-perfil.usuario-multiple {
+  flex-direction: row;
+  gap: 15px;
+  height: 100%;
+  min-height: 250px;
+}
+
+.imagen-perfil {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #ddd;
+}
+
+/* Imágenes con altura completa para pacientes y admin */
+.imagen-perfil.grande {
+  width: 180px;
+  height: 100%;
+  min-height: 250px;
+}
+
+.datos-basicos p {
+  margin: 8px 0;
+}
+
+.datos-basicos ul {
+  margin: 5px 0;
+  padding-left: 20px;
+}
+
+.habilitado {
+  color: green;
+  font-weight: bold;
+}
+
+.no-habilitado {
+  color: orange;
+  font-weight: bold;
+}
+
+.horarios-section {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.mensaje-error {
+  background: #fee;
+  color: #c33;
+  padding: 10px;
+  border-radius: 4px;
+  margin: 10px 0;
+  border: 1px solid #fcc;
+}
+
+.mensaje-exito {
+  background: #efe;
+  color: #3c3;
+  padding: 10px;
+  border-radius: 4px;
+  margin: 10px 0;
+  border: 1px solid #cfc;
+}
+
+.horarios-existentes {
+  background: #f5f5f5;
+  padding: 15px;
+  border-radius: 4px;
+  margin: 15px 0;
+}
+
+.horario-item {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.horario-item:last-child {
+  border-bottom: none;
+}
+
+.sin-horarios {
+  text-align: center;
+  padding: 30px;
+  background: #f9f9f9;
+  border-radius: 4px;
+  margin: 20px 0;
+}
+
+.especialidad-section {
+  margin: 25px 0;
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+}
+
+.especialidad-section h5 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.horario-form {
+  margin: 15px 0;
+}
+
+.horario-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  padding: 10px;
+  background: #fafafa;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+.campo-especialidad {
+  flex: 2;
+  min-width: 200px;
+}
+
+.campo-dia {
+  flex: 1;
+  min-width: 150px;
+}
+
+.campo-hora {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 2;
+  min-width: 200px;
+}
+
+.campo-especialidad label,
+.campo-dia label,
+.campo-hora label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #555;
+}
+
+.input-readonly {
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  padding: 8px;
+  border-radius: 4px;
+  width: 100%;
+}
+
+.select-dia,
+.select-hora {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: white;
+}
+
+.select-dia {
+  width: 100%;
+}
+
+.select-hora {
+  width: 80px;
+}
+
+.acciones {
+  display: flex;
+  align-items: center;
+}
+
+.btn-eliminar {
+  background: #ff4444;
+  color: white;
+  border: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-eliminar:hover {
+  background: #cc0000;
+}
+
+.agregar-horario {
+  margin: 10px 0;
+  text-align: center;
+}
+
+.btn-agregar {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-agregar:hover {
+  background: #218838;
+}
+
+.botones-accion {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.btn-guardar {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.btn-guardar:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.btn-guardar:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.btn-cancelar {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.btn-cancelar:hover {
+  background: #545b62;
+}
+
+.btn-modificar,
+.btn-asignar {
+  background: #17a2b8;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 15px;
+}
+
+.btn-modificar:hover,
+.btn-asignar:hover {
+  background: #117a8b;
+}
+
+.no-habilitado {
+  text-align: center;
+  padding: 30px;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  color: #856404;
+}
+
+@media (max-width: 768px) {
+  .info-personal,
+  .info-personal.especialista {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .datos-especialista {
+    flex-direction: column;
+  }
+  
+  .imagenes-perfil.usuario-multiple {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .info-personal.especialista .imagen-perfil,
+  .imagen-perfil.grande {
+    width: 180px;
+    height: 180px;
+    min-height: auto;
+  }
+  
+  .horario-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .campo-hora {
+    justify-content: center;
+  }
+  
+  .botones-accion {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

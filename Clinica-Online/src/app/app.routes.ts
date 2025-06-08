@@ -9,6 +9,7 @@ import { ErrorComponent } from './pages/error/error.component';
 import { EsperandoHabilitacionComponent } from './pages/esperando-habilitacion/esperando-habilitacion.component';
 import { RegistroAdminsComponent } from './pages/registro-admins/registro-admins.component';
 import { AdministracionEspecialistasComponent } from './pages/administracion-especialistas/administracion-especialistas.component';
+import { MiPerfilComponent } from './pages/mi-perfil/mi-perfil.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -45,5 +46,6 @@ export const routes: Routes = [
     component: AdministracionEspecialistasComponent,
     title: 'Administración Especialistas',
   },
+  { path: 'mi-perfil', component: MiPerfilComponent, title: 'Mi perfil' },
   { path: '**', component: ErrorComponent, title: 'ERROR' },
 ];

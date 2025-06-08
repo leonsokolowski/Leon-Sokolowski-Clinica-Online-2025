@@ -1,0 +1,185 @@
+<div class="mi-perfil-container">
+  <div class="loading-spinner" *ngIf="cargando">
+    <p>Cargando...</p>
+  </div>
+
+  <div *ngIf="!cargando">
+    <!-- Sección de datos del usuario -->
+    <div class="datos-usuario" *ngIf="usuario">
+      <h2>Mi Perfil</h2>
+      
+      <!-- Layout para especialistas -->
+      <div class="info-personal especialista" *ngIf="esEspecialista">
+        <div class="imagenes-perfil" *ngIf="usuario.imagen_perfil_1 || obtenerSegundaImagen()">
+          <img 
+            *ngIf="usuario.imagen_perfil_1" 
+            [src]="usuario.imagen_perfil_1" 
+            alt="Imagen de perfil 1"
+            class="imagen-perfil">
+          <img 
+            *ngIf="obtenerSegundaImagen()" 
+            [src]="obtenerSegundaImagen()" 
+            alt="Imagen de perfil 2"
+            class="imagen-perfil">
+        </div>
+        
+        <div class="datos-especialista" *ngIf="usuarioEspecialista">
+          <div class="datos-basicos-especialista">
+            <p><strong>Nombre:</strong> {{ usuario.nombre }}</p>
+            <p><strong>Apellido:</strong> {{ usuario.apellido }}</p>
+            <p><strong>Edad:</strong> {{ usuario.edad }}</p>
+            <p><strong>DNI:</strong> {{ usuario.dni }}</p>
+            <p><strong>Email:</strong> {{ usuario.email }}</p>
+            <p><strong>Perfil:</strong> {{ usuario.perfil | titlecase }}</p>
+            <p><strong>Estado:</strong> 
+              <span [class]="usuario.habilitado ? 'habilitado' : 'no-habilitado'">
+                {{ usuario.habilitado ? 'Habilitado' : 'Pendiente de habilitación' }}
+              </span>
+            </p>
+          </div>
+          
+          <div class="especialidades-columna">
+            <h4>Especialidades:</h4>
+            <ul>
+              <li *ngFor="let esp of especialidades">{{ esp }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Layout para pacientes y admin -->
+      <div class="info-personal" *ngIf="!esEspecialista">
+        <div class="imagenes-perfil usuario-multiple" *ngIf="usuario.imagen_perfil_1 || obtenerSegundaImagen()">
+          <img 
+            *ngIf="usuario.imagen_perfil_1" 
+            [src]="usuario.imagen_perfil_1" 
+            alt="Imagen de perfil 1"
+            class="imagen-perfil grande">
+          <img 
+            *ngIf="obtenerSegundaImagen()" 
+            [src]="obtenerSegundaImagen()" 
+            alt="Imagen de perfil 2"
+            class="imagen-perfil grande">
+        </div>
+        
+        <div class="datos-basicos">
+          <p><strong>Nombre:</strong> {{ usuario.nombre }}</p>
+          <p><strong>Apellido:</strong> {{ usuario.apellido }}</p>
+          <p><strong>Edad:</strong> {{ usuario.edad }}</p>
+          <p><strong>DNI:</strong> {{ usuario.dni }}</p>
+          <p><strong>Email:</strong> {{ usuario.email }}</p>
+          <p><strong>Perfil:</strong> {{ usuario.perfil | titlecase }}</p>
+          
+          <div *ngIf="esPaciente && usuarioPaciente">
+            <p><strong>Obra Social:</strong> {{ usuarioPaciente.obra_social || 'No especificada' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección de horarios (solo para especialistas) -->
+    <div class="horarios-section" *ngIf="esEspecialista && usuario?.habilitado">
+      <h3>Mis Horarios</h3>
+      
+      <!-- Mensajes -->
+      <div class="mensaje-error" *ngIf="mensajeError">
+        {{ mensajeError }}
+      </div>
+      
+      <div class="mensaje-exito" *ngIf="mensajeExito">
+        {{ mensajeExito }}
+      </div>
+
+      <!-- Mostrar horarios existentes -->
+      <div *ngIf="modoEdicion && horariosExistentes.length > 0">
+        <h4>Horarios Actuales</h4>
+        <div class="horarios-existentes">
+          <div *ngFor="let horario of horariosExistentes" class="horario-item">
+            <span><strong>{{ horario.especialidad }}</strong> - {{ horario.dia }}: 
+              {{ horario.hora_inicio.split(':')[0] }}hs a {{ horario.hora_final.split(':')[0] }}hs</span>
+          </div>
+        </div>
+        <button (click)="editarHorarios()" class="btn-modificar">Modificar Horarios</button>
+      </div>
+
+      <!-- Mensaje cuando no hay horarios -->
+      <div *ngIf="modoEdicion && horariosExistentes.length === 0" class="sin-horarios">
+        <p>Sus horarios todavía no fueron asignados</p>
+        <button (click)="editarHorarios()" class="btn-asignar">Asignar Horarios</button>
+      </div>
+
+      <!-- Formulario para agregar/editar horarios -->
+      <div *ngIf="!modoEdicion" class="formulario-horarios">
+        <h4>{{ horariosExistentes.length > 0 ? 'Modificar' : 'Asignar' }} Horarios</h4>
+        
+        <div *ngFor="let especialidad of especialidades" class="especialidad-section">
+          <h5>{{ especialidad }}</h5>
+          
+          <div *ngFor="let horario of obtenerHorariosPorEspecialidad(especialidad); let i = index" 
+               class="horario-form">
+            <div class="horario-row">
+              <div class="campo-especialidad">
+                <label>Especialidad:</label>
+                <input type="text" [value]="horario.especialidad" readonly class="input-readonly">
+              </div>
+              
+              <div class="campo-dia">
+                <label>Día:</label>
+                <select [(ngModel)]="horario.dia" class="select-dia">
+                  <option value="">Seleccionar día</option>
+                  <option *ngFor="let dia of diasDisponibles" [value]="dia">{{ dia }}</option>
+                </select>
+              </div>
+              
+              <div class="campo-hora">
+                <label>De</label>
+                <select [(ngModel)]="horario.hora_inicio" class="select-hora">
+                  <option value="">Hora</option>
+                  <option *ngFor="let hora of horasDisponibles" [value]="hora">{{ hora }}hs</option>
+                </select>
+                
+                <label>a</label>
+                <select [(ngModel)]="horario.hora_final" class="select-hora">
+                  <option value="">Hora</option>
+                  <option *ngFor="let hora of horasDisponibles" [value]="hora">{{ hora }}hs</option>
+                </select>
+              </div>
+              
+              <div class="acciones" *ngIf="obtenerHorariosPorEspecialidad(especialidad).length > 1">
+                <button (click)="eliminarHorario(nuevosHorarios.indexOf(horario))" 
+                        class="btn-eliminar" type="button">×</button>
+              </div>
+            </div>
+            
+            <!-- Botón para agregar más horarios -->
+            <div *ngIf="horario.dia !== 'Todos los días' && i === obtenerHorariosPorEspecialidad(especialidad).length - 1" 
+                 class="agregar-horario">
+              <button (click)="agregarNuevoHorario(especialidad)" 
+                      class="btn-agregar" type="button">+ Agregar otro horario</button>
+            </div>
+          </div>
+          
+          <!-- Si no hay horarios para esta especialidad -->
+          <div *ngIf="obtenerHorariosPorEspecialidad(especialidad).length === 0">
+            <button (click)="agregarNuevoHorario(especialidad)" 
+                    class="btn-agregar" type="button">+ Agregar horario</button>
+          </div>
+        </div>
+        
+        <div class="botones-accion">
+          <button (click)="guardarHorarios()" 
+                  [disabled]="cargando || nuevosHorarios.length === 0" 
+                  class="btn-guardar">
+            {{ horariosExistentes.length > 0 ? 'Actualizar' : 'Guardar' }} Horarios
+          </button>
+          <button (click)="cancelarEdicion()" class="btn-cancelar">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mensaje para especialistas no habilitados -->
+    <div *ngIf="esEspecialista && !usuario?.habilitado" class="no-habilitado">
+      <p>Su cuenta está pendiente de habilitación. Una vez habilitada podrá gestionar sus horarios.</p>
+    </div>
+  </div>
+</div>

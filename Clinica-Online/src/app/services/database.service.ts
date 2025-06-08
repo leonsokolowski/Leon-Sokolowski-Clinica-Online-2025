@@ -273,5 +273,93 @@ export class DatabaseService {
     
     console.log('Administrador registrado exitosamente:', data);
   }
-  
+
+  async obtenerHorariosEspecialista(usuarioId: number): Promise<any[]> {
+    const { data, error } = await this.sb.supabase
+      .from('horarios_especialistas')
+      .select('*')
+      .eq('usuario_id', usuarioId)
+      .order('especialidad', { ascending: true })
+      .order('dia', { ascending: true });
+    
+    if (error) {
+      console.error('Error al obtener horarios del especialista:', error);
+      throw error;
+    }
+    
+    return data || [];
+  }
+
+  // Método para guardar horarios de especialista
+  async guardarHorariosEspecialista(horarios: any[]): Promise<void> {
+    const { data, error } = await this.sb.supabase
+      .from('horarios_especialistas')
+      .insert(horarios);
+    
+    if (error) {
+      console.error('Error al guardar horarios:', error);
+      throw error;
+    }
+    
+    console.log('Horarios guardados exitosamente:', data);
+  }
+
+  // Método para actualizar horarios de especialista
+  async actualizarHorariosEspecialista(usuarioId: number, horarios: any[]): Promise<void> {
+    // Primero eliminar los horarios existentes
+    await this.eliminarHorariosEspecialista(usuarioId);
+    
+    // Luego insertar los nuevos horarios
+    await this.guardarHorariosEspecialista(horarios);
+  }
+
+  // Método para eliminar horarios de especialista
+  async eliminarHorariosEspecialista(usuarioId: number): Promise<void> {
+    const { error } = await this.sb.supabase
+      .from('horarios_especialistas')
+      .delete()
+      .eq('usuario_id', usuarioId);
+    
+    if (error) {
+      console.error('Error al eliminar horarios:', error);
+      throw error;
+    }
+    
+    console.log('Horarios eliminados exitosamente');
+  }
+
+  // Método para verificar disponibilidad de horarios (evitar superposiciones)
+  async verificarDisponibilidadHorario(usuarioId: number, especialidad: string, dia: string, horaInicio: string, horaFinal: string): Promise<boolean> {
+    const { data, error } = await this.sb.supabase
+      .from('horarios_especialistas')
+      .select('*')
+      .eq('usuario_id', usuarioId)
+      .eq('dia', dia)
+      .neq('especialidad', especialidad);
+    
+    if (error) {
+      console.error('Error al verificar disponibilidad:', error);
+      return false;
+    }
+    
+    if (!data || data.length === 0) {
+      return true;
+    }
+    
+    const inicio = parseInt(horaInicio);
+    const final = parseInt(horaFinal);
+    
+    // Verificar superposiciones con horarios existentes
+    for (const horario of data) {
+      const inicioExistente = parseInt(horario.hora_inicio.split(':')[0]);
+      const finalExistente = parseInt(horario.hora_final.split(':')[0]);
+      
+      // Si hay superposición
+      if (inicio < finalExistente && final > inicioExistente) {
+        return false;
+      }
+    }
+    
+    return true;
+  } 
 }
