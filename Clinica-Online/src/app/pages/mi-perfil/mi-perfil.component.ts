@@ -125,26 +125,10 @@ export class MiPerfilComponent implements OnInit {
         return;
       }
 
-      // Consultar horarios existentes desde la base de datos
-      const { data, error } = await this.databaseService.sb.supabase
-        .from('horarios_especialistas')
-        .select('*')
-        .eq('usuario_id', this.usuario.id)
-        .order('especialidad', { ascending: true })
-        .order('dia', { ascending: true });
-
-      if (error) {
-        console.error('Error al cargar horarios:', error);
-        return;
-      }
-
-      console.log('Horarios cargados desde BD:', data);
-      this.horariosExistentes = data || [];
-      this.modoEdicion = true; // Siempre empezar en modo edición
-      
-      // Limpiar el array de nuevos horarios
+      this.horariosExistentes = await this.databaseService.cargarHorariosEspecialista(this.usuario.id);
+      this.modoEdicion = true;
       this.nuevosHorarios = [];
-
+      
     } catch (error) {
       console.error('Error al cargar horarios existentes:', error);
     }
@@ -266,71 +250,44 @@ export class MiPerfilComponent implements OnInit {
     try {
       this.cargando = true;
       this.mensajeError = '';
-      
+
       // Expandir horarios "Todos los días"
       const horariosParaGuardar: any[] = [];
-      
+
       this.nuevosHorarios.forEach(horario => {
-        if (horario.dia === 'Todos los días') {
-          ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'].forEach(dia => {
-            horariosParaGuardar.push({
-              usuario_id: this.usuario?.id,
-              especialidad: horario.especialidad,
-              dia: dia,
-              hora_inicio: horario.hora_inicio + ':00',
-              hora_final: horario.hora_final + ':00'
-            });
-          });
-        } else {
+        const dias = horario.dia === 'Todos los días'
+          ? ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']
+          : [horario.dia];
+
+        dias.forEach(dia => {
           horariosParaGuardar.push({
             usuario_id: this.usuario?.id,
             especialidad: horario.especialidad,
-            dia: horario.dia,
+            dia,
             hora_inicio: horario.hora_inicio + ':00',
             hora_final: horario.hora_final + ':00'
           });
-        }
+        });
       });
 
       console.log('Horarios para guardar:', horariosParaGuardar);
       console.log('Horarios existentes antes de eliminar:', this.horariosExistentes);
 
-      // SIEMPRE eliminar horarios existentes antes de insertar nuevos
       if (this.usuario?.id) {
-        const { error: deleteError } = await this.databaseService.sb.supabase
-          .from('horarios_especialistas')
-          .delete()
-          .eq('usuario_id', this.usuario.id);
-        
-        if (deleteError) {
-          console.error('Error al eliminar horarios existentes:', deleteError);
-          throw deleteError;
-        }
-        
-        console.log('Horarios existentes eliminados exitosamente');
+        await this.databaseService.eliminarHorariosEspecialista(this.usuario.id);
       }
 
-      // Insertar nuevos horarios
       if (horariosParaGuardar.length > 0) {
-        const { error: insertError } = await this.databaseService.sb.supabase
-          .from('horarios_especialistas')
-          .insert(horariosParaGuardar);
-
-        if (insertError) {
-          console.error('Error al insertar nuevos horarios:', insertError);
-          throw insertError;
-        }
-        
-        console.log('Nuevos horarios insertados exitosamente');
+        await this.databaseService.guardarHorariosEspecialista(horariosParaGuardar);
       }
 
       this.mensajeExito = 'Horarios guardados exitosamente';
       setTimeout(() => {
         this.mensajeExito = '';
       }, 3000);
-      
+
       await this.cargarHorariosExistentes();
-      
+
     } catch (error) {
       console.error('Error al guardar horarios:', error);
       this.mensajeError = 'Error al guardar los horarios';
@@ -338,6 +295,7 @@ export class MiPerfilComponent implements OnInit {
       this.cargando = false;
     }
   }
+
 
   editarHorarios() {
     this.modoEdicion = false;
