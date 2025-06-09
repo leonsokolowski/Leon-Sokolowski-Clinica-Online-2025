@@ -108,41 +108,75 @@
       <div *ngIf="horariosDisponibles.length === 0" class="no-data">
         <p>No hay horarios disponibles para el {{ fechaSeleccionada }}.</p>
       </div>
-
-      <!-- Botón confirmar turno -->
-      <div *ngIf="horaSeleccionada && puedeConfirmar" class="confirmar-container">
-        <div class="resumen-turno">
-          <h3>Resumen del Turno</h3>
-          <div class="resumen-item">
-            <strong>Paciente:</strong> 
-            <span *ngIf="!esAdmin">{{ usuarioActual?.nombreCompleto }}</span>
-            <span *ngIf="esAdmin">{{ pacienteSeleccionado?.nombreCompleto }}</span>
-          </div>
-          <div class="resumen-item">
-            <strong>Especialidad:</strong> 
-            <span>{{ especialidadSeleccionada }}</span>
-          </div>
-          <div class="resumen-item">
-            <strong>Especialista:</strong> 
-            <span>{{ especialistaSeleccionado?.nombreCompleto }}</span>
-          </div>
-          <div class="resumen-item">
-            <strong>Fecha:</strong> 
-            <span>{{ fechaSeleccionada }}</span>
-          </div>
-          <div class="resumen-item">
-            <strong>Horario:</strong> 
-            <span>{{ formatearHoraAmPm(horaSeleccionada) }}</span>
-          </div>
-        </div>
-        
-        <button (click)="confirmarTurno()" 
-                class="btn-confirmar"
-                [disabled]="cargando">
-          {{ cargando ? 'Guardando...' : 'Confirmar Turno' }}
-        </button>
-      </div>
     </div>
 
-  </div>
-</div>
+    <!-- PASO 5: CONFIRMACIÓN - Sección corregida -->
+    <div *ngIf="paso === 'confirmacion'" class="confirmacion-container">
+      
+      <div class="resumen-turno">
+        <h3>Resumen del Turno</h3>
+        
+        <!-- Información del turno -->
+        <div class="resumen-item">
+          <strong>Paciente:</strong> 
+          <span>{{ obtenerInfoPaciente() }}</span>
+        </div>
+        
+        <div class="resumen-item" *ngIf="esAdmin && pacienteSeleccionado?.obra_social">
+          <strong>Obra Social:</strong> 
+          <span>{{ pacienteSeleccionado?.obra_social }}</span>
+        </div>
+        
+        <div class="resumen-item">
+          <strong>Especialidad:</strong> 
+          <span>{{ especialidadSeleccionada }}</span>
+        </div>
+        
+        <div class="resumen-item">
+          <strong>Especialista:</strong> 
+          <span>{{ obtenerInfoEspecialista() }}</span>
+        </div>
+        
+        <div class="resumen-item">
+          <strong>Fecha:</strong> 
+          <span>{{ fechaSeleccionada }}</span>
+        </div>
+        
+        <div class="resumen-item">
+          <strong>Horario:</strong> 
+          <span>{{ formatearHoraAmPm(horaSeleccionada) }}</span>
+        </div>
+      </div>
+      
+      <!-- Botón confirmar turno -->
+      <div class="confirmar-container">
+        <button (click)="confirmarTurno()" 
+                [ngClass]="['btn-confirmar', puedeConfirmar ? 'btn-enabled' : 'btn-disabled']"
+                [disabled]="cargando || !puedeConfirmar">
+          {{ cargando ? 'Guardando...' : 'Confirmar Turno' }}
+        </button>
+        
+        <!-- Estado de validación -->
+        <div [ngClass]="['validation-status', puedeConfirmar ? 'status-success' : 'status-error']">
+          <strong>Estado:</strong> 
+          <span [ngClass]="puedeConfirmar ? 'text-success' : 'text-error'">
+            {{ puedeConfirmar ? '✓ Listo para confirmar' : '✗ Faltan datos requeridos' }}
+          </span>
+          <br>
+          <small class="validation-details">
+            Especialidad: {{ especialidadSeleccionada ? '✓' : '✗' }} | 
+            Especialista: {{ especialistaSeleccionado ? '✓' : '✗' }} | 
+            Fecha: {{ fechaSeleccionada ? '✓' : '✗' }} | 
+            Hora: {{ horaSeleccionada ? '✓' : '✗' }}
+            <span *ngIf="esAdmin"> | Paciente: {{ pacienteSeleccionado ? '✓' : '✗' }}</span>
+            <span *ngIf="!esAdmin"> | Usuario: {{ usuarioActual ? '✓' : '✗' }}</span>
+          </small>
+        </div>
+      </div>
+
+      <!-- Debug info (puedes ocultarlo o eliminarlo en producción) -->
+      <details class="debug-section" *ngIf="true">
+        <summary>Información de depuración</summary>
+        <pre>{{ obtenerDebugInfo() | json }}</pre>
+      </details>
+    </div>

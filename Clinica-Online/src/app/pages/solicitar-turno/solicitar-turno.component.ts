@@ -1,6 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
 import { Usuario, Paciente, Especialista } from '../../clases/usuario';
 import { DatabaseService } from '../../services/database.service';
 import { AuthService } from '../../services/auth.service';
@@ -73,13 +72,18 @@ export class SolicitarTurnoComponent implements OnInit {
       
       // Obtener usuario actual desde el AuthService
       if (this.auth.usuarioActual?.email) {
+        console.log('Obteniendo usuario por email:', this.auth.usuarioActual.email);
         this.usuarioActual = await this.db.obtenerUsuarioPorEmail(this.auth.usuarioActual.email);
+        console.log('Usuario obtenido:', this.usuarioActual);
         this.esAdmin = this.auth.perfilUsuario === 'admin';
+        console.log('Es admin:', this.esAdmin);
       }
       
       // Si es admin, cargar lista de pacientes
       if (this.esAdmin) {
+        console.log('Cargando pacientes para admin...');
         this.pacientes = await this.db.obtenerPacientes();
+        console.log('Pacientes cargados:', this.pacientes.length);
       }
       
       // Cargar especialidades disponibles
@@ -196,12 +200,14 @@ export class SolicitarTurnoComponent implements OnInit {
   async seleccionarEspecialista(especialista: Especialista) {
     try {
       this.cargando = true;
+      console.log('Seleccionando especialista:', especialista);
       this.especialistaSeleccionado = especialista;
       
       // Cargar fechas disponibles
       await this.cargarFechasDisponibles();
       
       this.paso = 'fechas';
+      console.log('Especialista seleccionado y fechas cargadas');
       
     } catch (error) {
       console.error('Error al seleccionar especialista:', error);
@@ -388,22 +394,32 @@ export class SolicitarTurnoComponent implements OnInit {
 }
   
   seleccionarHorario(hora: string) {
-    this.horaSeleccionada = hora;
-    
-    // Si es admin y no ha seleccionado paciente, mostrar selección de paciente
-    if (this.esAdmin && !this.pacienteSeleccionado) {
-      // Aquí podrías agregar un paso adicional para seleccionar paciente
-      // Por ahora mantenemos la lógica simple
-    }
-  }
+  this.horaSeleccionada = hora;
+  
+  // Cambiar al paso de confirmación
+  this.paso = 'confirmacion';
+}
   
   seleccionarPaciente(paciente: Paciente) {
+    console.log('Seleccionando paciente:', paciente);
     this.pacienteSeleccionado = paciente;
+    console.log('Paciente seleccionado guardado:', this.pacienteSeleccionado);
   }
   
   async confirmarTurno() {
     try {
       this.cargando = true;
+      
+      console.log('Iniciando confirmación de turno...');
+      console.log('Estado actual:', {
+        especialidad: this.especialidadSeleccionada,
+        especialista: this.especialistaSeleccionado,
+        fecha: this.fechaSeleccionada,
+        hora: this.horaSeleccionada,
+        esAdmin: this.esAdmin,
+        usuarioActual: this.usuarioActual,
+        pacienteSeleccionado: this.pacienteSeleccionado
+      });
       
       // Validar datos necesarios
       if (!this.especialidadSeleccionada || !this.especialistaSeleccionado || 
@@ -412,20 +428,26 @@ export class SolicitarTurnoComponent implements OnInit {
         return;
       }
       
-      // Determinar paciente
+      // Determinar paciente con mejor logging
       let pacienteId: number;
+      let pacienteNombre: string;
+      
       if (this.esAdmin) {
         if (!this.pacienteSeleccionado?.id) {
           alert('Por favor seleccione un paciente');
           return;
         }
         pacienteId = this.pacienteSeleccionado.id;
+        pacienteNombre = this.pacienteSeleccionado.nombreCompleto;
+        console.log('Turno para paciente seleccionado por admin:', pacienteNombre, 'ID:', pacienteId);
       } else {
         if (!this.usuarioActual?.id) {
           alert('Error: Usuario no identificado');
           return;
         }
         pacienteId = this.usuarioActual.id;
+        pacienteNombre = this.usuarioActual.nombreCompleto;
+        console.log('Turno para usuario actual:', pacienteNombre, 'ID:', pacienteId);
       }
       
       // Convertir fecha a formato completo YYYY-MM-DD
@@ -434,13 +456,15 @@ export class SolicitarTurnoComponent implements OnInit {
       const fechaCompleta = new Date(añoActual, parseInt(mes) - 1, parseInt(dia));
       const fechaStr = fechaCompleta.toISOString().split('T')[0];
       
-      // Verificar una vez más que el horario esté disponible usando el service
+      console.log('Fecha convertida:', fechaStr);
+      
+      // Verificar una vez más que el horario esté disponible
       const turnosExistentes = await this.db.obtenerTurnosExistentes(this.especialistaSeleccionado.id!, fechaStr);
       const horarioOcupado = turnosExistentes.some(t => t.hora === this.horaSeleccionada);
       
       if (horarioOcupado) {
         alert('Lo sentimos, ese horario ya fue reservado. Por favor seleccione otro.');
-        await this.cargarHorariosDisponibles(); // Actualizar horarios disponibles
+        await this.cargarHorariosDisponibles();
         return;
       }
       
@@ -454,10 +478,12 @@ export class SolicitarTurnoComponent implements OnInit {
         estado: 'pendiente'
       };
       
+      console.log('Guardando turno:', nuevoTurno);
+      
       // Guardar turno usando el service
       await this.db.guardarTurno(nuevoTurno);
       
-      alert('Turno solicitado exitosamente');
+      alert(`Turno solicitado exitosamente para ${pacienteNombre}`);
       this.reiniciarFormulario();
       
     } catch (error) {
@@ -469,24 +495,28 @@ export class SolicitarTurnoComponent implements OnInit {
   }
   
   volver() {
-    switch (this.paso) {
-      case 'especialistas':
-        this.paso = 'especialidades';
-        this.especialidadSeleccionada = '';
-        this.especialistas = [];
-        break;
-      case 'fechas':
-        this.paso = 'especialistas';
-        this.especialistaSeleccionado = null;
-        this.fechasDisponibles = [];
-        break;
-      case 'horarios':
-        this.paso = 'fechas';
-        this.fechaSeleccionada = '';
-        this.horariosDisponibles = [];
-        break;
-    }
+  switch (this.paso) {
+    case 'especialistas':
+      this.paso = 'especialidades';
+      this.especialidadSeleccionada = '';
+      this.especialistas = [];
+      break;
+    case 'fechas':
+      this.paso = 'especialistas';
+      this.especialistaSeleccionado = null;
+      this.fechasDisponibles = [];
+      break;
+    case 'horarios':
+      this.paso = 'fechas';
+      this.fechaSeleccionada = '';
+      this.horariosDisponibles = [];
+      break;
+    case 'confirmacion':
+      this.paso = 'horarios';
+      this.horaSeleccionada = '';
+      break;
   }
+}
   
   private reiniciarFormulario() {
     this.paso = 'especialidades';
@@ -502,30 +532,46 @@ export class SolicitarTurnoComponent implements OnInit {
   
   // Métodos auxiliares para el template
   get puedeConfirmar(): boolean {
-    const datosBasicos = this.especialidadSeleccionada && this.especialistaSeleccionado && 
-                        this.fechaSeleccionada && this.horaSeleccionada;
+    const datosBasicos = !!(this.especialidadSeleccionada && this.especialistaSeleccionado && 
+                            this.fechaSeleccionada && this.horaSeleccionada);
+    
+    console.log('Debug puedeConfirmar:', {
+      especialidad: this.especialidadSeleccionada,
+      especialista: this.especialistaSeleccionado?.nombreCompleto,
+      especialistaId: this.especialistaSeleccionado?.id,
+      fecha: this.fechaSeleccionada,
+      hora: this.horaSeleccionada,
+      esAdmin: this.esAdmin,
+      pacienteSeleccionado: this.pacienteSeleccionado?.nombreCompleto,
+      pacienteId: this.pacienteSeleccionado?.id,
+      usuarioActual: this.usuarioActual?.nombreCompleto,
+      usuarioId: this.usuarioActual?.id,
+      datosBasicos
+    });
     
     if (this.esAdmin) {
-      return !!(datosBasicos && this.pacienteSeleccionado);
+      return !!(datosBasicos && this.pacienteSeleccionado?.id);
     }
     
-    return !!datosBasicos;
+    return !!(datosBasicos && this.usuarioActual?.id);
   }
   
   get tituloSeccion(): string {
-    switch (this.paso) {
-      case 'especialidades':
-        return 'Seleccione una Especialidad';
-      case 'especialistas':
-        return `Especialistas en ${this.especialidadSeleccionada}`;
-      case 'fechas':
-        return `Fechas disponibles - ${this.especialistaSeleccionado?.nombreCompleto}`;
-      case 'horarios':
-        return `Horarios disponibles - ${this.fechaSeleccionada}`;
-      default:
-        return '';
-    }
+  switch (this.paso) {
+    case 'especialidades':
+      return 'Seleccione una Especialidad';
+    case 'especialistas':
+      return `Especialistas en ${this.especialidadSeleccionada}`;
+    case 'fechas':
+      return `Fechas disponibles - ${this.especialistaSeleccionado?.nombreCompleto}`;
+    case 'horarios':
+      return `Horarios disponibles - ${this.fechaSeleccionada}`;
+    case 'confirmacion':
+      return 'Confirmar Turno';
+    default:
+      return '';
   }
+}
 
   // Método auxiliar para formatear hora a formato 12 horas (AM/PM)
   formatearHoraAmPm(hora: string): string {
@@ -533,6 +579,64 @@ export class SolicitarTurnoComponent implements OnInit {
     const periodo = horas >= 12 ? 'PM' : 'AM';
     const horaFormateada = horas === 0 ? 12 : horas > 12 ? horas - 12 : horas;
     return `${horaFormateada}:${minutos.toString().padStart(2, '0')} ${periodo}`;
+  }
+
+  obtenerNombrePaciente(): string {
+    if (this.esAdmin) {
+      return this.pacienteSeleccionado?.nombreCompleto || 'No seleccionado';
+    } else {
+      return this.usuarioActual?.nombreCompleto || 'No identificado';
+    }
+    }
+
+  obtenerNombreEspecialista(): string {
+    return this.especialistaSeleccionado?.nombreCompleto || 'No seleccionado';
+    }
+  
+  obtenerInfoPaciente(): string {
+    if (this.esAdmin) {
+      if (this.pacienteSeleccionado) {
+        return `${this.pacienteSeleccionado.nombreCompleto} (DNI: ${this.pacienteSeleccionado.dni})`;
+      }
+      return 'No seleccionado';
+    } else {
+      if (this.usuarioActual) {
+        return `${this.usuarioActual.nombreCompleto} (DNI: ${this.usuarioActual.dni})`;
+      }
+      return 'No identificado';
+    }
+  }
+
+  obtenerInfoEspecialista(): string {
+    if (this.especialistaSeleccionado) {
+      return `${this.especialistaSeleccionado.nombreCompleto} - ${this.especialidadSeleccionada}`;
+    }
+    return 'No seleccionado';
+  }
+
+  obtenerDebugInfo(): any {
+    return {
+      esAdmin: this.esAdmin,
+      usuarioActual: this.usuarioActual ? {
+        id: this.usuarioActual.id,
+        nombre: this.usuarioActual.nombreCompleto,
+        email: this.usuarioActual.email
+      } : null,
+      pacienteSeleccionado: this.pacienteSeleccionado ? {
+        id: this.pacienteSeleccionado.id,
+        nombre: this.pacienteSeleccionado.nombreCompleto,
+        email: this.pacienteSeleccionado.email
+      } : null,
+      especialistaSeleccionado: this.especialistaSeleccionado ? {
+        id: this.especialistaSeleccionado.id,
+        nombre: this.especialistaSeleccionado.nombreCompleto,
+        email: this.especialistaSeleccionado.email
+      } : null,
+      especialidad: this.especialidadSeleccionada,
+      fecha: this.fechaSeleccionada,
+      hora: this.horaSeleccionada,
+      puedeConfirmar: this.puedeConfirmar
+    };
   }
   
 }

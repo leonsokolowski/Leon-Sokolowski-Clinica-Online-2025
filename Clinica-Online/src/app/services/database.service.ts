@@ -562,16 +562,54 @@ async completarTurno(turnoId: number, diagnostico: string, comentario: string, p
 
 // Método para obtener estadísticas de turnos (útil para admins)
 async obtenerEstadisticasTurnos(): Promise<any> {
+    const { data, error } = await this.sb.supabase
+      .from('turnos')
+      .select('estado, especialidad, fecha')
+      .gte('fecha', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]); // Últimos 30 días
+    
+    if (error) {
+      console.error('Error al obtener estadísticas:', error);
+      throw error;
+    }
+    
+    return data || [];
+  }
+
+  async obtenerUsuarioPorId(id: number): Promise<Usuario | null> {
   const { data, error } = await this.sb.supabase
-    .from('turnos')
-    .select('estado, especialidad, fecha')
-    .gte('fecha', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]); // Últimos 30 días
+    .from('usuarios')
+    .select('*')
+    .eq('id', id)
+    .single();
   
-  if (error) {
-    console.error('Error al obtener estadísticas:', error);
+  if (error && error.code !== 'PGRST116') {
+    console.error('Error al obtener usuario por ID:', error);
     throw error;
   }
   
-  return data || [];
+  return data as Usuario | null;
+}
+
+// Método para obtener información específica de un paciente
+async obtenerPacientePorId(id: number): Promise<Paciente | null> {
+  const usuario = await this.obtenerUsuarioPorId(id);
+  return usuario && usuario.perfil === 'paciente' ? usuario as Paciente : null;
+}
+
+// Método para obtener información específica de un especialista
+async obtenerEspecialistaPorId(id: number): Promise<Especialista | null> {
+  const usuario = await this.obtenerUsuarioPorId(id);
+  return usuario && usuario.perfil === 'especialista' ? usuario as Especialista : null;
+}
+
+// Método para validar que existe el turno antes de confirmarlo
+async validarDisponibilidadTurno(especialistaId: number, fecha: string, hora: string): Promise<boolean> {
+  try {
+    const turnosExistentes = await this.obtenerTurnosExistentes(especialistaId, fecha);
+    return !turnosExistentes.some(t => t.hora === hora);
+  } catch (error) {
+    console.error('Error al validar disponibilidad:', error);
+    return false;
+  }
 }
 }
