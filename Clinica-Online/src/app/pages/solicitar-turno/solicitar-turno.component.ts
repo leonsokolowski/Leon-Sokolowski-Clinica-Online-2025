@@ -24,7 +24,7 @@ export class SolicitarTurnoComponent implements OnInit {
   private authService = inject(AuthService);
 
   // Estados del componente
-  pasoActual: number = 1; // 1: Especialidades, 2: Especialistas, 3: Fechas, 4: Horarios, 5: Confirmación
+  pasoActual: number = 1; // 1: Especialidades, 2: Especialistas, 3: Fechas, 4: Horarios, 5: Confirmación, 6: Resultado
   especialidades: string[] = [];
   especialistas: Especialista[] = [];
   fechasDisponibles: string[] = [];
@@ -52,6 +52,12 @@ export class SolicitarTurnoComponent implements OnInit {
 
   // Mensajes de error
   mensajeError: string = '';
+
+  // Estado del resultado (para paso 6)
+  resultado: {
+    exitoso: boolean;
+    mensaje: string;
+  } | null = null;
 
   // Mapeo de imágenes de especialidades
   imagenesEspecialidades: { [key: string]: string } = {
@@ -271,12 +277,23 @@ export class SolicitarTurnoComponent implements OnInit {
         estado: 'creado',
       });
 
-      alert('Turno creado exitosamente');
-      this.reiniciarFormulario();
+      // Configurar resultado exitoso y avanzar al paso 6
+      this.resultado = {
+        exitoso: true,
+        mensaje: '¡Turno creado exitosamente!'
+      };
+      this.pasoActual = 6;
+
     } catch (error) {
       console.error('Error al crear turno:', error);
-      this.mensajeError =
-        'Error al crear el turno. Por favor intente nuevamente.';
+      
+      // Configurar resultado de error y avanzar al paso 6
+      this.resultado = {
+        exitoso: false,
+        mensaje: 'Error al crear el turno. Por favor intente nuevamente.'
+      };
+      this.pasoActual = 6;
+      
     } finally {
       this.creandoTurno = false;
     }
@@ -310,7 +327,7 @@ export class SolicitarTurnoComponent implements OnInit {
     }
   }
 
-  // Reiniciar formulario
+  // Reiniciar formulario completamente
   reiniciarFormulario() {
     this.pasoActual = 1;
     this.especialidadSeleccionada = '';
@@ -320,7 +337,8 @@ export class SolicitarTurnoComponent implements OnInit {
     this.pacienteSeleccionado = null;
     this.turnoInfo = null;
     this.mensajeError = '';
-    this.preparandoConfirmacion = false; // Agregar esta línea
+    this.preparandoConfirmacion = false;
+    this.resultado = null; // Limpiar resultado
     this.especialistas = [];
     this.fechasDisponibles = [];
     this.horariosDisponibles = [];

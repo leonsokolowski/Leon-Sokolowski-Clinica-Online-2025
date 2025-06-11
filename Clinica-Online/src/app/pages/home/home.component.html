@@ -1,3 +1,6 @@
-<p>home works!</p>
 <button routerLink="/mi-perfil">Mi perfil</button>
-<button routerLink="/solicitar-turno">Solicitar-turno</button>
+@if(this.perfil === "admin" || this.perfil === "paciente"){
+    <button routerLink="/solicitar-turno">Solicitar-turno</button>
+
+}
+

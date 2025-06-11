@@ -731,9 +731,7 @@ export class DatabaseService {
         const horas = Math.floor(minutos / 60);
         const mins = minutos % 60;
 
-        const horaFormateada = `${horas.toString().padStart(2, '0')}:${mins
-          .toString()
-          .padStart(2, '0')}`;
+        const horaFormateada = `${horas.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00`;
         slots.push(horaFormateada);
       }
     } catch (error) {

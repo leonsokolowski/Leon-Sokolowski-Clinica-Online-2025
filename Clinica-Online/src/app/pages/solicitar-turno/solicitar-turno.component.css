@@ -2,7 +2,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .header {
@@ -26,13 +26,13 @@
   cursor: pointer;
   font-size: 14px;
   transition: all 0.3s;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-volver:hover:not(:disabled) {
   background: var(--primary-dark);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .btn-volver:disabled {
@@ -113,7 +113,7 @@
   border-radius: 15px;
   margin-bottom: 30px;
   border: 1px solid rgba(157, 209, 241, 0.3);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .seccion-paciente h3 {
@@ -138,7 +138,7 @@
   display: flex;
   align-items: center;
   gap: 15px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .paciente-card:hover {
@@ -200,7 +200,7 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 0.3s;
   padding: 20px;
@@ -222,7 +222,7 @@
   object-fit: contain;
 }
 
-/* Especialistas - Tarjetas rectangulares con imagen directa */
+/* Especialistas - Tarjetas rectangulares con imagen integrada */
 .especialistas-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -242,10 +242,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 200px;
+  height: 200px;
   width: 100%;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .btn-especialista:hover {
@@ -256,10 +256,9 @@
 
 .btn-especialista img {
   width: 100%;
-  height: 140px;
+  height: 280px;
   object-fit: cover;
-  border-radius: 0;
-  border: none;
+  border-bottom: 1px solid rgba(157, 209, 241, 0.2);
 }
 
 .btn-especialista .nombre {
@@ -269,11 +268,15 @@
   text-align: center;
   line-height: 1.2;
   padding: 15px;
-  background: rgba(255, 255, 255, 0.9);
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
+  background: rgba(255, 255, 255, 0.95);
 }
 
-/* Fechas - Tarjetas más grandes */
+/* Fechas - Tarjetas más grandes con hover diferente */
 .fechas-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -292,17 +295,16 @@
   font-size: 16px;
   font-weight: 600;
   color: var(--primary-dark);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .btn-fecha:hover {
-  border-color: var(--primary-medium-blue);
-  background: rgba(157, 209, 241, 0.1);
+  background: #a8e6a3 !important;
+  border-color: var(--primary-medium-blue) !important;
   transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(80, 138, 168, 0.15);
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.2);
 }
-
-/* Horarios - Tarjetas más grandes */
+/* Horarios - Tarjetas más grandes con hover diferente */
 .horarios-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -321,18 +323,19 @@
   font-size: 16px;
   font-weight: 600;
   color: var(--primary-dark);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .btn-horario:hover {
   border-color: var(--primary-medium-blue);
-  background: rgba(157, 209, 241, 0.1);
+  background: #a8e6a3 !important;
   transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(80, 138, 168, 0.15);
+  box-shadow: 0 6px 20px rgba(219, 80, 74, 0.2);
 }
 
 /* Información de selección */
-.info-especialista, .info-seleccion {
+.info-especialista,
+.info-seleccion {
   background: rgba(157, 209, 241, 0.2);
   backdrop-filter: blur(10px);
   padding: 18px;
@@ -353,7 +356,7 @@
   padding: 35px;
   max-width: 550px;
   margin: 0 auto;
-  box-shadow: 0 6px 25px rgba(0,0,0,0.1);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
 }
 
 .tarjeta-confirmacion h4 {
@@ -483,8 +486,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* No datos */
@@ -506,31 +513,131 @@
   backdrop-filter: blur(10px);
 }
 
+/* Estilos para el paso 6 - Resultado mejorado */
+.resultado-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.resultado-icono {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 1.5rem;
+}
+
+.resultado-icono.exitoso {
+  background-color: #28a745;
+}
+
+.resultado-icono.error {
+  background-color: #dc3545;
+}
+
+.resultado-titulo {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+}
+
+.resultado-titulo.exitoso {
+  color: #28a745;
+}
+
+.resultado-titulo.error {
+  color: #dc3545;
+}
+
+.resultado-mensaje {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+.resumen-turno {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 2px solid var(--primary-very-light);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  width: 100%;
+  text-align: left;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+}
+
+.resumen-turno h4 {
+  margin-bottom: 1.5rem;
+  color: var(--primary-dark);
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.3rem;
+}
+
+.btn-aceptar {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 2px solid var(--primary-very-light);
+  color: var(--primary-dark);
+  padding: 18px 35px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  min-width: 150px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.btn-aceptar:hover {
+  border-color: var(--primary-medium-blue);
+  background: rgba(80, 138, 168, 0.1);
+  color: var(--primary-medium-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(80, 138, 168, 0.2);
+}
+
+.btn-aceptar:active {
+  transform: translateY(1px);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .pasos-indicador {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .linea {
     width: 20px;
     transform: rotate(90deg);
   }
-  
+
   .especialidades-grid {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   }
-  
+
   .especialistas-grid {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   }
-  
+
   .fechas-grid,
   .horarios-grid {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   }
-  
+
   .botones-confirmacion {
     flex-direction: column;
   }
@@ -544,5 +651,4 @@
     width: 70px;
     height: 70px;
   }
-
 }

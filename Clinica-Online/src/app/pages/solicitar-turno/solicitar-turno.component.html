@@ -2,9 +2,9 @@
   <div class="header">
     <h2>Solicitar Turno</h2>
     
-    <!-- Botón volver (excepto en el primer paso) -->
+    <!-- Botón volver (excepto en el primer paso y en el resultado) -->
     <button 
-      *ngIf="pasoActual > 1" 
+      *ngIf="pasoActual > 1 && pasoActual !== 6" 
       class="btn-volver"
       (click)="volverAtras()"
       [disabled]="cargandoEspecialistas || cargandoFechas || cargandoHorarios">
@@ -38,14 +38,20 @@
     </div>
     <div class="linea" [class.completada]="pasoActual > 4"></div>
     
-    <div class="paso" [class.activo]="pasoActual === 5">
+    <div class="paso" [class.activo]="pasoActual === 5" [class.completado]="pasoActual > 5">
       <span class="numero">5</span>
       <span class="texto">Confirmar</span>
+    </div>
+    <div class="linea" [class.completada]="pasoActual > 5"></div>
+    
+    <div class="paso" [class.activo]="pasoActual === 6">
+      <span class="numero">6</span>
+      <span class="texto">Resultado</span>
     </div>
   </div>
 
   <!-- Sección de selección de paciente (solo para administradores) -->
-  <div *ngIf="esAdministrador" class="seccion-paciente">
+  <div *ngIf="esAdministrador && pasoActual < 6" class="seccion-paciente">
     <h3>Seleccionar Paciente</h3>
     <div class="loading" *ngIf="cargandoPacientes">
       <div class="spinner"></div>
@@ -229,6 +235,51 @@
           Cancelar
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- Paso 6: Resultado -->
+  <div *ngIf="pasoActual === 6 && resultado" class="paso-content">
+    <div class="resultado-container">
+      <div class="resultado-icono" [class.exitoso]="resultado.exitoso" [class.error]="!resultado.exitoso">
+        <span *ngIf="resultado.exitoso">✓</span>
+        <span *ngIf="!resultado.exitoso">✗</span>
+      </div>
+      
+      <h3 class="resultado-titulo" [class.exitoso]="resultado.exitoso" [class.error]="!resultado.exitoso">
+        {{resultado.exitoso ? '¡Éxito!' : 'Error'}}
+      </h3>
+      
+      <p class="resultado-mensaje">{{resultado.mensaje}}</p>
+      
+      <div *ngIf="resultado.exitoso && turnoInfo" class="resumen-turno">
+        <h4>Resumen del Turno Creado</h4>
+        <div class="info-turno">
+          <div class="campo">
+            <strong>Especialidad:</strong> 
+            <span>{{turnoInfo.especialidad | titlecase}}</span>
+          </div>
+          
+          <div class="campo">
+            <strong>Paciente:</strong> 
+            <span>{{turnoInfo.paciente.apellido}}, {{turnoInfo.paciente.nombre}}</span>
+          </div>
+          
+          <div class="campo">
+            <strong>Especialista:</strong> 
+            <span>{{turnoInfo.especialista.apellido}}, {{turnoInfo.especialista.nombre}}</span>
+          </div>
+          
+          <div class="campo">
+            <strong>Fecha y Hora:</strong> 
+            <span>{{formatearFechaCompleta(turnoInfo.fecha)}}, {{formatearHorario(turnoInfo.hora)}}</span>
+          </div>
+        </div>
+      </div>
+      
+      <button class="btn-aceptar" (click)="reiniciarFormulario()">
+        Aceptar
+      </button>
     </div>
   </div>
 
