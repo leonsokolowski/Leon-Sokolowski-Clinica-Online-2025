@@ -140,7 +140,6 @@ export class SolicitarTurnoComponent implements OnInit {
   }
 
   // Seleccionar especialista
-  // Modificar el método seleccionarEspecialista para incluir debug
   async seleccionarEspecialista(especialista: Especialista) {
     this.especialistaSeleccionado = especialista;
     console.log('Especialista seleccionado:', especialista);
@@ -280,20 +279,18 @@ export class SolicitarTurnoComponent implements OnInit {
       // Configurar resultado exitoso y avanzar al paso 6
       this.resultado = {
         exitoso: true,
-        mensaje: '¡Turno creado exitosamente!'
+        mensaje: '¡Turno creado exitosamente!',
       };
       this.pasoActual = 6;
-
     } catch (error) {
       console.error('Error al crear turno:', error);
-      
+
       // Configurar resultado de error y avanzar al paso 6
       this.resultado = {
         exitoso: false,
-        mensaje: 'Error al crear el turno. Por favor intente nuevamente.'
+        mensaje: 'Error al crear el turno. Por favor intente nuevamente.',
       };
       this.pasoActual = 6;
-      
     } finally {
       this.creandoTurno = false;
     }
@@ -344,6 +341,10 @@ export class SolicitarTurnoComponent implements OnInit {
     this.horariosDisponibles = [];
   }
 
+  // ===============================
+  // MÉTODOS AUXILIARES MOVIDOS DESDE EL SERVICE
+  // ===============================
+
   // Obtener imagen de especialidad
   obtenerImagenEspecialidad(especialidad: string): string {
     return (
@@ -380,7 +381,49 @@ export class SolicitarTurnoComponent implements OnInit {
     const hora12 = horaNum % 12 || 12;
     return `${hora12}:${minutos} ${ampm}`;
   }
-  // Agregar estos métodos al componente para debug
+
+  // Obtener nombre del día
+  private obtenerNombreDia(numeroDia: number): string {
+    const dias = [
+      'Domingo', // 0 - No laborable
+      'Lunes', // 1 - Laborable
+      'Martes', // 2 - Laborable
+      'Miércoles', // 3 - Laborable
+      'Jueves', // 4 - Laborable
+      'Viernes', // 5 - Laborable
+      'Sábado', // 6 - No laborable
+    ];
+    return dias[numeroDia];
+  }
+
+  // Formatear fecha DD/MM
+  private formatearFechaDisplay(fecha: Date): string {
+    const dia = fecha.getDate().toString().padStart(2, '0');
+    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+    return `${dia}/${mes}`;
+  }
+
+  // Formatear fecha completa YYYY-MM-DD
+  private formatearFechaCompletaInterno(fecha: Date): string {
+    const año = fecha.getFullYear();
+    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+    const dia = fecha.getDate().toString().padStart(2, '0');
+    return `${año}-${mes}-${dia}`;
+  }
+
+  // Convertir fecha display a completa
+  private convertirFechaDisplayACompleta(fechaDisplay: string): string {
+    const [dia, mes] = fechaDisplay.split('/').map(Number);
+    const año = new Date().getFullYear();
+
+    // Si el mes es menor al actual, asumir que es del próximo año
+    const mesActual = new Date().getMonth() + 1;
+    const añoFinal = mes < mesActual ? año + 1 : año;
+
+    return `${añoFinal}-${mes.toString().padStart(2, '0')}-${dia
+      .toString()
+      .padStart(2, '0')}`;
+  }
 
   // Método para debug - mostrar todos los horarios del especialista
   async debugHorariosEspecialista(especialista: Especialista) {

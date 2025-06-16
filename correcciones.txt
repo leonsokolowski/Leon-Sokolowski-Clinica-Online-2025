@@ -1,0 +1,17 @@
+ - Comienza mostrando las ESPECIALIDADES en botones con la imagen de la especialidad, en caso de no tener muesra imagen por default. Deben ser botones redondos sin el nombre de la especialidad
+ - Una vez seleccionada mostrará los PROFESIONALES, en botones con la imagen de perfil de cada profesional y su nombre debajo. Estos botones deben ser redondos.
+- Una vez seleccionado el profesional, aparecerán los días con turnos disponibles para ese PROFESIONAL. Estos botones deben ser rectangulares. Formato (09/09).
+ - Seleccionado el día mostrará los horarios disponibles. Estos botones deben ser rectangulares. Formato 12:15am,.
+
+CORRECCIONES SPRINT 3
+Sección Pacientes,	"para los especialistas. Solo deberá mostrar los usuarios que el
+especialista haya atendido al menos 1 vez."
+...
+Sección usuarios	"solamente para el perfil Administrador, poder dedscargar un excel general con los datos de todos los
+usuarios."
+...
+Mi perfil	"Para los usuarios paciente, poder descargar un pdf con toda su historia clínica. El PDF tiene que tener
+logo de la clínica, título del informe y fecha de emisión."
+...
+Animaciones	"Se debe agregar al menos 2, como mínimo, animaciones de transición entre componentes al navegar
+la aplicación."

@@ -1,6 +1,8 @@
 <button routerLink="/mi-perfil">Mi perfil</button>
 @if(this.perfil === "admin" || this.perfil === "paciente"){
-    <button routerLink="/solicitar-turno">Solicitar-turno</button>
-
+    <button routerLink="/solicitar-turno">Solicitar turno</button>
+}
+@if(this.perfil === "especialista" || this.perfil === "paciente"){
+    <button routerLink="/mis-turnos">Mis turnos</button>
 }
 

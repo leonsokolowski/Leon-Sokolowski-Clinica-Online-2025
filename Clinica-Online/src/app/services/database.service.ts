@@ -8,6 +8,7 @@ import { Usuario, Paciente, Especialista, Admin } from '../clases/usuario';
 export class DatabaseService {
   sb = inject(SupabaseService);
 
+  //Se usa en la mayoría de componentes
   async obtenerUsuarioPorEmail(email: string): Promise<Usuario | null> {
     const { data, error } = await this.sb.supabase
       .from('usuarios')
@@ -23,7 +24,7 @@ export class DatabaseService {
 
     return data as Usuario | null;
   }
-
+  //Se usa en los registros
   async verificarUsuarioExistente(
     email: string,
     dni: string,
@@ -44,7 +45,7 @@ export class DatabaseService {
 
     return data && data.length > 0;
   }
-
+  //Se usa en registroUsuarios
   async registrarPaciente(paciente: Paciente): Promise<void> {
     // Preparar datos para insertar con los campos correctos de la BD
     const userData = {
@@ -71,7 +72,7 @@ export class DatabaseService {
 
     console.log('Paciente registrado exitosamente:', data);
   }
-
+  //Se usa en registroEspecialista
   async registrarEspecialista(especialista: Especialista): Promise<void> {
     // Preparar datos para insertar - los especialistas se registran con habilitado: false por defecto
     const userData = {
@@ -100,7 +101,7 @@ export class DatabaseService {
       data
     );
   }
-
+  //Se usa en registroAdmin
   async registrarAdmin(admin: Admin): Promise<void> {
     // Preparar datos para insertar con los campos correctos de la BD
     const userData = {
@@ -340,9 +341,6 @@ export class DatabaseService {
     console.log('Horarios eliminados exitosamente');
   }
 
-  // Métodos completos para agregar al final de la clase DatabaseService
-
-  // Obtener todas las especialidades disponibles
   async obtenerEspecialidades(): Promise<string[]> {
     const { data, error } = await this.sb.supabase
       .from('usuarios')
@@ -371,7 +369,6 @@ export class DatabaseService {
     return Array.from(especialidadesSet).sort();
   }
 
-  // Obtener especialistas por especialidad
   async obtenerEspecialistasPorEspecialidad(
     especialidad: string
   ): Promise<Especialista[]> {
@@ -390,7 +387,6 @@ export class DatabaseService {
     return data as Especialista[];
   }
 
-  // Obtener días disponibles para un especialista en una especialidad específica
   async obtenerDiasDisponibles(
     especialistaId: number,
     especialidad: string
@@ -399,6 +395,151 @@ export class DatabaseService {
       especialistaId,
       especialidad,
     });
+
+    // Función auxiliar interna: Obtener nombre del día
+    const obtenerNombreDia = (numeroDia: number): string => {
+      const dias = [
+        'Domingo', // 0 - No laborable
+        'Lunes', // 1 - Laborable
+        'Martes', // 2 - Laborable
+        'Miércoles', // 3 - Laborable
+        'Jueves', // 4 - Laborable
+        'Viernes', // 5 - Laborable
+        'Sábado', // 6 - No laborable
+      ];
+      return dias[numeroDia];
+    };
+
+    // Función auxiliar interna: Formatear fecha DD/MM
+    const formatearFechaDisplay = (fecha: Date): string => {
+      const dia = fecha.getDate().toString().padStart(2, '0');
+      const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+      return `${dia}/${mes}`;
+    };
+
+    // Función auxiliar interna: Formatear fecha completa YYYY-MM-DD
+    const formatearFechaCompleta = (fecha: Date): string => {
+      const año = fecha.getFullYear();
+      const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+      const dia = fecha.getDate().toString().padStart(2, '0');
+      return `${año}-${mes}-${dia}`;
+    };
+
+    // Función auxiliar interna: Verificar disponibilidad de una fecha específica
+    const verificarDisponibilidadFecha = async (
+      especialistaId: number,
+      fechaCompleta: string,
+      especialidad: string
+    ): Promise<boolean> => {
+      try {
+        const fechaObj = new Date(fechaCompleta);
+        const diaSemana = obtenerNombreDia(fechaObj.getDay());
+
+        // Verificar que sea día laborable
+        if (
+          !['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'].includes(
+            diaSemana
+          )
+        ) {
+          return false;
+        }
+
+        // Verificar si el especialista trabaja ese día en esa especialidad
+        const { data: horarios, error } = await this.sb.supabase
+          .from('horarios_especialistas')
+          .select('hora_inicio, hora_final')
+          .eq('usuario_id', especialistaId)
+          .eq('especialidad', especialidad)
+          .eq('dia', diaSemana);
+
+        if (error || !horarios || horarios.length === 0) {
+          return false;
+        }
+
+        // Obtener turnos ocupados para esa fecha
+        const { data: turnosOcupados } = await this.sb.supabase
+          .from('turnos')
+          .select('hora')
+          .eq('especialista_id', especialistaId)
+          .eq('fecha', fechaCompleta)
+          .eq('especialidad', especialidad)
+          .neq('estado', 'cancelado');
+
+        const horasOcupadas = new Set(turnosOcupados?.map((t) => t.hora) || []);
+
+        // Función auxiliar interna: Generar slots de horarios cada 30 minutos
+        const generarSlotsHorarios = (
+          horaInicio: string,
+          horaFinal: string
+        ): string[] => {
+          const slots: string[] = [];
+
+          console.log('Generando slots entre:', horaInicio, 'y', horaFinal);
+
+          try {
+            // Limpiar formato de tiempo si viene con milisegundos
+            const inicioLimpio = horaInicio.split('.')[0];
+            const finalLimpio = horaFinal.split('.')[0];
+
+            // Convertir horas a minutos para facilitar el cálculo
+            const [inicioHora, inicioMin] = inicioLimpio.split(':').map(Number);
+            const [finalHora, finalMin] = finalLimpio.split(':').map(Number);
+
+            const inicioMinutos = inicioHora * 60 + inicioMin;
+            const finalMinutos = finalHora * 60 + finalMin;
+
+            console.log(
+              'Minutos inicio:',
+              inicioMinutos,
+              'Minutos final:',
+              finalMinutos
+            );
+
+            // Generar slots cada 30 minutos
+            for (
+              let minutos = inicioMinutos;
+              minutos < finalMinutos;
+              minutos += 30
+            ) {
+              const horas = Math.floor(minutos / 60);
+              const mins = minutos % 60;
+
+              const horaFormateada = `${horas
+                .toString()
+                .padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00`;
+              slots.push(horaFormateada);
+            }
+          } catch (error) {
+            console.error('Error generando slots:', error);
+          }
+
+          console.log('Slots generados:', slots);
+          return slots;
+        };
+
+        // Generar todos los slots posibles y verificar si hay alguno disponible
+        let hayEspacioDisponible = false;
+
+        horarios.forEach((horario) => {
+          const slots = generarSlotsHorarios(
+            horario.hora_inicio,
+            horario.hora_final
+          );
+
+          const slotsDisponibles = slots.filter(
+            (slot) => !horasOcupadas.has(slot)
+          );
+          if (slotsDisponibles.length > 0) {
+            hayEspacioDisponible = true;
+          }
+        });
+
+        return hayEspacioDisponible;
+      } catch (error) {
+        console.error('Error verificando disponibilidad:', error);
+        return false;
+      }
+    };
 
     // Obtener horarios del especialista para esa especialidad
     const { data: horarios, error } = await this.sb.supabase
@@ -433,15 +574,15 @@ export class DatabaseService {
       const fecha = new Date(hoy);
       fecha.setDate(hoy.getDate() + i);
 
-      const diaSemana = this.obtenerNombreDia(fecha.getDay());
+      const diaSemana = obtenerNombreDia(fecha.getDay());
 
       // Solo procesar días laborables
       if (diasDisponibles.includes(diaSemana)) {
-        const fechaFormatoCompleto = this.formatearFechaCompleta(fecha); // YYYY-MM-DD para BD
-        const fechaFormatoDisplay = this.formatearFechaDisplay(fecha); // DD/MM para mostrar
+        const fechaFormatoCompleto = formatearFechaCompleta(fecha); // YYYY-MM-DD para BD
+        const fechaFormatoDisplay = formatearFechaDisplay(fecha); // DD/MM para mostrar
 
         // Verificar disponibilidad usando formato completo
-        const tieneEspacio = await this.verificarDisponibilidadFecha(
+        const tieneEspacio = await verificarDisponibilidadFecha(
           especialistaId,
           fechaFormatoCompleto,
           especialidad
@@ -456,7 +597,6 @@ export class DatabaseService {
     return fechasDisponibles;
   }
 
-  // Obtener horarios disponibles para un día específico
   async obtenerHorariosDisponibles(
     especialistaId: number,
     especialidad: string,
@@ -468,10 +608,88 @@ export class DatabaseService {
       fechaDisplay,
     });
 
+    // Función auxiliar interna: Obtener nombre del día
+    const obtenerNombreDia = (numeroDia: number): string => {
+      const dias = [
+        'Domingo', // 0 - No laborable
+        'Lunes', // 1 - Laborable
+        'Martes', // 2 - Laborable
+        'Miércoles', // 3 - Laborable
+        'Jueves', // 4 - Laborable
+        'Viernes', // 5 - Laborable
+        'Sábado', // 6 - No laborable
+      ];
+      return dias[numeroDia];
+    };
+
+    // Función auxiliar interna: Convertir fecha display a completa
+    const convertirFechaDisplayACompleta = (fechaDisplay: string): string => {
+      const [dia, mes] = fechaDisplay.split('/').map(Number);
+      const año = new Date().getFullYear();
+
+      // Si el mes es menor al actual, asumir que es del próximo año
+      const mesActual = new Date().getMonth() + 1;
+      const añoFinal = mes < mesActual ? año + 1 : año;
+
+      return `${añoFinal}-${mes.toString().padStart(2, '0')}-${dia
+        .toString()
+        .padStart(2, '0')}`;
+    };
+
+    // Función auxiliar interna: Generar slots de horarios cada 30 minutos
+    const generarSlotsHorarios = (
+      horaInicio: string,
+      horaFinal: string
+    ): string[] => {
+      const slots: string[] = [];
+
+      console.log('Generando slots entre:', horaInicio, 'y', horaFinal);
+
+      try {
+        // Limpiar formato de tiempo si viene con milisegundos
+        const inicioLimpio = horaInicio.split('.')[0];
+        const finalLimpio = horaFinal.split('.')[0];
+
+        // Convertir horas a minutos para facilitar el cálculo
+        const [inicioHora, inicioMin] = inicioLimpio.split(':').map(Number);
+        const [finalHora, finalMin] = finalLimpio.split(':').map(Number);
+
+        const inicioMinutos = inicioHora * 60 + inicioMin;
+        const finalMinutos = finalHora * 60 + finalMin;
+
+        console.log(
+          'Minutos inicio:',
+          inicioMinutos,
+          'Minutos final:',
+          finalMinutos
+        );
+
+        // Generar slots cada 30 minutos
+        for (
+          let minutos = inicioMinutos;
+          minutos < finalMinutos;
+          minutos += 30
+        ) {
+          const horas = Math.floor(minutos / 60);
+          const mins = minutos % 60;
+
+          const horaFormateada = `${horas.toString().padStart(2, '0')}:${mins
+            .toString()
+            .padStart(2, '0')}:00`;
+          slots.push(horaFormateada);
+        }
+      } catch (error) {
+        console.error('Error generando slots:', error);
+      }
+
+      console.log('Slots generados:', slots);
+      return slots;
+    };
+
     // Convertir fecha display a formato completo para consultas BD
-    const fechaCompleta = this.convertirFechaDisplayACompleta(fechaDisplay);
+    const fechaCompleta = convertirFechaDisplayACompleta(fechaDisplay);
     const fechaObj = new Date(fechaCompleta);
-    const diaSemana = this.obtenerNombreDia(fechaObj.getDay());
+    const diaSemana = obtenerNombreDia(fechaObj.getDay());
 
     // Verificar que sea día laborable
     if (
@@ -507,7 +725,7 @@ export class DatabaseService {
     const horariosDisponibles: string[] = [];
 
     horarios.forEach((horario) => {
-      const slots = this.generarSlotsHorarios(
+      const slots = generarSlotsHorarios(
         horario.hora_inicio,
         horario.hora_final
       );
@@ -522,7 +740,6 @@ export class DatabaseService {
     return horariosDisponibles.sort();
   }
 
-  // Crear un nuevo turno
   async crearTurno(turno: {
     paciente_id: number;
     especialista_id: number;
@@ -531,8 +748,22 @@ export class DatabaseService {
     hora: string;
     estado: string;
   }): Promise<void> {
+    // Función auxiliar interna: Convertir fecha display a completa
+    const convertirFechaDisplayACompleta = (fechaDisplay: string): string => {
+      const [dia, mes] = fechaDisplay.split('/').map(Number);
+      const año = new Date().getFullYear();
+
+      // Si el mes es menor al actual, asumir que es del próximo año
+      const mesActual = new Date().getMonth() + 1;
+      const añoFinal = mes < mesActual ? año + 1 : año;
+
+      return `${añoFinal}-${mes.toString().padStart(2, '0')}-${dia
+        .toString()
+        .padStart(2, '0')}`;
+    };
+
     // Convertir fecha display a formato completo para BD
-    const fechaCompleta = this.convertirFechaDisplayACompleta(turno.fecha);
+    const fechaCompleta = convertirFechaDisplayACompleta(turno.fecha);
 
     const { data, error } = await this.sb.supabase.from('turnos').insert({
       paciente_id: turno.paciente_id,
@@ -551,7 +782,6 @@ export class DatabaseService {
     console.log('Turno creado exitosamente:', data);
   }
 
-  // Obtener todos los horarios de un especialista (para debug)
   async obtenerTodosLosHorarios(especialistaId: number): Promise<any[]> {
     const { data, error } = await this.sb.supabase
       .from('horarios_especialistas')
@@ -566,179 +796,243 @@ export class DatabaseService {
     return data || [];
   }
 
-  // Métodos auxiliares privados
+// 1. OBTENER TURNOS DEL PACIENTE
+async obtenerTurnosPaciente(pacienteId: number): Promise<any[]> {
+  const { data, error } = await this.sb.supabase
+    .from('turnos')
+    .select(`
+      *,
+      especialista:especialista_id (
+        nombre,
+        apellido,
+        especialidades,
+        imagen_perfil_1
+      )
+    `)
+    .eq('paciente_id', pacienteId)
+    .order('fecha', { ascending: false })
+    .order('hora', { ascending: false });
 
-  // Obtener nombre del día - SOLO DÍAS LABORABLES
-  private obtenerNombreDia(numeroDia: number): string {
-    const dias = [
-      'Domingo', // 0 - No laborable
-      'Lunes', // 1 - Laborable
-      'Martes', // 2 - Laborable
-      'Miércoles', // 3 - Laborable
-      'Jueves', // 4 - Laborable
-      'Viernes', // 5 - Laborable
-      'Sábado', // 6 - No laborable
-    ];
-    return dias[numeroDia];
+  if (error) {
+    console.error('Error al obtener turnos del paciente:', error);
+    throw error;
   }
 
-  // Formatear fecha DD/MM
-  private formatearFechaDisplay(fecha: Date): string {
-    const dia = fecha.getDate().toString().padStart(2, '0');
-    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
-    return `${dia}/${mes}`;
+  return data || [];
+}
+
+// 2. OBTENER TURNOS DEL ESPECIALISTA
+async obtenerTurnosEspecialista(especialistaId: number): Promise<any[]> {
+  const { data, error } = await this.sb.supabase
+    .from('turnos')
+    .select(`
+      *,
+      paciente:paciente_id (
+        nombre,
+        apellido,
+        obra_social,
+        imagen_perfil_1
+      )
+    `)
+    .eq('especialista_id', especialistaId)
+    .order('fecha', { ascending: false })
+    .order('hora', { ascending: false });
+
+  if (error) {
+    console.error('Error al obtener turnos del especialista:', error);
+    throw error;
   }
 
-  private formatearFechaCompleta(fecha: Date): string {
-    const año = fecha.getFullYear();
-    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
-    const dia = fecha.getDate().toString().padStart(2, '0');
-    return `${año}-${mes}-${dia}`;
+  return data || [];
+}
+
+// 3. FILTRAR TURNOS PACIENTE (por especialidad o especialista)
+async filtrarTurnosPaciente(pacienteId: number, filtro: string): Promise<any[]> {
+  const { data, error } = await this.sb.supabase
+    .from('turnos')
+    .select(`
+      *,
+      especialista:especialista_id (
+        nombre,
+        apellido,
+        especialidades,
+        imagen_perfil_1
+      )
+    `)
+    .eq('paciente_id', pacienteId)
+    .or(`especialidad.ilike.%${filtro}%,especialista.nombre.ilike.%${filtro}%,especialista.apellido.ilike.%${filtro}%`)
+    .order('fecha', { ascending: false })
+    .order('hora', { ascending: false });
+
+  if (error) {
+    console.error('Error al filtrar turnos del paciente:', error);
+    throw error;
   }
 
-  private convertirFechaDisplayACompleta(fechaDisplay: string): string {
-    const [dia, mes] = fechaDisplay.split('/').map(Number);
-    const año = new Date().getFullYear();
+  return data || [];
+}
 
-    // Si el mes es menor al actual, asumir que es del próximo año
-    const mesActual = new Date().getMonth() + 1;
-    const añoFinal = mes < mesActual ? año + 1 : año;
+// 4. FILTRAR TURNOS ESPECIALISTA (por especialidad o paciente)
+async filtrarTurnosEspecialista(especialistaId: number, filtro: string): Promise<any[]> {
+  const { data, error } = await this.sb.supabase
+    .from('turnos')
+    .select(`
+      *,
+      paciente:paciente_id (
+        nombre,
+        apellido,
+        obra_social,
+        imagen_perfil_1
+      )
+    `)
+    .eq('especialista_id', especialistaId)
+    .or(`especialidad.ilike.%${filtro}%,paciente.nombre.ilike.%${filtro}%,paciente.apellido.ilike.%${filtro}%`)
+    .order('fecha', { ascending: false })
+    .order('hora', { ascending: false });
 
-    return `${añoFinal}-${mes.toString().padStart(2, '0')}-${dia
-      .toString()
-      .padStart(2, '0')}`;
+  if (error) {
+    console.error('Error al filtrar turnos del especialista:', error);
+    throw error;
   }
 
-  private parsearFechaDisplay(fechaDisplay: string): Date {
-    const [dia, mes] = fechaDisplay.split('/').map(Number);
-    const año = new Date().getFullYear();
+  return data || [];
+}
 
-    // Si el mes es menor al actual, asumir que es del próximo año
-    const mesActual = new Date().getMonth() + 1;
-    const añoFinal = mes < mesActual ? año + 1 : año;
+// 5. CANCELAR TURNO (paciente o especialista)
+async cancelarTurno(turnoId: number, comentarioCancelacion: string): Promise<void> {
+  const { data, error } = await this.sb.supabase
+    .from('turnos')
+    .update({
+      estado: 'cancelado',
+      comentario_cancelacion: comentarioCancelacion
+    })
+    .eq('id', turnoId);
 
-    return new Date(añoFinal, mes - 1, dia);
+  if (error) {
+    console.error('Error al cancelar turno:', error);
+    throw error;
   }
 
-  // Parsear fecha string a Date
-  private parsearFecha(fechaStr: string): Date {
-    const [dia, mes] = fechaStr.split('/').map(Number);
-    const año = new Date().getFullYear();
+  console.log('Turno cancelado exitosamente:', data);
+}
 
-    // Crear fecha correctamente
-    const fecha = new Date(año, mes - 1, dia);
-    console.log(`Parseando fecha: ${fechaStr} -> ${fecha.toDateString()}`);
+// 6. RECHAZAR TURNO (solo especialista)
+async rechazarTurno(turnoId: number, comentarioRechazo: string): Promise<void> {
+  const { data, error } = await this.sb.supabase
+    .from('turnos')
+    .update({
+      estado: 'rechazado',
+      comentario_rechazo: comentarioRechazo
+    })
+    .eq('id', turnoId);
 
-    return fecha;
+  if (error) {
+    console.error('Error al rechazar turno:', error);
+    throw error;
   }
 
-  // Verificar disponibilidad de una fecha específica
-  private async verificarDisponibilidadFecha(
-    especialistaId: number,
-    fechaCompleta: string, // Recibe formato YYYY-MM-DD
-    especialidad: string
-  ): Promise<boolean> {
-    try {
-      const fechaObj = new Date(fechaCompleta);
-      const diaSemana = this.obtenerNombreDia(fechaObj.getDay());
+  console.log('Turno rechazado exitosamente:', data);
+}
 
-      // Verificar que sea día laborable
-      if (
-        !['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'].includes(
-          diaSemana
-        )
-      ) {
-        return false;
-      }
+// 7. ACEPTAR TURNO (solo especialista)
+async aceptarTurno(turnoId: number): Promise<void> {
+  const { data, error } = await this.sb.supabase
+    .from('turnos')
+    .update({
+      estado: 'aceptado'
+    })
+    .eq('id', turnoId);
 
-      // Verificar si el especialista trabaja ese día en esa especialidad
-      const { data: horarios, error } = await this.sb.supabase
-        .from('horarios_especialistas')
-        .select('hora_inicio, hora_final')
-        .eq('usuario_id', especialistaId)
-        .eq('especialidad', especialidad)
-        .eq('dia', diaSemana);
-
-      if (error || !horarios || horarios.length === 0) {
-        return false;
-      }
-
-      // Obtener turnos ocupados para esa fecha
-      const { data: turnosOcupados } = await this.sb.supabase
-        .from('turnos')
-        .select('hora')
-        .eq('especialista_id', especialistaId)
-        .eq('fecha', fechaCompleta) // Usar formato completo
-        .eq('especialidad', especialidad)
-        .neq('estado', 'cancelado');
-
-      const horasOcupadas = new Set(turnosOcupados?.map((t) => t.hora) || []);
-
-      // Generar todos los slots posibles y verificar si hay alguno disponible
-      let hayEspacioDisponible = false;
-
-      horarios.forEach((horario) => {
-        const slots = this.generarSlotsHorarios(
-          horario.hora_inicio,
-          horario.hora_final
-        );
-
-        const slotsDisponibles = slots.filter(
-          (slot) => !horasOcupadas.has(slot)
-        );
-        if (slotsDisponibles.length > 0) {
-          hayEspacioDisponible = true;
-        }
-      });
-
-      return hayEspacioDisponible;
-    } catch (error) {
-      console.error('Error verificando disponibilidad:', error);
-      return false;
-    }
+  if (error) {
+    console.error('Error al aceptar turno:', error);
+    throw error;
   }
 
-  // Generar slots de horarios cada 30 minutos
-  private generarSlotsHorarios(
-    horaInicio: string,
-    horaFinal: string
-  ): string[] {
-    const slots: string[] = [];
+  console.log('Turno aceptado exitosamente:', data);
+}
 
-    console.log('Generando slots entre:', horaInicio, 'y', horaFinal);
+// 8. FINALIZAR TURNO (solo especialista)
+async finalizarTurno(turnoId: number, resena: string, diagnostico: string): Promise<void> {
+  const { data, error } = await this.sb.supabase
+    .from('turnos')
+    .update({
+      estado: 'finalizado',
+      comentario_especialista: resena,
+      diagnostico: diagnostico
+    })
+    .eq('id', turnoId);
 
-    try {
-      // Limpiar formato de tiempo si viene con milisegundos
-      const inicioLimpio = horaInicio.split('.')[0]; // Elimina milisegundos si existen
-      const finalLimpio = horaFinal.split('.')[0];
-
-      // Convertir horas a minutos para facilitar el cálculo
-      const [inicioHora, inicioMin] = inicioLimpio.split(':').map(Number);
-      const [finalHora, finalMin] = finalLimpio.split(':').map(Number);
-
-      const inicioMinutos = inicioHora * 60 + inicioMin;
-      const finalMinutos = finalHora * 60 + finalMin;
-
-      console.log(
-        'Minutos inicio:',
-        inicioMinutos,
-        'Minutos final:',
-        finalMinutos
-      );
-
-      // Generar slots cada 30 minutos
-      for (let minutos = inicioMinutos; minutos < finalMinutos; minutos += 30) {
-        const horas = Math.floor(minutos / 60);
-        const mins = minutos % 60;
-
-        const horaFormateada = `${horas.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00`;
-        slots.push(horaFormateada);
-      }
-    } catch (error) {
-      console.error('Error generando slots:', error);
-    }
-
-    console.log('Slots generados:', slots);
-    return slots;
+  if (error) {
+    console.error('Error al finalizar turno:', error);
+    throw error;
   }
+
+  console.log('Turno finalizado exitosamente:', data);
+}
+
+// 9. COMPLETAR ENCUESTA (solo paciente)
+async completarEncuesta(turnoId: number, encuesta: any): Promise<void> {
+  const { data, error } = await this.sb.supabase
+    .from('turnos')
+    .update({
+      encuesta: encuesta
+    })
+    .eq('id', turnoId);
+
+  if (error) {
+    console.error('Error al completar encuesta:', error);
+    throw error;
+  }
+
+  console.log('Encuesta completada exitosamente:', data);
+}
+
+// 10. CALIFICAR ATENCIÓN (solo paciente)
+async calificarAtencion(turnoId: number, puntaje: number, comentarioAtencion: string): Promise<void> {
+  const { data, error } = await this.sb.supabase
+    .from('turnos')
+    .update({
+      puntaje: puntaje,
+      comentario_atencion: comentarioAtencion
+    })
+    .eq('id', turnoId);
+
+  if (error) {
+    console.error('Error al calificar atención:', error);
+    throw error;
+  }
+
+  console.log('Atención calificada exitosamente:', data);
+}
+
+// 11. OBTENER TURNO POR ID (para mostrar detalles)
+async obtenerTurnoPorId(turnoId: number): Promise<any> {
+  const { data, error } = await this.sb.supabase
+    .from('turnos')
+    .select(`
+      *,
+      paciente:paciente_id (
+        nombre,
+        apellido,
+        obra_social,
+        imagen_perfil_1,
+        imagen_perfil_2
+      ),
+      especialista:especialista_id (
+        nombre,
+        apellido,
+        especialidades,
+        imagen_perfil_1
+      )
+    `)
+    .eq('id', turnoId)
+    .single();
+
+  if (error) {
+    console.error('Error al obtener turno:', error);
+    throw error;
+  }
+
+  return data;
+}
 }

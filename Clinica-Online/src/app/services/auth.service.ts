@@ -66,6 +66,31 @@ export class AuthService {
     });
    }
 
+  // Método para obtener el usuario actual con datos completos de la base de datos
+  async obtenerUsuarioActual(): Promise<any | null> {
+    try {
+      if (!this.usuarioActual) {
+        return null;
+      }
+
+      const { data, error } = await this.sb.supabase
+        .from('usuarios')
+        .select('*')
+        .eq('email', this.usuarioActual.email!)
+        .single();
+      
+      if (error) {
+        console.error('Error al obtener usuario actual:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error al obtener usuario actual:', error);
+      return null;
+    }
+  }
+
   // Nuevo método para obtener el perfil del usuario
   private async obtenerPerfilUsuario(email: string): Promise<void> {
     try {
