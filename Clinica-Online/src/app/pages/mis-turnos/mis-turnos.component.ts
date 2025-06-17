@@ -28,7 +28,7 @@ export class MisTurnosComponent implements OnInit {
   // Estados disponibles para filtrar
   estadosDisponibles = [
     { valor: '', texto: 'Todos' },
-    { valor: 'creado', texto: 'Creado' },
+    { valor: 'creado', texto: 'Pendiente' },
     { valor: 'aceptado', texto: 'Aceptado' },
     { valor: 'cancelado', texto: 'Cancelado' },
     { valor: 'rechazado', texto: 'Rechazado' },
@@ -430,7 +430,7 @@ export class MisTurnosComponent implements OnInit {
     const estadoNormalizado = this.normalizarEstado(estado);
     
     switch(estadoNormalizado) {
-      case 'creado': return 'estado-creado';
+      case 'creado': return 'estado-pendiente';
       case 'aceptado': return 'estado-aceptado';
       case 'cancelado': return 'estado-cancelado';
       case 'rechazado': return 'estado-rechazado';
@@ -443,7 +443,7 @@ export class MisTurnosComponent implements OnInit {
     const estadoNormalizado = this.normalizarEstado(estado);
     
     switch(estadoNormalizado) {
-      case 'creado': return 'Creado';
+      case 'creado': return 'Pendiente';
       case 'aceptado': return 'Aceptado';
       case 'cancelado': return 'Cancelado';
       case 'rechazado': return 'Rechazado';

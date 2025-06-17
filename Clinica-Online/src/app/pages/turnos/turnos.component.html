@@ -1,1 +1,210 @@
-<p>turnos works!</p>
+<div class="container-turnos">
+  <!-- Verificación de permisos -->
+  <div *ngIf="!puedeVerComponente() && !cargando" class="sin-permisos">
+    <div class="mensaje-sin-permisos">
+      <h3>Acceso Restringido</h3>
+      <p *ngIf="!usuarioActual">
+        Debe iniciar sesión para acceder a esta sección.
+      </p>
+      <p *ngIf="usuarioActual && !esAdmin">
+        Esta sección está disponible solo para administradores.
+      </p>
+    </div>
+  </div>
+
+  <!-- Contenido principal -->
+  <div *ngIf="puedeVerComponente()">
+    <div class="header">
+      <h2>Gestión de Turnos - Administrador</h2>
+      
+      <!-- Filtro principal -->
+      <div class="filtro-container">
+        <div class="filtro-input">
+          <input 
+            type="text" 
+            [(ngModel)]="filtro" 
+            placeholder="Filtrar por especialidad o especialista..."
+            class="input-filtro"
+            (input)="aplicarFiltros()"
+          >
+          <button 
+            *ngIf="filtro" 
+            (click)="limpiarFiltro()" 
+            class="btn-limpiar"
+            title="Limpiar filtro"
+          >
+            ✕
+          </button>
+        </div>
+        <small class="filtro-ayuda">
+          Puede filtrar por especialidad o nombre del especialista (sin importar tildes o mayúsculas)
+        </small>
+      </div>
+
+      <!-- Filtros por estado -->
+      <div class="filtros-estado">
+        <h4>Filtrar por estado:</h4>
+        <div class="botones-estado">
+          <button 
+            *ngFor="let estado of estadosDisponibles"
+            (click)="filtrarPorEstado(estado.valor)"
+            class="btn-estado"
+            [class.activo]="filtroEstado === estado.valor"
+          >
+            {{ estado.texto }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="cargando" class="loading">
+      <div class="spinner"></div>
+      <p>Cargando turnos de la clínica...</p>
+    </div>
+
+    <!-- Lista de turnos -->
+    <div *ngIf="!cargando" class="turnos-lista">
+      <div *ngIf="turnosFiltrados.length === 0" class="sin-turnos">
+        <p>{{ filtro || filtroEstado ? 'No se encontraron turnos que coincidan con los filtros aplicados' : 'No hay turnos registrados en la clínica' }}</p>
+      </div>
+
+      <div *ngFor="let turno of turnosFiltrados" class="turno-card">
+        <div class="turno-header">
+          <!-- Información del paciente -->
+          <div class="paciente-info">
+            <img 
+              [src]="turno.paciente?.imagen_perfil_1 || 'assets/default-avatar.png'" 
+              [alt]="turno.paciente?.nombre"
+              class="avatar-paciente"
+            >
+            <div class="datos-paciente">
+              <h3>{{ turno.paciente?.nombre }} {{ turno.paciente?.apellido }}</h3>
+              <p class="obra-social">{{ turno.paciente?.obra_social }}</p>
+            </div>
+          </div>
+
+          <!-- Información del especialista -->
+          <div class="especialista-info">
+            <img 
+              [src]="turno.especialista?.imagen_perfil_1 || 'assets/default-avatar.png'" 
+              [alt]="turno.especialista?.nombre"
+              class="avatar-especialista"
+            >
+            <div class="datos-especialista">
+              <h3>Dr. {{ turno.especialista?.nombre }} {{ turno.especialista?.apellido }}</h3>
+              <p class="especialidad-text">{{ turno.especialidad }}</p>
+            </div>
+          </div>
+          
+          <div class="estado-turno" [ngClass]="obtenerClaseEstado(turno.estado)">
+            {{ obtenerTextoEstado(turno.estado) }}
+          </div>
+        </div>
+
+        <div class="turno-body">
+          <div class="turno-detalles">
+            <div class="detalle-item">
+              <strong>Especialidad:</strong> {{ turno.especialidad }}
+            </div>
+            <div class="detalle-item">
+              <strong>Fecha:</strong> {{ formatearFecha(turno.fecha) }}
+            </div>
+            <div class="detalle-item">
+              <strong>Hora:</strong> {{ formatearHora(turno.hora) }}
+            </div>
+            <div *ngIf="turno.comentario_paciente" class="detalle-item">
+              <strong>Comentario del paciente:</strong> {{ turno.comentario_paciente }}
+            </div>
+            
+            <!-- Información adicional según el estado -->
+            <div *ngIf="turno.comentario_cancelacion" class="detalle-item">
+              <strong>Motivo de cancelación:</strong> {{ turno.comentario_cancelacion }}
+            </div>
+            <div *ngIf="turno.comentario_rechazo" class="detalle-item">
+              <strong>Motivo de rechazo:</strong> {{ turno.comentario_rechazo }}
+            </div>
+            <div *ngIf="turno.comentario_especialista && turno.estado === 'finalizado'" class="detalle-item">
+              <strong>Reseña del especialista:</strong> {{ turno.comentario_especialista }}
+            </div>
+            <div *ngIf="turno.diagnostico && turno.estado === 'finalizado'" class="detalle-item">
+              <strong>Diagnóstico:</strong> {{ turno.diagnostico }}
+            </div>
+            <div *ngIf="turno.puntaje" class="detalle-item">
+              <strong>Puntuación del paciente:</strong> 
+              <div class="puntuacion">
+                <span *ngFor="let star of obtenerEstrellasArray(turno.puntaje)" 
+                      class="estrella activa">
+                  ★
+                </span>
+                <span *ngFor="let star of obtenerEstrellasArray(5 - turno.puntaje)" 
+                      class="estrella">
+                  ★
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Acciones para ADMINISTRADOR -->
+          <div class="acciones">
+            <!-- Cancelar turno (solo si no está aceptado, finalizado o rechazado) -->
+            <button 
+              *ngIf="puedeCancelarAdmin(turno)" 
+              (click)="abrirModalCancelar(turno)"
+              class="btn btn-cancelar"
+              title="Cancelar turno"
+            >
+              Cancelar Turno
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Cancelar (administrador) -->
+    <div *ngIf="mostrarModalCancelar" class="modal-overlay" (click)="cerrarModales()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Cancelar Turno - Administrador</h3>
+          <button (click)="cerrarModales()" class="btn-cerrar">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="turno-cancelar-info">
+            <p><strong>Paciente:</strong> {{ turnoSeleccionado?.paciente?.nombre }} {{ turnoSeleccionado?.paciente?.apellido }}</p>
+            <p><strong>Especialista:</strong> Dr. {{ turnoSeleccionado?.especialista?.nombre }} {{ turnoSeleccionado?.especialista?.apellido }}</p>
+            <p><strong>Especialidad:</strong> {{ turnoSeleccionado?.especialidad }}</p>
+            <p><strong>Fecha y hora:</strong> {{ formatearFecha(turnoSeleccionado?.fecha) }} - {{ formatearHora(turnoSeleccionado?.hora) }}</p>
+          </div>
+          
+          <p class="advertencia-cancelacion">
+            ¿Está seguro que desea cancelar este turno? Esta acción notificará tanto al paciente como al especialista.
+          </p>
+          
+          <div class="form-group">
+            <label for="comentarioCancelacion">Motivo de cancelación *</label>
+            <textarea 
+              id="comentarioCancelacion"
+              [(ngModel)]="comentarioCancelacion" 
+              placeholder="Ingrese el motivo de la cancelación (será visible para el paciente y especialista)..."
+              rows="4"
+              class="textarea"
+            ></textarea>
+            <small class="form-help">
+              Incluya una explicación clara del motivo de la cancelación para informar adecuadamente a las partes involucradas.
+            </small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button (click)="cerrarModales()" class="btn btn-secundario">Cancelar</button>
+          <button 
+            (click)="confirmarCancelacion()" 
+            class="btn btn-cancelar"
+            [disabled]="!comentarioCancelacion.trim()"
+          >
+            Confirmar Cancelación
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
