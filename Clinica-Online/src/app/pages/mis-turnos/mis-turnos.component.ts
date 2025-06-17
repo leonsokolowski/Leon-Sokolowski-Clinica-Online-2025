@@ -18,15 +18,27 @@ export class MisTurnosComponent implements OnInit {
   turnos: any[] = [];
   turnosFiltrados: any[] = [];
   filtro: string = '';
+  filtroEstado: string = '';
   cargando: boolean = false;
   especialistaId: number = 0;
   usuarioActual: any = null;
+
+  // Estados disponibles para filtrar
+  estadosDisponibles = [
+    { valor: '', texto: 'Todos' },
+    { valor: 'creado', texto: 'Creado' },
+    { valor: 'aceptado', texto: 'Aceptado' },
+    { valor: 'cancelado', texto: 'Cancelado' },
+    { valor: 'finalizado', texto: 'Finalizado' }
+  ];
 
   // Variables para modales
   mostrarModalCancelar: boolean = false;
   mostrarModalRechazar: boolean = false;
   mostrarModalFinalizar: boolean = false;
   mostrarModalResena: boolean = false;
+  mostrarModalDiagnostico: boolean = false;
+  mostrarModalMotivoCancelacion: boolean = false;
   
   turnoSeleccionado: any = null;
   comentarioCancelacion: string = '';
@@ -74,8 +86,8 @@ export class MisTurnosComponent implements OnInit {
     try {
       this.cargando = true;
       this.turnos = await this.dbService.obtenerTurnosEspecialista(this.especialistaId);
-      this.turnosFiltrados = [...this.turnos];
-      console.log('Turnos cargados:', this.turnos); // Para debug
+      this.aplicarFiltros();
+      console.log('Turnos cargados:', this.turnos);
     } catch (error) {
       console.error('Error al cargar turnos:', error);
     } finally {
@@ -83,54 +95,102 @@ export class MisTurnosComponent implements OnInit {
     }
   }
 
-  async aplicarFiltro() {
-    if (!this.filtro.trim()) {
-      this.turnosFiltrados = [...this.turnos];
-      return;
+  // Método para normalizar texto (sin tildes y en minúsculas)
+  private normalizarTexto(texto: string): string {
+    if (!texto) return '';
+    return texto
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, ''); // Elimina tildes
+  }
+
+  aplicarFiltros() {
+    let turnosFiltrados = [...this.turnos];
+
+    // Filtro por texto (especialidad o paciente)
+    if (this.filtro.trim()) {
+      const filtroNormalizado = this.normalizarTexto(this.filtro.trim());
+      
+      turnosFiltrados = turnosFiltrados.filter(turno => {
+        const especialidad = this.normalizarTexto(turno.especialidad || '');
+        const nombrePaciente = this.normalizarTexto(turno.paciente?.nombre || '');
+        const apellidoPaciente = this.normalizarTexto(turno.paciente?.apellido || '');
+        const nombreCompleto = `${nombrePaciente} ${apellidoPaciente}`.trim();
+        
+        return especialidad.includes(filtroNormalizado) || 
+               nombreCompleto.includes(filtroNormalizado) ||
+               nombrePaciente.includes(filtroNormalizado) ||
+               apellidoPaciente.includes(filtroNormalizado);
+      });
     }
 
-    try {
-      this.cargando = true;
-      this.turnosFiltrados = await this.dbService.filtrarTurnosEspecialista(
-        this.especialistaId, 
-        this.filtro.trim()
-      );
-    } catch (error) {
-      console.error('Error al filtrar turnos:', error);
-      this.turnosFiltrados = [];
-    } finally {
-      this.cargando = false;
+    // Filtro por estado
+    if (this.filtroEstado) {
+      turnosFiltrados = turnosFiltrados.filter(turno => {
+        const estadoTurno = this.normalizarEstado(turno.estado);
+        return estadoTurno === this.filtroEstado;
+      });
+    }
+
+    this.turnosFiltrados = turnosFiltrados;
+  }
+
+  // Normalizar estado para comparación
+  private normalizarEstado(estado: string): string {
+    if (!estado) return 'creado'; // Por defecto creado si no tiene estado
+    
+    const estadoLower = estado.toLowerCase();
+    
+    // Mapear estados similares
+    switch(estadoLower) {
+      case 'pendiente':
+        return 'creado';
+      case 'rechazado':
+        return 'cancelado';
+      default:
+        return estadoLower;
     }
   }
 
   limpiarFiltro() {
     this.filtro = '';
-    this.turnosFiltrados = [...this.turnos];
+    this.aplicarFiltros();
   }
 
-  // Métodos para verificar qué acciones mostrar según los estados correctos
+  filtrarPorEstado(estado: string) {
+    this.filtroEstado = estado;
+    this.aplicarFiltros();
+  }
+
+  // Métodos para verificar qué acciones mostrar según los estados
   puedeAceptar(turno: any): boolean {
-    const estado = turno.estado?.toLowerCase();
-    return estado === 'pendiente'; // Solo si está pendiente
+    const estado = this.normalizarEstado(turno.estado);
+    return estado === 'creado';
   }
 
   puedeRechazar(turno: any): boolean {
-    const estado = turno.estado?.toLowerCase();
-    return estado === 'pendiente'; // Solo si está pendiente
+    const estado = this.normalizarEstado(turno.estado);
+    return estado === 'creado';
   }
 
   puedeCancelar(turno: any): boolean {
-    const estado = turno.estado?.toLowerCase();
-    return estado === 'aceptado'; // Solo si fue aceptado
+    const estado = this.normalizarEstado(turno.estado);
+    return estado === 'aceptado';
   }
 
   puedeFinalizar(turno: any): boolean {
-    const estado = turno.estado?.toLowerCase();
-    return estado === 'aceptado'; // Solo si fue aceptado
+    const estado = this.normalizarEstado(turno.estado);
+    return estado === 'aceptado';
   }
 
-  puedeVerResena(turno: any): boolean {
-    return !!(turno.comentario_especialista || turno.diagnostico);
+  puedeVerDiagnostico(turno: any): boolean {
+    const estado = this.normalizarEstado(turno.estado);
+    return estado === 'finalizado' && !!(turno.comentario_especialista || turno.diagnostico);
+  }
+
+  puedeVerMotivoCancelacion(turno: any): boolean {
+    const estado = this.normalizarEstado(turno.estado);
+    return estado === 'cancelado' && !!(turno.comentario_cancelacion || turno.comentario_rechazo);
   }
 
   // Acciones de turnos
@@ -138,9 +198,6 @@ export class MisTurnosComponent implements OnInit {
     try {
       await this.dbService.aceptarTurno(turno.id);
       await this.cargarTurnos();
-      if (this.filtro) {
-        await this.aplicarFiltro();
-      }
     } catch (error) {
       console.error('Error al aceptar turno:', error);
       alert('Error al aceptar el turno. Inténtelo nuevamente.');
@@ -167,9 +224,14 @@ export class MisTurnosComponent implements OnInit {
     this.mostrarModalFinalizar = true;
   }
 
-  abrirModalResena(turno: any) {
+  abrirModalDiagnostico(turno: any) {
     this.turnoSeleccionado = turno;
-    this.mostrarModalResena = true;
+    this.mostrarModalDiagnostico = true;
+  }
+
+  abrirModalMotivoCancelacion(turno: any) {
+    this.turnoSeleccionado = turno;
+    this.mostrarModalMotivoCancelacion = true;
   }
 
   async confirmarCancelacion() {
@@ -182,9 +244,6 @@ export class MisTurnosComponent implements OnInit {
       await this.dbService.cancelarTurno(this.turnoSeleccionado.id, this.comentarioCancelacion);
       this.cerrarModales();
       await this.cargarTurnos();
-      if (this.filtro) {
-        await this.aplicarFiltro();
-      }
     } catch (error) {
       console.error('Error al cancelar turno:', error);
       alert('Error al cancelar el turno. Inténtelo nuevamente.');
@@ -201,9 +260,6 @@ export class MisTurnosComponent implements OnInit {
       await this.dbService.rechazarTurno(this.turnoSeleccionado.id, this.comentarioRechazo);
       this.cerrarModales();
       await this.cargarTurnos();
-      if (this.filtro) {
-        await this.aplicarFiltro();
-      }
     } catch (error) {
       console.error('Error al rechazar turno:', error);
       alert('Error al rechazar el turno. Inténtelo nuevamente.');
@@ -224,9 +280,6 @@ export class MisTurnosComponent implements OnInit {
       );
       this.cerrarModales();
       await this.cargarTurnos();
-      if (this.filtro) {
-        await this.aplicarFiltro();
-      }
     } catch (error) {
       console.error('Error al finalizar turno:', error);
       alert('Error al finalizar el turno. Inténtelo nuevamente.');
@@ -238,6 +291,8 @@ export class MisTurnosComponent implements OnInit {
     this.mostrarModalRechazar = false;
     this.mostrarModalFinalizar = false;
     this.mostrarModalResena = false;
+    this.mostrarModalDiagnostico = false;
+    this.mostrarModalMotivoCancelacion = false;
     this.turnoSeleccionado = null;
   }
 
@@ -252,30 +307,26 @@ export class MisTurnosComponent implements OnInit {
   }
 
   obtenerClaseEstado(estado: string): string {
-    if (!estado) return 'estado-default';
+    const estadoNormalizado = this.normalizarEstado(estado);
     
-    switch(estado.toLowerCase()) {
-      case 'pendiente': return 'estado-pendiente';
+    switch(estadoNormalizado) {
+      case 'creado': return 'estado-creado';
       case 'aceptado': return 'estado-aceptado';
-      case 'rechazado': return 'estado-rechazado';
       case 'cancelado': return 'estado-cancelado';
       case 'finalizado': return 'estado-finalizado';
-      case 'realizado': return 'estado-realizado';
       default: return 'estado-default';
     }
   }
 
   obtenerTextoEstado(estado: string): string {
-    if (!estado) return 'Sin estado';
+    const estadoNormalizado = this.normalizarEstado(estado);
     
-    switch(estado.toLowerCase()) {
-      case 'pendiente': return 'Pendiente';
+    switch(estadoNormalizado) {
+      case 'creado': return 'Creado';
       case 'aceptado': return 'Aceptado';
-      case 'rechazado': return 'Rechazado';
       case 'cancelado': return 'Cancelado';
       case 'finalizado': return 'Finalizado';
-      case 'realizado': return 'Realizado';
-      default: return estado;
+      default: return 'Sin estado';
     }
   }
 }

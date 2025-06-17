@@ -408,6 +408,61 @@
 .btn-secundario:hover {
   background: #5a6268;
 }
+/* Filtro */
+.filtro-container {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+/* Filtros por estado */
+.filtros-estado {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.filtros-estado h4 {
+  margin: 0 0 15px 0;
+  color: #2c3e50;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.botones-estado {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-estado {
+  padding: 8px 16px;
+  border: 2px solid #ddd;
+  border-radius: 25px;
+  background: white;
+  color: #666;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  text-transform: capitalize;
+  min-width: 100px;
+}
+
+.btn-estado:hover {
+  border-color: #3498db;
+  color: #3498db;
+  transform: translateY(-1px);
+}
+
+.btn-estado.activo {
+  background: #3498db;
+  border-color: #3498db;
+  color: white;
+  box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
+}
 
 /* Responsivo */
 @media (max-width: 768px) {

@@ -17,7 +17,7 @@
     <div class="header">
       <h2>Mis Turnos - Especialista</h2>
       
-      <!-- Filtro -->
+      <!-- Filtro principal -->
       <div class="filtro-container">
         <div class="filtro-input">
           <input 
@@ -25,7 +25,7 @@
             [(ngModel)]="filtro" 
             placeholder="Filtrar por especialidad o paciente..."
             class="input-filtro"
-            (input)="aplicarFiltro()"
+            (input)="aplicarFiltros()"
           >
           <button 
             *ngIf="filtro" 
@@ -37,8 +37,23 @@
           </button>
         </div>
         <small class="filtro-ayuda">
-          Puede filtrar por especialidad o nombre del paciente
+          Puede filtrar por especialidad o nombre del paciente (sin importar tildes o mayúsculas)
         </small>
+      </div>
+
+      <!-- Filtros por estado -->
+      <div class="filtros-estado">
+        <h4>Filtrar por estado:</h4>
+        <div class="botones-estado">
+          <button 
+            *ngFor="let estado of estadosDisponibles"
+            (click)="filtrarPorEstado(estado.valor)"
+            class="btn-estado"
+            [class.activo]="filtroEstado === estado.valor"
+          >
+            {{ estado.texto }}
+          </button>
+        </div>
       </div>
     </div>
 
@@ -51,7 +66,7 @@
     <!-- Lista de turnos -->
     <div *ngIf="!cargando" class="turnos-lista">
       <div *ngIf="turnosFiltrados.length === 0" class="sin-turnos">
-        <p>{{ filtro ? 'No se encontraron turnos que coincidan con el filtro' : 'No tienes turnos asignados' }}</p>
+        <p>{{ filtro || filtroEstado ? 'No se encontraron turnos que coincidan con los filtros aplicados' : 'No tienes turnos asignados' }}</p>
       </div>
 
       <div *ngFor="let turno of turnosFiltrados" class="turno-card">
@@ -91,7 +106,7 @@
 
           <!-- Acciones -->
           <div class="acciones">
-            <!-- Aceptar -->
+            <!-- Aceptar (solo para estado 'creado') -->
             <button 
               *ngIf="puedeAceptar(turno)" 
               (click)="aceptarTurno(turno)"
@@ -101,7 +116,7 @@
               Aceptar
             </button>
 
-            <!-- Rechazar -->
+            <!-- Rechazar (solo para estado 'creado') -->
             <button 
               *ngIf="puedeRechazar(turno)" 
               (click)="abrirModalRechazar(turno)"
@@ -111,7 +126,7 @@
               Rechazar
             </button>
 
-            <!-- Cancelar -->
+            <!-- Cancelar (solo para estado 'aceptado') -->
             <button 
               *ngIf="puedeCancelar(turno)" 
               (click)="abrirModalCancelar(turno)"
@@ -121,7 +136,7 @@
               Cancelar
             </button>
 
-            <!-- Finalizar -->
+            <!-- Finalizar (solo para estado 'aceptado') -->
             <button 
               *ngIf="puedeFinalizar(turno)" 
               (click)="abrirModalFinalizar(turno)"
@@ -131,14 +146,24 @@
               Finalizar
             </button>
 
-            <!-- Ver Reseña -->
+            <!-- Ver Diagnóstico (solo para estado 'finalizado') -->
             <button 
-              *ngIf="puedeVerResena(turno)" 
-              (click)="abrirModalResena(turno)"
-              class="btn btn-ver-resena"
-              title="Ver reseña del turno"
+              *ngIf="puedeVerDiagnostico(turno)" 
+              (click)="abrirModalDiagnostico(turno)"
+              class="btn btn-ver-diagnostico"
+              title="Ver diagnóstico"
             >
-              Ver Reseña
+              Ver Diagnóstico
+            </button>
+
+            <!-- Ver Motivo Cancelación (solo para estado 'cancelado') -->
+            <button 
+              *ngIf="puedeVerMotivoCancelacion(turno)" 
+              (click)="abrirModalMotivoCancelacion(turno)"
+              class="btn btn-ver-cancelacion"
+              title="Ver motivo de cancelación"
+            >
+              Ver Motivo
             </button>
           </div>
         </div>
@@ -254,11 +279,11 @@
       </div>
     </div>
 
-    <!-- Modal Ver Reseña -->
-    <div *ngIf="mostrarModalResena" class="modal-overlay" (click)="cerrarModales()">
+    <!-- Modal Ver Diagnóstico -->
+    <div *ngIf="mostrarModalDiagnostico" class="modal-overlay" (click)="cerrarModales()">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Reseña del Turno</h3>
+          <h3>Diagnóstico del Turno</h3>
           <button (click)="cerrarModales()" class="btn-cerrar">✕</button>
         </div>
         <div class="modal-body">
@@ -273,6 +298,30 @@
           <div *ngIf="turnoSeleccionado?.diagnostico" class="form-group">
             <label>Diagnóstico:</label>
             <div class="resena-texto">{{ turnoSeleccionado.diagnostico }}</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button (click)="cerrarModales()" class="btn btn-primario">Cerrar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Ver Motivo Cancelación -->
+    <div *ngIf="mostrarModalMotivoCancelacion" class="modal-overlay" (click)="cerrarModales()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Motivo de Cancelación</h3>
+          <button (click)="cerrarModales()" class="btn-cerrar">✕</button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Paciente:</strong> {{ turnoSeleccionado?.paciente?.nombre }} {{ turnoSeleccionado?.paciente?.apellido }}</p>
+          <p><strong>Fecha:</strong> {{ formatearFecha(turnoSeleccionado?.fecha) }} - {{ formatearHora(turnoSeleccionado?.hora) }}</p>
+          
+          <div class="form-group">
+            <label>Motivo:</label>
+            <div class="resena-texto">
+              {{ turnoSeleccionado?.comentario_cancelacion || turnoSeleccionado?.comentario_rechazo || 'No se especificó motivo' }}
+            </div>
           </div>
         </div>
         <div class="modal-footer">
