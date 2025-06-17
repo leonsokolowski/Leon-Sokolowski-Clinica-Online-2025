@@ -3,19 +3,19 @@
   <div *ngIf="!puedeVerComponente() && !cargando" class="sin-permisos">
     <div class="mensaje-sin-permisos">
       <h3>Acceso Restringido</h3>
-      <p *ngIf="usuarioActual?.perfil === 'paciente'">
-        Esta sección está temporalmente disponible solo para especialistas.
-      </p>
       <p *ngIf="!usuarioActual">
         Debe iniciar sesión para acceder a esta sección.
+      </p>
+      <p *ngIf="usuarioActual && !esPaciente && !esEspecialista">
+        Esta sección está disponible solo para pacientes y especialistas.
       </p>
     </div>
   </div>
 
-  <!-- Contenido para especialistas -->
+  <!-- Contenido principal -->
   <div *ngIf="puedeVerComponente()">
     <div class="header">
-      <h2>Mis Turnos - Especialista</h2>
+      <h2>Mis Turnos - {{ esPaciente ? 'Paciente' : 'Especialista' }}</h2>
       
       <!-- Filtro principal -->
       <div class="filtro-container">
@@ -23,7 +23,7 @@
           <input 
             type="text" 
             [(ngModel)]="filtro" 
-            placeholder="Filtrar por especialidad o paciente..."
+            [placeholder]="esPaciente ? 'Filtrar por especialidad o especialista...' : 'Filtrar por especialidad o paciente...'"
             class="input-filtro"
             (input)="aplicarFiltros()"
           >
@@ -37,7 +37,7 @@
           </button>
         </div>
         <small class="filtro-ayuda">
-          Puede filtrar por especialidad o nombre del paciente (sin importar tildes o mayúsculas)
+          Puede filtrar por especialidad o {{ esPaciente ? 'nombre del especialista' : 'nombre del paciente' }} (sin importar tildes o mayúsculas)
         </small>
       </div>
 
@@ -71,7 +71,21 @@
 
       <div *ngFor="let turno of turnosFiltrados" class="turno-card">
         <div class="turno-header">
-          <div class="paciente-info">
+          <!-- Header para PACIENTE -->
+          <div *ngIf="esPaciente" class="especialista-info">
+            <img 
+              [src]="turno.especialista?.imagen_perfil_1 || 'assets/default-avatar.png'" 
+              [alt]="turno.especialista?.nombre"
+              class="avatar-especialista"
+            >
+            <div class="datos-especialista">
+              <h3>Dr. {{ turno.especialista?.nombre }} {{ turno.especialista?.apellido }}</h3>
+              <p class="especialidad-text">{{ turno.especialidad }}</p>
+            </div>
+          </div>
+
+          <!-- Header para ESPECIALISTA -->
+          <div *ngIf="esEspecialista" class="paciente-info">
             <img 
               [src]="turno.paciente?.imagen_perfil_1 || 'assets/default-avatar.png'" 
               [alt]="turno.paciente?.nombre"
@@ -90,7 +104,7 @@
 
         <div class="turno-body">
           <div class="turno-detalles">
-            <div class="detalle-item">
+            <div *ngIf="esEspecialista" class="detalle-item">
               <strong>Especialidad:</strong> {{ turno.especialidad }}
             </div>
             <div class="detalle-item">
@@ -102,10 +116,74 @@
             <div *ngIf="turno.comentario_paciente" class="detalle-item">
               <strong>Comentario del paciente:</strong> {{ turno.comentario_paciente }}
             </div>
+            <!-- Mostrar puntuación si existe -->
+            <div *ngIf="turno.puntaje && esPaciente" class="detalle-item">
+              <strong>Tu puntuación:</strong> 
+              <div class="puntuacion">
+                <span *ngFor="let star of obtenerEstrellasArray(turno.puntaje)" 
+                      class="estrella" 
+                      [class.activa]="star <= turno.puntaje">
+                  ★
+                </span>
+              </div>
+            </div>
           </div>
 
-          <!-- Acciones -->
-          <div class="acciones">
+          <!-- Acciones para PACIENTE -->
+          <div *ngIf="esPaciente" class="acciones">
+            <!-- Cancelar turno -->
+            <button 
+              *ngIf="puedeCancelarPaciente(turno)" 
+              (click)="abrirModalCancelar(turno)"
+              class="btn btn-cancelar"
+              title="Cancelar turno"
+            >
+              Cancelar
+            </button>
+
+            <!-- Ver reseña -->
+            <button 
+              *ngIf="puedeVerResena(turno)" 
+              (click)="abrirModalResena(turno)"
+              class="btn btn-ver-resena"
+              title="Ver reseña"
+            >
+              Ver Reseña
+            </button>
+
+            <!-- Completar encuesta -->
+            <button 
+              *ngIf="puedeCompletarEncuesta(turno)" 
+              (click)="abrirModalEncuesta(turno)"
+              class="btn btn-encuesta"
+              title="Completar encuesta"
+            >
+              Completar Encuesta
+            </button>
+
+            <!-- Calificar atención -->
+            <button 
+              *ngIf="puedeCalificarAtencion(turno)" 
+              (click)="abrirModalCalificar(turno)"
+              class="btn btn-calificar"
+              title="Calificar atención"
+            >
+              Calificar Atención
+            </button>
+
+            <!-- Ver Motivo Cancelación -->
+            <button 
+              *ngIf="puedeVerMotivoCancelacion(turno)" 
+              (click)="abrirModalMotivoCancelacion(turno)"
+              class="btn btn-ver-cancelacion"
+              title="Ver motivo de cancelación"
+            >
+              Ver Motivo
+            </button>
+          </div>
+
+          <!-- Acciones para ESPECIALISTA -->
+          <div *ngIf="esEspecialista" class="acciones">
             <!-- Aceptar (solo para estado 'creado') -->
             <button 
               *ngIf="puedeAceptar(turno)" 
@@ -128,7 +206,7 @@
 
             <!-- Cancelar (solo para estado 'aceptado') -->
             <button 
-              *ngIf="puedeCancelar(turno)" 
+              *ngIf="puedeCancelarEspecialista(turno)" 
               (click)="abrirModalCancelar(turno)"
               class="btn btn-cancelar"
               title="Cancelar turno"
@@ -156,7 +234,7 @@
               Ver Diagnóstico
             </button>
 
-            <!-- Ver Motivo Cancelación (solo para estado 'cancelado') -->
+            <!-- Ver Motivo Cancelación -->
             <button 
               *ngIf="puedeVerMotivoCancelacion(turno)" 
               (click)="abrirModalMotivoCancelacion(turno)"
@@ -170,7 +248,7 @@
       </div>
     </div>
 
-    <!-- Modal Cancelar -->
+    <!-- Modal Cancelar (común para paciente y especialista) -->
     <div *ngIf="mostrarModalCancelar" class="modal-overlay" (click)="cerrarModales()">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
@@ -178,7 +256,12 @@
           <button (click)="cerrarModales()" class="btn-cerrar">✕</button>
         </div>
         <div class="modal-body">
-          <p>¿Está seguro que desea cancelar el turno con {{ turnoSeleccionado?.paciente?.nombre }} {{ turnoSeleccionado?.paciente?.apellido }}?</p>
+          <p *ngIf="esPaciente">
+            ¿Está seguro que desea cancelar el turno con Dr. {{ turnoSeleccionado?.especialista?.nombre }} {{ turnoSeleccionado?.especialista?.apellido }}?
+          </p>
+          <p *ngIf="esEspecialista">
+            ¿Está seguro que desea cancelar el turno con {{ turnoSeleccionado?.paciente?.nombre }} {{ turnoSeleccionado?.paciente?.apellido }}?
+          </p>
           <div class="form-group">
             <label for="comentarioCancelacion">Motivo de cancelación *</label>
             <textarea 
@@ -203,7 +286,7 @@
       </div>
     </div>
 
-    <!-- Modal Rechazar -->
+    <!-- Modal Rechazar (solo especialista) -->
     <div *ngIf="mostrarModalRechazar" class="modal-overlay" (click)="cerrarModales()">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
@@ -236,7 +319,7 @@
       </div>
     </div>
 
-    <!-- Modal Finalizar -->
+    <!-- Modal Finalizar (solo especialista) -->
     <div *ngIf="mostrarModalFinalizar" class="modal-overlay" (click)="cerrarModales()">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
@@ -279,7 +362,34 @@
       </div>
     </div>
 
-    <!-- Modal Ver Diagnóstico -->
+    <!-- Modal Ver Reseña (para paciente) -->
+    <div *ngIf="mostrarModalResena" class="modal-overlay" (click)="cerrarModales()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Reseña del Turno</h3>
+          <button (click)="cerrarModales()" class="btn-cerrar">✕</button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Especialista:</strong> Dr. {{ turnoSeleccionado?.especialista?.nombre }} {{ turnoSeleccionado?.especialista?.apellido }}</p>
+          <p><strong>Fecha:</strong> {{ formatearFecha(turnoSeleccionado?.fecha) }} - {{ formatearHora(turnoSeleccionado?.hora) }}</p>
+          
+          <div *ngIf="turnoSeleccionado?.comentario_especialista" class="form-group">
+            <label>Reseña de la consulta:</label>
+            <div class="resena-texto">{{ turnoSeleccionado.comentario_especialista }}</div>
+          </div>
+          
+          <div *ngIf="turnoSeleccionado?.diagnostico" class="form-group">
+            <label>Diagnóstico:</label>
+            <div class="resena-texto">{{ turnoSeleccionado.diagnostico }}</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button (click)="cerrarModales()" class="btn btn-primario">Cerrar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Ver Diagnóstico (para especialista) -->
     <div *ngIf="mostrarModalDiagnostico" class="modal-overlay" (click)="cerrarModales()">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
@@ -306,15 +416,135 @@
       </div>
     </div>
 
-    <!-- Modal Ver Motivo Cancelación -->
-    <div *ngIf="mostrarModalMotivoCancelacion" class="modal-overlay" (click)="cerrarModales()">
+    <!-- Modal Completar Encuesta (para paciente) -->
+    <div *ngIf="mostrarModalEncuesta" class="modal-overlay" (click)="cerrarModales()">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Motivo de Cancelación</h3>
+          <h3>Completar Encuesta</h3>
           <button (click)="cerrarModales()" class="btn-cerrar">✕</button>
         </div>
         <div class="modal-body">
-          <p><strong>Paciente:</strong> {{ turnoSeleccionado?.paciente?.nombre }} {{ turnoSeleccionado?.paciente?.apellido }}</p>
+          <p><strong>Turno con:</strong> Dr. {{ turnoSeleccionado?.especialista?.nombre }} {{ turnoSeleccionado?.especialista?.apellido }}</p>
+          
+          <div class="form-group">
+            <label for="atencionRecibida">¿Cómo calificaría la atención recibida? *</label>
+            <select id="atencionRecibida" [(ngModel)]="encuesta.atencion_recibida" class="select-encuesta">
+              <option value="">Seleccione una opción</option>
+              <option value="excelente">Excelente</option>
+              <option value="muy_buena">Muy buena</option>
+              <option value="buena">Buena</option>
+              <option value="regular">Regular</option>
+              <option value="mala">Mala</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="tiempoEspera">¿Cómo considera el tiempo de espera? *</label>
+            <select id="tiempoEspera" [(ngModel)]="encuesta.tiempo_espera" class="select-encuesta">
+              <option value="">Seleccione una opción</option>
+              <option value="muy_corto">Muy corto</option>
+              <option value="adecuado">Adecuado</option>
+              <option value="largo">Largo</option>
+              <option value="muy_largo">Muy largo</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="instalaciones">¿Cómo calificaría las instalaciones? *</label>
+            <select id="instalaciones" [(ngModel)]="encuesta.instalaciones" class="select-encuesta">
+              <option value="">Seleccione una opción</option>
+              <option value="excelentes">Excelentes</option>
+              <option value="muy_buenas">Muy buenas</option>
+              <option value="buenas">Buenas</option>
+              <option value="regulares">Regulares</option>
+              <option value="malas">Malas</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="recomendaria">¿Recomendaría nuestros servicios? *</label>
+            <select id="recomendaria" [(ngModel)]="encuesta.recomendaria" class="select-encuesta">
+              <option value="">Seleccione una opción</option>
+              <option value="definitivamente_si">Definitivamente sí</option>
+              <option value="probablemente_si">Probablemente sí</option>
+              <option value="tal_vez">Tal vez</option>
+              <option value="probablemente_no">Probablemente no</option>
+              <option value="definitivamente_no">Definitivamente no</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="comentariosEncuesta">Comentarios adicionales</label>
+            <textarea 
+              id="comentariosEncuesta"
+              [(ngModel)]="encuesta.comentarios" 
+              placeholder="Ingrese comentarios adicionales (opcional)..."
+              rows="3"
+              class="textarea"
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button (click)="cerrarModales()" class="btn btn-secundario">Cancelar</button>
+          <button 
+            (click)="confirmarEncuesta()" 
+            class="btn btn-primario"
+            [disabled]="!encuesta.atencion_recibida || !encuesta.tiempo_espera || !encuesta.instalaciones || !encuesta.recomendaria"
+          >
+            Completar Encuesta
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="mostrarModalCalificar" class="modal-overlay" (click)="cerrarModales()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Calificar Atención</h3>
+      <button (click)="cerrarModales()" class="btn-cerrar">✕</button>
+    </div>
+    <div class="modal-body">
+      <p><strong>Calificar atención de:</strong> Dr. {{ turnoSeleccionado?.especialista?.nombre }} {{ turnoSeleccionado?.especialista?.apellido }}</p>
+      
+      <div class="form-group">
+        <label>Puntuación (1-5 estrellas) *</label>
+        <div class="puntuacion-selector">
+          <span *ngFor="let star of obtenerEstrellasArray(5)" 
+                class="estrella-selector" 
+                [class.activa]="star <= puntajeAtencion"
+                (click)="puntajeAtencion = star">
+            ★
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button (click)="cerrarModales()" class="btn btn-secundario">Cancelar</button>
+      <button 
+        (click)="confirmarCalificacion()" 
+        class="btn btn-primario"
+        [disabled]="!puntajeAtencion"
+      >
+        Calificar
+      </button>
+    </div>
+  </div>
+</div>
+
+    <!-- Modal Ver Motivo Cancelación (común) -->
+    <div *ngIf="mostrarModalMotivoCancelacion" class="modal-overlay" (click)="cerrarModales()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Motivo de {{ turnoSeleccionado?.estado === 'cancelado' ? 'Cancelación' : 'Rechazo' }}</h3>
+          <button (click)="cerrarModales()" class="btn-cerrar">✕</button>
+        </div>
+        <div class="modal-body">
+          <p *ngIf="esPaciente">
+            <strong>Especialista:</strong> Dr. {{ turnoSeleccionado?.especialista?.nombre }} {{ turnoSeleccionado?.especialista?.apellido }}
+          </p>
+          <p *ngIf="esEspecialista">
+            <strong>Paciente:</strong> {{ turnoSeleccionado?.paciente?.nombre }} {{ turnoSeleccionado?.paciente?.apellido }}
+          </p>
           <p><strong>Fecha:</strong> {{ formatearFecha(turnoSeleccionado?.fecha) }} - {{ formatearHora(turnoSeleccionado?.hora) }}</p>
           
           <div class="form-group">

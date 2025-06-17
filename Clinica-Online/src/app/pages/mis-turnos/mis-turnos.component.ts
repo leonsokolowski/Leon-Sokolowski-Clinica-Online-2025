@@ -20,8 +20,10 @@ export class MisTurnosComponent implements OnInit {
   filtro: string = '';
   filtroEstado: string = '';
   cargando: boolean = false;
-  especialistaId: number = 0;
+  usuarioId: number = 0;
   usuarioActual: any = null;
+  esPaciente: boolean = false;
+  esEspecialista: boolean = false;
 
   // Estados disponibles para filtrar
   estadosDisponibles = [
@@ -29,6 +31,7 @@ export class MisTurnosComponent implements OnInit {
     { valor: 'creado', texto: 'Creado' },
     { valor: 'aceptado', texto: 'Aceptado' },
     { valor: 'cancelado', texto: 'Cancelado' },
+    { valor: 'rechazado', texto: 'Rechazado' },
     { valor: 'finalizado', texto: 'Finalizado' }
   ];
 
@@ -39,12 +42,24 @@ export class MisTurnosComponent implements OnInit {
   mostrarModalResena: boolean = false;
   mostrarModalDiagnostico: boolean = false;
   mostrarModalMotivoCancelacion: boolean = false;
+  mostrarModalEncuesta: boolean = false;
+  mostrarModalCalificar: boolean = false;
   
   turnoSeleccionado: any = null;
   comentarioCancelacion: string = '';
   comentarioRechazo: string = '';
   resenaConsulta: string = '';
   diagnostico: string = '';
+  puntajeAtencion: number = 0;
+  
+  // Variables para encuesta
+  encuesta = {
+    atencion_recibida: '',
+    tiempo_espera: '',
+    instalaciones: '',
+    recomendaria: '',
+    comentarios: ''
+  };
 
   async ngOnInit() {
     await this.cargarUsuarioYTurnos();
@@ -62,9 +77,12 @@ export class MisTurnosComponent implements OnInit {
         return;
       }
 
-      // Solo procesamos si es especialista
-      if (this.usuarioActual.perfil === 'especialista') {
-        this.especialistaId = this.usuarioActual.id;
+      // Establecemos el tipo de usuario
+      this.esPaciente = this.usuarioActual.perfil === 'paciente';
+      this.esEspecialista = this.usuarioActual.perfil === 'especialista';
+      
+      if (this.esPaciente || this.esEspecialista) {
+        this.usuarioId = this.usuarioActual.id;
         await this.cargarTurnos();
       }
       
@@ -77,15 +95,21 @@ export class MisTurnosComponent implements OnInit {
 
   // Método para verificar si el usuario puede ver el componente
   puedeVerComponente(): boolean {
-    return this.usuarioActual && this.usuarioActual.perfil === 'especialista';
+    return this.usuarioActual && (this.esPaciente || this.esEspecialista);
   }
 
   async cargarTurnos() {
-    if (!this.especialistaId) return;
+    if (!this.usuarioId) return;
     
     try {
       this.cargando = true;
-      this.turnos = await this.dbService.obtenerTurnosEspecialista(this.especialistaId);
+      
+      if (this.esPaciente) {
+        this.turnos = await this.dbService.obtenerTurnosPacienteConDetalles(this.usuarioId);
+      } else if (this.esEspecialista) {
+        this.turnos = await this.dbService.obtenerTurnosEspecialista(this.usuarioId);
+      }
+      
       this.aplicarFiltros();
       console.log('Turnos cargados:', this.turnos);
     } catch (error) {
@@ -107,20 +131,34 @@ export class MisTurnosComponent implements OnInit {
   aplicarFiltros() {
     let turnosFiltrados = [...this.turnos];
 
-    // Filtro por texto (especialidad o paciente)
+    // Filtro por texto
     if (this.filtro.trim()) {
       const filtroNormalizado = this.normalizarTexto(this.filtro.trim());
       
       turnosFiltrados = turnosFiltrados.filter(turno => {
         const especialidad = this.normalizarTexto(turno.especialidad || '');
-        const nombrePaciente = this.normalizarTexto(turno.paciente?.nombre || '');
-        const apellidoPaciente = this.normalizarTexto(turno.paciente?.apellido || '');
-        const nombreCompleto = `${nombrePaciente} ${apellidoPaciente}`.trim();
         
-        return especialidad.includes(filtroNormalizado) || 
-               nombreCompleto.includes(filtroNormalizado) ||
-               nombrePaciente.includes(filtroNormalizado) ||
-               apellidoPaciente.includes(filtroNormalizado);
+        if (this.esPaciente) {
+          // Para paciente: filtrar por especialidad o especialista
+          const nombreEspecialista = this.normalizarTexto(turno.especialista?.nombre || '');
+          const apellidoEspecialista = this.normalizarTexto(turno.especialista?.apellido || '');
+          const nombreCompletoEspecialista = `${nombreEspecialista} ${apellidoEspecialista}`.trim();
+          
+          return especialidad.includes(filtroNormalizado) || 
+                 nombreCompletoEspecialista.includes(filtroNormalizado) ||
+                 nombreEspecialista.includes(filtroNormalizado) ||
+                 apellidoEspecialista.includes(filtroNormalizado);
+        } else {
+          // Para especialista: filtrar por especialidad o paciente
+          const nombrePaciente = this.normalizarTexto(turno.paciente?.nombre || '');
+          const apellidoPaciente = this.normalizarTexto(turno.paciente?.apellido || '');
+          const nombreCompletoPaciente = `${nombrePaciente} ${apellidoPaciente}`.trim();
+          
+          return especialidad.includes(filtroNormalizado) || 
+                 nombreCompletoPaciente.includes(filtroNormalizado) ||
+                 nombrePaciente.includes(filtroNormalizado) ||
+                 apellidoPaciente.includes(filtroNormalizado);
+        }
       });
     }
 
@@ -137,19 +175,8 @@ export class MisTurnosComponent implements OnInit {
 
   // Normalizar estado para comparación
   private normalizarEstado(estado: string): string {
-    if (!estado) return 'creado'; // Por defecto creado si no tiene estado
-    
-    const estadoLower = estado.toLowerCase();
-    
-    // Mapear estados similares
-    switch(estadoLower) {
-      case 'pendiente':
-        return 'creado';
-      case 'rechazado':
-        return 'cancelado';
-      default:
-        return estadoLower;
-    }
+    if (!estado) return 'creado';
+    return estado.toLowerCase();
   }
 
   limpiarFiltro() {
@@ -162,38 +189,69 @@ export class MisTurnosComponent implements OnInit {
     this.aplicarFiltros();
   }
 
-  // Métodos para verificar qué acciones mostrar según los estados
+  // === MÉTODOS PARA VERIFICAR ACCIONES SEGÚN PERFIL ===
+
+  // Para PACIENTE
+  puedeCancelarPaciente(turno: any): boolean {
+    if (!this.esPaciente) return false;
+    const estado = this.normalizarEstado(turno.estado);
+    return ['creado', 'aceptado'].includes(estado);
+  }
+
+  puedeVerResena(turno: any): boolean {
+    return !!(turno.comentario_especialista || turno.diagnostico);
+  }
+
+  puedeCompletarEncuesta(turno: any): boolean {
+    if (!this.esPaciente) return false;
+    const estado = this.normalizarEstado(turno.estado);
+    return estado === 'finalizado' && !turno.encuesta && !!(turno.comentario_especialista || turno.diagnostico);
+  }
+
+  puedeCalificarAtencion(turno: any): boolean {
+    if (!this.esPaciente) return false;
+    const estado = this.normalizarEstado(turno.estado);
+    return estado === 'finalizado' && !turno.puntaje;
+  }
+
+  // Para ESPECIALISTA
   puedeAceptar(turno: any): boolean {
+    if (!this.esEspecialista) return false;
     const estado = this.normalizarEstado(turno.estado);
     return estado === 'creado';
   }
 
   puedeRechazar(turno: any): boolean {
+    if (!this.esEspecialista) return false;
     const estado = this.normalizarEstado(turno.estado);
     return estado === 'creado';
   }
 
-  puedeCancelar(turno: any): boolean {
+  puedeCancelarEspecialista(turno: any): boolean {
+    if (!this.esEspecialista) return false;
     const estado = this.normalizarEstado(turno.estado);
     return estado === 'aceptado';
   }
 
   puedeFinalizar(turno: any): boolean {
+    if (!this.esEspecialista) return false;
     const estado = this.normalizarEstado(turno.estado);
     return estado === 'aceptado';
   }
 
   puedeVerDiagnostico(turno: any): boolean {
+    if (!this.esEspecialista) return false;
     const estado = this.normalizarEstado(turno.estado);
     return estado === 'finalizado' && !!(turno.comentario_especialista || turno.diagnostico);
   }
 
   puedeVerMotivoCancelacion(turno: any): boolean {
     const estado = this.normalizarEstado(turno.estado);
-    return estado === 'cancelado' && !!(turno.comentario_cancelacion || turno.comentario_rechazo);
+    return ['cancelado', 'rechazado'].includes(estado) && !!(turno.comentario_cancelacion || turno.comentario_rechazo);
   }
 
-  // Acciones de turnos
+  // === ACCIONES DE TURNOS ===
+
   async aceptarTurno(turno: any) {
     try {
       await this.dbService.aceptarTurno(turno.id);
@@ -204,7 +262,60 @@ export class MisTurnosComponent implements OnInit {
     }
   }
 
-  // Modales
+  // === MODALES PARA PACIENTE ===
+
+  abrirModalEncuesta(turno: any) {
+    this.turnoSeleccionado = turno;
+    this.encuesta = {
+      atencion_recibida: '',
+      tiempo_espera: '',
+      instalaciones: '',
+      recomendaria: '',
+      comentarios: ''
+    };
+    this.mostrarModalEncuesta = true;
+  }
+
+  abrirModalCalificar(turno: any) {
+    this.turnoSeleccionado = turno;
+    this.puntajeAtencion = 0;
+    this.mostrarModalCalificar = true;
+  }
+
+  async confirmarEncuesta() {
+    if (!this.encuesta.atencion_recibida || !this.encuesta.tiempo_espera || !this.encuesta.instalaciones || !this.encuesta.recomendaria) {
+      alert('Debe completar todos los campos obligatorios de la encuesta');
+      return;
+    }
+
+    try {
+      await this.dbService.completarEncuesta(this.turnoSeleccionado.id, this.encuesta);
+      this.cerrarModales();
+      await this.cargarTurnos();
+    } catch (error) {
+      console.error('Error al completar encuesta:', error);
+      alert('Error al completar la encuesta. Inténtelo nuevamente.');
+    }
+  }
+
+  async confirmarCalificacion() {
+    if (!this.puntajeAtencion) {
+      alert('Debe ingresar una puntuación');
+      return;
+    }
+
+    try {
+      await this.dbService.calificarAtencion(this.turnoSeleccionado.id, this.puntajeAtencion, '');
+      this.cerrarModales();
+      await this.cargarTurnos();
+    } catch (error) {
+      console.error('Error al calificar atención:', error);
+      alert('Error al calificar la atención. Inténtelo nuevamente.');
+    }
+  }
+
+  // === MODALES COMUNES ===
+
   abrirModalCancelar(turno: any) {
     this.turnoSeleccionado = turno;
     this.comentarioCancelacion = '';
@@ -222,6 +333,11 @@ export class MisTurnosComponent implements OnInit {
     this.resenaConsulta = '';
     this.diagnostico = '';
     this.mostrarModalFinalizar = true;
+  }
+
+  abrirModalResena(turno: any) {
+    this.turnoSeleccionado = turno;
+    this.mostrarModalResena = true;
   }
 
   abrirModalDiagnostico(turno: any) {
@@ -293,8 +409,12 @@ export class MisTurnosComponent implements OnInit {
     this.mostrarModalResena = false;
     this.mostrarModalDiagnostico = false;
     this.mostrarModalMotivoCancelacion = false;
+    this.mostrarModalEncuesta = false;
+    this.mostrarModalCalificar = false;
     this.turnoSeleccionado = null;
   }
+
+  // === MÉTODOS DE UTILIDAD ===
 
   formatearFecha(fecha: string): string {
     if (!fecha) return '';
@@ -313,6 +433,7 @@ export class MisTurnosComponent implements OnInit {
       case 'creado': return 'estado-creado';
       case 'aceptado': return 'estado-aceptado';
       case 'cancelado': return 'estado-cancelado';
+      case 'rechazado': return 'estado-rechazado';
       case 'finalizado': return 'estado-finalizado';
       default: return 'estado-default';
     }
@@ -325,8 +446,13 @@ export class MisTurnosComponent implements OnInit {
       case 'creado': return 'Creado';
       case 'aceptado': return 'Aceptado';
       case 'cancelado': return 'Cancelado';
+      case 'rechazado': return 'Rechazado';
       case 'finalizado': return 'Finalizado';
       default: return 'Sin estado';
     }
+  }
+
+  obtenerEstrellasArray(puntaje: number): number[] {
+    return Array(5).fill(0).map((_, i) => i + 1);
   }
 }

@@ -464,6 +464,236 @@
   box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
 }
 
+/* Estilos para acceso restringido */
+.sin-permisos {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 40px;
+}
+
+.mensaje-sin-permisos {
+  text-align: center;
+  background: #f8f9fa;
+  padding: 40px;
+  border-radius: 12px;
+  border-left: 4px solid #dc3545;
+  max-width: 500px;
+}
+
+.mensaje-sin-permisos h3 {
+  color: #dc3545;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+.mensaje-sin-permisos p {
+  color: #666;
+  margin: 10px 0;
+  line-height: 1.5;
+}
+
+/* Estilos para especialista info (header del turno) */
+.especialista-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.avatar-especialista {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ddd;
+}
+
+.datos-especialista h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+}
+
+.especialidad-text {
+  margin: 5px 0 0 0;
+  color: #666;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+/* Estilos para puntuación */
+.puntuacion {
+  display: inline-flex;
+  gap: 2px;
+  margin-left: 8px;
+}
+
+.estrella {
+  color: #ddd;
+  font-size: 1.2rem;
+  transition: color 0.3s;
+}
+
+.estrella.activa {
+  color: #f39c12;
+}
+
+/* Botones adicionales de acciones */
+.btn-encuesta {
+  background: #9b59b6;
+  color: white;
+}
+
+.btn-encuesta:hover {
+  background: #8e44ad;
+}
+
+.btn-calificar {
+  background: #f39c12;
+  color: white;
+}
+
+.btn-calificar:hover {
+  background: #e67e22;
+}
+
+.btn-ver-cancelacion {
+  background: #95a5a6;
+  color: white;
+}
+
+.btn-ver-cancelacion:hover {
+  background: #7f8c8d;
+}
+
+.btn-ver-diagnostico {
+  background: #1abc9c;
+  color: white;
+}
+
+.btn-ver-diagnostico:hover {
+  background: #16a085;
+}
+
+/* Estilos para formularios de encuesta */
+.select-encuesta {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  transition: border-color 0.3s;
+}
+
+.select-encuesta:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+/* Estilos para selector de puntuación */
+.puntuacion-selector {
+  display: flex;
+  gap: 5px;
+  margin: 10px 0;
+}
+
+.estrella-selector {
+  color: #ddd;
+  font-size: 2rem;
+  cursor: pointer;
+  transition: color 0.3s, transform 0.2s;
+  user-select: none;
+}
+
+.estrella-selector:hover {
+  transform: scale(1.1);
+}
+
+.estrella-selector.activa {
+  color: #f39c12;
+}
+
+/* Efectos hover para estrellas */
+.puntuacion-selector .estrella-selector:hover,
+.puntuacion-selector .estrella-selector:hover ~ .estrella-selector {
+  color: #ddd;
+}
+
+.puntuacion-selector .estrella-selector:hover {
+  color: #f39c12;
+}
+
+/* Estilos para botones deshabilitados */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn:disabled:hover {
+  transform: none !important;
+}
+
+/* Mejoras responsive adicionales */
+@media (max-width: 480px) {
+  .especialista-info,
+  .paciente-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  .botones-estado {
+    justify-content: center;
+  }
+  
+  .btn-estado {
+    min-width: 80px;
+    font-size: 0.8rem;
+  }
+  
+  .puntuacion-selector {
+    justify-content: center;
+  }
+  
+  .estrella-selector {
+    font-size: 1.5rem;
+  }
+}
+
+/* Animaciones adicionales */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.turno-card {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Estilos para mejorar la accesibilidad */
+.btn:focus,
+.input-filtro:focus,
+.textarea:focus,
+.select-encuesta:focus {
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+/* Estilos para estados de carga */
+.loading p {
+  color: #666;
+  font-size: 1.1rem;
+  margin-top: 15px;
+}
+
 /* Responsivo */
 @media (max-width: 768px) {
   .container-turnos {

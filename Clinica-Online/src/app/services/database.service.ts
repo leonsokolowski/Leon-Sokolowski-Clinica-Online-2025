@@ -992,8 +992,7 @@ async calificarAtencion(turnoId: number, puntaje: number, comentarioAtencion: st
   const { data, error } = await this.sb.supabase
     .from('turnos')
     .update({
-      puntaje: puntaje,
-      comentario_atencion: comentarioAtencion
+      puntaje: puntaje
     })
     .eq('id', turnoId);
 
@@ -1034,5 +1033,29 @@ async obtenerTurnoPorId(turnoId: number): Promise<any> {
   }
 
   return data;
+}
+// OBTENER TURNOS DEL PACIENTE CON DETALLES COMPLETOS
+async obtenerTurnosPacienteConDetalles(pacienteId: number): Promise<any[]> {
+  const { data, error } = await this.sb.supabase
+    .from('turnos')
+    .select(`
+      *,
+      especialista:especialista_id (
+        nombre,
+        apellido,
+        especialidades,
+        imagen_perfil_1
+      )
+    `)
+    .eq('paciente_id', pacienteId)
+    .order('fecha', { ascending: false })
+    .order('hora', { ascending: false });
+
+  if (error) {
+    console.error('Error al obtener turnos del paciente con detalles:', error);
+    throw error;
+  }
+
+  return data || [];
 }
 }
