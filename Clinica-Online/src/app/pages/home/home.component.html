@@ -1,8 +1,17 @@
 <button routerLink="/mi-perfil">Mi perfil</button>
-@if(this.perfil === "admin" || this.perfil === "paciente"){
-    <button routerLink="/solicitar-turno">Solicitar turno</button>
+@switch (this.perfil) {
+    @case ("admin") 
+    {
+        <button routerLink="/solicitar-turno">Solicitar turno</button>
+        <button routerLink="/turnos">Solicitar turno</button>
+    }
+    @case ("paciente") 
+    {
+        <button routerLink="/solicitar-turno">Solicitar turno</button>
+        <button routerLink="/mis-turnos">Mis turnos</button>
+    }   
+    @case ("especialista") 
+    {
+        <button routerLink="/mis-turnos">Mis turnos</button>
+    }
 }
-@if(this.perfil === "especialista" || this.perfil === "paciente"){
-    <button routerLink="/mis-turnos">Mis turnos</button>
-}
-
