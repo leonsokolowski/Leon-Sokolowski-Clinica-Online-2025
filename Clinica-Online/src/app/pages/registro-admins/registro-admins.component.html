@@ -141,6 +141,37 @@
             </div>
           </div>
 
+          <!-- SECCIÓN DEL CAPTCHA - NUEVA -->
+          <div class="captcha-section">
+            <div class="form-group">
+              <label>Verificación de seguridad:</label>
+              <div class="captcha-container">
+                <ngx-recaptcha2
+                  [siteKey]="siteKey"
+                  [size]="'normal'"
+                  [theme]="'light'"
+                  [type]="'image'"
+                  (success)="onCaptchaSuccess($event)"
+                  (load)="onCaptchaLoaded()"
+                  (error)="onCaptchaError()"
+                  (expire)="onCaptchaExpired()">
+                </ngx-recaptcha2>
+              </div>
+              
+              <!-- Error del captcha -->
+              <div *ngIf="captchaError" class="error-container">
+                <small class="text-danger">{{ captchaError }}</small>
+              </div>
+              
+              <!-- Botón para resetear captcha si hay error -->
+              <div *ngIf="captchaError" class="captcha-reset">
+                <button type="button" class="btn btn-sm btn-outline-secondary" (click)="resetCaptcha()">
+                  🔄 Recargar Captcha
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- Mensajes de error y éxito -->
           <div *ngIf="successMessage || errorMessage" class="alert-container">
             <div *ngIf="successMessage" class="alert alert-success">

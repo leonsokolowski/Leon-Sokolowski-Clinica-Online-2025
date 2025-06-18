@@ -4,20 +4,23 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } 
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { DatabaseService } from '../../services/database.service';
+import { CaptchaService } from '../../services/captcha.service';
 import { Especialista } from '../../clases/usuario';
+// Importar el módulo de ngx-captcha
+import { NgxCaptchaModule } from 'ngx-captcha';
 
 @Component({
   selector: 'app-registro-especialistas',
   templateUrl: './registro-especialistas.component.html',
   styleUrl: './registro-especialistas.component.css',
-  imports: [ReactiveFormsModule, CommonModule, FormsModule, RouterLink]
+  imports: [ReactiveFormsModule, CommonModule, FormsModule, RouterLink, NgxCaptchaModule]
 })
 export class RegistroEspecialistasComponent {
   private auth = inject(AuthService);
   private db = inject(DatabaseService);
   private fb = inject(FormBuilder);
   private router = inject(Router);
-
+  private captchaService = inject(CaptchaService);
 
   registroForm: FormGroup;
   errorMessage: string = '';
@@ -53,6 +56,11 @@ export class RegistroEspecialistasComponent {
   mostrarErrorEspecialidades: boolean = false;
   mostrarErrorImagen: boolean = false;
 
+  // CAPTCHA configuration
+  siteKey: string = '6Ld4qmQrAAAAAJCEFHW4W_X0tZm1IGtNRjUHV7_C'; 
+  captchaToken: string = '';
+  captchaError: string = '';
+
   constructor() {
     this.registroForm = this.fb.group({
       correo: ['', [Validators.required, Validators.email]],
@@ -71,6 +79,39 @@ export class RegistroEspecialistasComponent {
 
   get f() {
     return this.registroForm.controls;
+  }
+
+  // Métodos del CAPTCHA
+  onCaptchaSuccess(token: string): void {
+    this.captchaToken = token;
+    this.captchaError = '';
+    this.captchaService.storeCaptchaToken(token);
+    console.log('CAPTCHA completado exitosamente');
+  }
+
+  onCaptchaError(): void {
+    this.captchaToken = '';
+    this.captchaError = 'Error al cargar el captcha. Por favor, recarga la página.';
+    this.captchaService.clearCaptchaToken();
+    console.error('Error en el captcha');
+  }
+
+  onCaptchaExpired(): void {
+    this.captchaToken = '';
+    this.captchaError = 'El captcha ha expirado. Por favor, complétalos nuevamente.';
+    this.captchaService.clearCaptchaToken();
+    console.warn('CAPTCHA expirado');
+  }
+
+  onCaptchaLoaded(): void {
+    console.log('CAPTCHA cargado correctamente');
+  }
+
+  // Método para resetear captcha manualmente
+  resetCaptcha(): void {
+    this.captchaService.resetCaptcha();
+    this.captchaToken = '';
+    this.captchaError = '';
   }
 
   // Manejar cambios en checkboxes de especialidades
@@ -231,6 +272,11 @@ export class RegistroEspecialistasComponent {
   }
 
   async registrar() {
+    // Limpiar mensajes previos
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.captchaError = '';
+
     // Validar formulario básico
     if (this.registroForm.invalid) {
       this.marcarCamposComoTocados();
@@ -259,9 +305,15 @@ export class RegistroEspecialistasComponent {
       return;
     }
 
+    // *** VALIDAR CAPTCHA - ESTO ES LO NUEVO ***
+    const captchaValidation = this.captchaService.validateCaptchaForSubmit();
+    if (!captchaValidation.isValid) {
+      this.captchaError = captchaValidation.message;
+      this.errorMessage = captchaValidation.message;
+      return;
+    }
+
     this.isLoading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
 
     try {
       // Verificar si el usuario ya existe
@@ -296,6 +348,9 @@ export class RegistroEspecialistasComponent {
       // 5. Cerrar la sesión creada automáticamente
       await this.auth.cerrarSesionParaRegistro();
 
+      // Limpiar captcha después del registro exitoso
+      this.captchaService.clearCaptchaToken();
+
       this.successMessage = 'Especialista registrado exitosamente. El administrador debe habilitarlo antes de que pueda acceder al sistema.';
       this.registroForm.reset();
       this.especialidadesSeleccionadas = [];
@@ -303,6 +358,7 @@ export class RegistroEspecialistasComponent {
       this.imagenSeleccionada = null;
       this.previewUrl = '';
       this.imagenSubida = '';
+      this.captchaToken = '';
 
       // Limpiar el input de archivo
       const fileInput = document.getElementById('imagen1') as HTMLInputElement;
@@ -333,6 +389,9 @@ export class RegistroEspecialistasComponent {
           console.error('Error al limpiar imagen:', cleanupError);
         }
       }
+      
+      // Resetear captcha en caso de error
+      this.resetCaptcha();
       
       // Mejorar el manejo de errores específicos
       if (error.message?.includes('User already registered')) {
