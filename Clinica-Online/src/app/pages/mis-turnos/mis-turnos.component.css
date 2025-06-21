@@ -299,6 +299,11 @@
   animation: modalSlideIn 0.3s ease-out;
 }
 
+/* Modal específico para finalizar - más ancho */
+.modal-finalizar {
+  max-width: 700px;
+}
+
 @keyframes modalSlideIn {
   from {
     opacity: 0;
@@ -394,26 +399,198 @@
 .btn-primario {
   background: #3498db;
   color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
 }
 
 .btn-primario:hover {
   background: #2980b9;
 }
 
+.btn-primario:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
 .btn-secundario {
   background: #6c757d;
   color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
 }
 
 .btn-secundario:hover {
   background: #5a6268;
 }
+
+/* Estilos específicos para el modal de finalizar */
+.seccion-finalizar {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.titulo-seccion {
+  color: #2c3e50;
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #3498db;
+}
+
+.subtitulo-seccion {
+  color: #34495e;
+  font-size: 1rem;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.datos-fijos {
+  margin-bottom: 25px;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.form-group-inline {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.input-numero,
+.input-texto {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.input-numero:focus,
+.input-texto:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.datos-dinamicos {
+  border-top: 1px solid #dee2e6;
+  padding-top: 20px;
+}
+
+.datos-dinamicos-lista {
+  margin-bottom: 20px;
+}
+
+.dato-dinamico-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.dato-dinamico-info {
+  color: #495057;
+}
+
+.btn-eliminar-dato {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.btn-eliminar-dato:hover {
+  background: #c0392b;
+}
+
+.agregar-dato-dinamico {
+  padding: 15px;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+}
+
+.btn-agregar-dinamico {
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+  margin-top: 10px;
+}
+
+.btn-agregar-dinamico:hover {
+  background: #219a52;
+}
+
+.btn-agregar-dinamico:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.mensaje-maximo {
+  padding: 15px;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 6px;
+  color: #856404;
+  text-align: center;
+  font-weight: 500;
+}
+
 /* Filtro */
 .filtro-container {
   background: #f8f9fa;
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 20px;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+  .modal-finalizar {
+    max-width: 95%;
+    margin: 10px;
+  }
+  
+  .form-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .modal-footer {
+    flex-direction: column;
+  }
+  
+  .modal-footer button {
+    width: 100%;
+  }
 }
 
 /* Filtros por estado */

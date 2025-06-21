@@ -25,6 +25,16 @@ export class MisTurnosComponent implements OnInit {
   esPaciente: boolean = false;
   esEspecialista: boolean = false;
 
+  altura: number = 0;
+  peso: number = 0;
+  temperatura: number = 0;
+  presion: string = '';
+
+  // Datos dinámicos (máximo 3)
+  datosDinamicos: any = {};
+  nuevoClave: string = '';
+  nuevoValor: string = '';
+
   // Estados disponibles para filtrar
   estadosDisponibles = [
     { valor: '', texto: 'Todos' },
@@ -314,6 +324,39 @@ export class MisTurnosComponent implements OnInit {
     }
   }
 
+  agregarDatoDinamico() {
+    if (!this.nuevoClave.trim() || !this.nuevoValor.trim()) {
+      alert('Debe completar tanto la clave como el valor');
+      return;
+    }
+
+    if (Object.keys(this.datosDinamicos).length >= 3) {
+      alert('No se pueden agregar más de 3 datos dinámicos');
+      return;
+    }
+
+    if (this.datosDinamicos.hasOwnProperty(this.nuevoClave.trim())) {
+      alert('Ya existe un dato con esa clave');
+      return;
+    }
+
+    this.datosDinamicos[this.nuevoClave.trim()] = this.nuevoValor.trim();
+    this.nuevoClave = '';
+    this.nuevoValor = '';
+  }
+
+  eliminarDatoDinamico(clave: string) {
+    delete this.datosDinamicos[clave];
+  }
+
+  obtenerClavesDatosDinamicos(): string[] {
+    return Object.keys(this.datosDinamicos);
+  }
+
+  puedeAgregarMasDatos(): boolean {
+    return Object.keys(this.datosDinamicos).length < 3;
+  }
+
   // === MODALES COMUNES ===
 
   abrirModalCancelar(turno: any) {
@@ -332,6 +375,16 @@ export class MisTurnosComponent implements OnInit {
     this.turnoSeleccionado = turno;
     this.resenaConsulta = '';
     this.diagnostico = '';
+    
+    // Limpiar datos de historia clínica
+    this.altura = 0;
+    this.peso = 0;
+    this.temperatura = 0;
+    this.presion = '';
+    this.datosDinamicos = {};
+    this.nuevoClave = '';
+    this.nuevoValor = '';
+    
     this.mostrarModalFinalizar = true;
   }
 
@@ -383,24 +436,53 @@ export class MisTurnosComponent implements OnInit {
   }
 
   async confirmarFinalizacion() {
-    if (!this.resenaConsulta.trim() || !this.diagnostico.trim()) {
-      alert('Debe completar tanto la reseña como el diagnóstico');
-      return;
-    }
-
-    try {
-      await this.dbService.finalizarTurno(
-        this.turnoSeleccionado.id, 
-        this.resenaConsulta, 
-        this.diagnostico
-      );
-      this.cerrarModales();
-      await this.cargarTurnos();
-    } catch (error) {
-      console.error('Error al finalizar turno:', error);
-      alert('Error al finalizar el turno. Inténtelo nuevamente.');
-    }
+  // Validar campos obligatorios
+  if (!this.resenaConsulta.trim() || !this.diagnostico.trim()) {
+    alert('Debe completar tanto la reseña como el diagnóstico');
+    return;
   }
+
+  // Validar datos de historia clínica
+  if (!this.altura || !this.peso || !this.temperatura || !this.presion.trim()) {
+    alert('Debe completar todos los datos de historia clínica (altura, peso, temperatura y presión)');
+    return;
+  }
+
+  // Validar rangos de datos
+  if (this.altura < 50 || this.altura > 250) {
+    alert('La altura debe estar entre 50 y 250 cm');
+    return;
+  }
+
+  if (this.peso < 1 || this.peso > 500) {
+    alert('El peso debe estar entre 1 y 500 kg');
+    return;
+  }
+
+  if (this.temperatura < 30 || this.temperatura > 45) {
+    alert('La temperatura debe estar entre 30 y 45°C');
+    return;
+  }
+
+  try {
+    await this.dbService.finalizarTurno({
+      turnoId: this.turnoSeleccionado.id,
+      resena: this.resenaConsulta,
+      diagnostico: this.diagnostico,
+      altura_cm: this.altura,
+      peso_kg: this.peso,
+      temperatura_c: this.temperatura,
+      presion_arterial: this.presion,
+      datos_dinamicos: this.datosDinamicos
+    });
+    
+    this.cerrarModales();
+    await this.cargarTurnos();
+  } catch (error) {
+    console.error('Error al finalizar turno:', error);
+    alert('Error al finalizar el turno. Inténtelo nuevamente.');
+  }
+}
 
   cerrarModales() {
     this.mostrarModalCancelar = false;

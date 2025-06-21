@@ -321,46 +321,183 @@
 
     <!-- Modal Finalizar (solo especialista) -->
     <div *ngIf="mostrarModalFinalizar" class="modal-overlay" (click)="cerrarModales()">
-      <div class="modal" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>Finalizar Turno</h3>
-          <button (click)="cerrarModales()" class="btn-cerrar">✕</button>
+  <div class="modal modal-finalizar" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Finalizar Turno</h3>
+      <button (click)="cerrarModales()" class="btn-cerrar">✕</button>
+    </div>
+    <div class="modal-body">
+      <p>Complete la información del turno con {{ turnoSeleccionado?.paciente?.nombre }} {{ turnoSeleccionado?.paciente?.apellido }}</p>
+      
+      <!-- Sección de Reseña y Diagnóstico -->
+      <div class="seccion-finalizar">
+        <h4 class="titulo-seccion">Información del Turno</h4>
+        
+        <div class="form-group">
+          <label for="resenaConsulta">Reseña de la consulta *</label>
+          <textarea 
+            id="resenaConsulta"
+            [(ngModel)]="resenaConsulta" 
+            placeholder="Ingrese la reseña de la consulta..."
+            rows="4"
+            class="textarea"
+          ></textarea>
         </div>
-        <div class="modal-body">
-          <p>Complete la información del turno con {{ turnoSeleccionado?.paciente?.nombre }} {{ turnoSeleccionado?.paciente?.apellido }}</p>
-          <div class="form-group">
-            <label for="resenaConsulta">Reseña de la consulta *</label>
-            <textarea 
-              id="resenaConsulta"
-              [(ngModel)]="resenaConsulta" 
-              placeholder="Ingrese la reseña de la consulta..."
-              rows="4"
-              class="textarea"
-            ></textarea>
+        
+        <div class="form-group">
+          <label for="diagnostico">Diagnóstico *</label>
+          <textarea 
+            id="diagnostico"
+            [(ngModel)]="diagnostico" 
+            placeholder="Ingrese el diagnóstico..."
+            rows="4"
+            class="textarea"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Sección de Historia Clínica -->
+      <div class="seccion-finalizar">
+        <h4 class="titulo-seccion">Historia Clínica</h4>
+        
+        <!-- Datos Fijos -->
+        <div class="datos-fijos">
+          <h5 class="subtitulo-seccion">Datos Fijos</h5>
+          
+          <div class="form-row">
+            <div class="form-group form-group-inline">
+              <label for="altura">Altura (cm) *</label>
+              <input 
+                type="number" 
+                id="altura"
+                [(ngModel)]="altura" 
+                placeholder="170"
+                min="50"
+                max="250"
+                class="input-numero"
+              >
+            </div>
+            
+            <div class="form-group form-group-inline">
+              <label for="peso">Peso (kg) *</label>
+              <input 
+                type="number" 
+                id="peso"
+                [(ngModel)]="peso" 
+                placeholder="70"
+                min="1"
+                max="500"
+                step="0.1"
+                class="input-numero"
+              >
+            </div>
           </div>
-          <div class="form-group">
-            <label for="diagnostico">Diagnóstico *</label>
-            <textarea 
-              id="diagnostico"
-              [(ngModel)]="diagnostico" 
-              placeholder="Ingrese el diagnóstico..."
-              rows="4"
-              class="textarea"
-            ></textarea>
+          
+          <div class="form-row">
+            <div class="form-group form-group-inline">
+              <label for="temperatura">Temperatura (°C) *</label>
+              <input 
+                type="number" 
+                id="temperatura"
+                [(ngModel)]="temperatura" 
+                placeholder="36.5"
+                min="30"
+                max="45"
+                step="0.1"
+                class="input-numero"
+              >
+            </div>
+            
+            <div class="form-group form-group-inline">
+              <label for="presion">Presión Arterial *</label>
+              <input 
+                type="text" 
+                id="presion"
+                [(ngModel)]="presion" 
+                placeholder="120/80"
+                class="input-texto"
+              >
+            </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button (click)="cerrarModales()" class="btn btn-secundario">Cancelar</button>
-          <button 
-            (click)="confirmarFinalizacion()" 
-            class="btn btn-primario"
-            [disabled]="!resenaConsulta.trim() || !diagnostico.trim()"
-          >
-            Finalizar Turno
-          </button>
+
+        <!-- Datos Dinámicos -->
+        <div class="datos-dinamicos">
+          <h5 class="subtitulo-seccion">Datos Dinámicos (máximo 3)</h5>
+          
+          <!-- Lista de datos dinámicos existentes -->
+          <div *ngIf="obtenerClavesDatosDinamicos().length > 0" class="datos-dinamicos-lista">
+            <div *ngFor="let clave of obtenerClavesDatosDinamicos()" class="dato-dinamico-item">
+              <div class="dato-dinamico-info">
+                <strong>{{ clave }}:</strong> {{ datosDinamicos[clave] }}
+              </div>
+              <button 
+                type="button" 
+                (click)="eliminarDatoDinamico(clave)" 
+                class="btn-eliminar-dato"
+                title="Eliminar dato"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+          
+          <!-- Formulario para agregar nuevo dato -->
+          <div *ngIf="puedeAgregarMasDatos()" class="agregar-dato-dinamico">
+            <div class="form-row">
+              <div class="form-group form-group-inline">
+                <label for="nuevoClave">Clave</label>
+                <input 
+                  type="text" 
+                  id="nuevoClave"
+                  [(ngModel)]="nuevoClave" 
+                  placeholder="Ej: caries"
+                  class="input-texto"
+                >
+              </div>
+              
+              <div class="form-group form-group-inline">
+                <label for="nuevoValor">Valor</label>
+                <input 
+                  type="text" 
+                  id="nuevoValor"
+                  [(ngModel)]="nuevoValor" 
+                  placeholder="Ej: 4"
+                  class="input-texto"
+                >
+              </div>
+            </div>
+            
+            <button 
+              type="button" 
+              (click)="agregarDatoDinamico()" 
+              class="btn btn-agregar-dinamico"
+              [disabled]="!nuevoClave.trim() || !nuevoValor.trim()"
+            >
+              Agregar Dato
+            </button>
+          </div>
+          
+          <!-- Mensaje cuando se alcanza el máximo -->
+          <div *ngIf="!puedeAgregarMasDatos()" class="mensaje-maximo">
+            Se ha alcanzado el máximo de 3 datos dinámicos
+          </div>
         </div>
       </div>
     </div>
+    
+    <div class="modal-footer">
+      <button (click)="cerrarModales()" class="btn btn-secundario">Cancelar</button>
+      <button 
+        (click)="confirmarFinalizacion()" 
+        class="btn btn-primario"
+        [disabled]="!resenaConsulta.trim() || !diagnostico.trim() || !altura || !peso || !temperatura || !presion.trim()"
+      >
+        Finalizar Turno
+      </button>
+    </div>
+  </div>
+</div>
 
     <!-- Modal Ver Reseña (para paciente) -->
     <div *ngIf="mostrarModalResena" class="modal-overlay" (click)="cerrarModales()">
