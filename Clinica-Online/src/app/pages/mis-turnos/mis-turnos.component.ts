@@ -109,25 +109,42 @@ export class MisTurnosComponent implements OnInit {
   }
 
   async cargarTurnos() {
-    if (!this.usuarioId) return;
+  if (!this.usuarioId) return;
+  
+  try {
+    this.cargando = true;
     
-    try {
-      this.cargando = true;
-      
-      if (this.esPaciente) {
-        this.turnos = await this.dbService.obtenerTurnosPacienteConDetalles(this.usuarioId);
-      } else if (this.esEspecialista) {
-        this.turnos = await this.dbService.obtenerTurnosEspecialista(this.usuarioId);
-      }
-      
-      this.aplicarFiltros();
-      console.log('Turnos cargados:', this.turnos);
-    } catch (error) {
-      console.error('Error al cargar turnos:', error);
-    } finally {
-      this.cargando = false;
+    if (this.esPaciente) {
+      this.turnos = await this.dbService.obtenerTurnosConDetalles('paciente', this.usuarioId);
+    } else if (this.esEspecialista) {
+      this.turnos = await this.dbService.obtenerTurnosConDetalles('especialista', this.usuarioId);
     }
+    
+    this.aplicarFiltros();
+    console.log('Turnos cargados:', this.turnos);
+  } catch (error) {
+    console.error('Error al cargar turnos:', error);
+  } finally {
+    this.cargando = false;
   }
+}
+async recargarDatosTurno(turnoId: number) {
+  try {
+    // Cambiar obtenerTurnoCompleto por el nuevo método
+    const turnoCompleto = await this.dbService.obtenerTurnoCompleto(turnoId);
+    
+    if (turnoCompleto) {
+      // Actualizar el turno en la lista
+      const index = this.turnos.findIndex(t => t.id === turnoId);
+      if (index !== -1) {
+        this.turnos[index] = turnoCompleto;
+        this.aplicarFiltros();
+      }
+    }
+  } catch (error) {
+    console.error('Error al recargar datos del turno:', error);
+  }
+}
 
   // Método para normalizar texto (sin tildes y en minúsculas)
   private normalizarTexto(texto: string): string {
@@ -136,6 +153,48 @@ export class MisTurnosComponent implements OnInit {
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, ''); // Elimina tildes
+  }
+
+  // Método para buscar en datos de historia clínica
+  private buscarEnHistoriaClinica(turno: any, filtroNormalizado: string): boolean {
+    if (!turno) return false;
+    
+    // Buscar en datos estáticos de historia clínica
+    const datosEstaticos = [
+      turno.altura_cm?.toString() || '',
+      turno.peso_kg?.toString() || '',
+      turno.temperatura_c?.toString() || '',
+      turno.presion_arterial || ''
+    ];
+    
+    // Verificar si algún dato estático coincide
+    const coincideEstatico = datosEstaticos.some(dato => 
+      this.normalizarTexto(dato).includes(filtroNormalizado)
+    );
+    
+    if (coincideEstatico) return true;
+    
+    // Buscar en datos dinámicos (solo valores, no claves)
+    if (turno.datos_dinamicos) {
+      try {
+        const datosDinamicos = typeof turno.datos_dinamicos === 'string' 
+          ? JSON.parse(turno.datos_dinamicos) 
+          : turno.datos_dinamicos;
+        
+        if (datosDinamicos && typeof datosDinamicos === 'object') {
+          const valoresDinamicos = Object.values(datosDinamicos);
+          const coincideDinamico = valoresDinamicos.some(valor => 
+            this.normalizarTexto(valor?.toString() || '').includes(filtroNormalizado)
+          );
+          
+          if (coincideDinamico) return true;
+        }
+      } catch (error) {
+        console.error('Error al parsear datos dinámicos:', error);
+      }
+    }
+    
+    return false;
   }
 
   aplicarFiltros() {
@@ -148,27 +207,41 @@ export class MisTurnosComponent implements OnInit {
       turnosFiltrados = turnosFiltrados.filter(turno => {
         const especialidad = this.normalizarTexto(turno.especialidad || '');
         
+        // Buscar en datos básicos del turno
+        let coincideBasico = false;
+        
         if (this.esPaciente) {
           // Para paciente: filtrar por especialidad o especialista
           const nombreEspecialista = this.normalizarTexto(turno.especialista?.nombre || '');
           const apellidoEspecialista = this.normalizarTexto(turno.especialista?.apellido || '');
           const nombreCompletoEspecialista = `${nombreEspecialista} ${apellidoEspecialista}`.trim();
           
-          return especialidad.includes(filtroNormalizado) || 
-                 nombreCompletoEspecialista.includes(filtroNormalizado) ||
-                 nombreEspecialista.includes(filtroNormalizado) ||
-                 apellidoEspecialista.includes(filtroNormalizado);
+          coincideBasico = especialidad.includes(filtroNormalizado) || 
+                          nombreCompletoEspecialista.includes(filtroNormalizado) ||
+                          nombreEspecialista.includes(filtroNormalizado) ||
+                          apellidoEspecialista.includes(filtroNormalizado);
         } else {
           // Para especialista: filtrar por especialidad o paciente
           const nombrePaciente = this.normalizarTexto(turno.paciente?.nombre || '');
           const apellidoPaciente = this.normalizarTexto(turno.paciente?.apellido || '');
           const nombreCompletoPaciente = `${nombrePaciente} ${apellidoPaciente}`.trim();
           
-          return especialidad.includes(filtroNormalizado) || 
-                 nombreCompletoPaciente.includes(filtroNormalizado) ||
-                 nombrePaciente.includes(filtroNormalizado) ||
-                 apellidoPaciente.includes(filtroNormalizado);
+          coincideBasico = especialidad.includes(filtroNormalizado) || 
+                          nombreCompletoPaciente.includes(filtroNormalizado) ||
+                          nombrePaciente.includes(filtroNormalizado) ||
+                          apellidoPaciente.includes(filtroNormalizado);
         }
+        
+        // Buscar también en diagnóstico y comentario del especialista
+        const diagnostico = this.normalizarTexto(turno.diagnostico || '');
+        const comentarioEspecialista = this.normalizarTexto(turno.comentario_especialista || '');
+        const coincideDiagnostico = diagnostico.includes(filtroNormalizado) || 
+                                   comentarioEspecialista.includes(filtroNormalizado);
+        
+        // Buscar en datos de historia clínica
+        const coincideHistoria = this.buscarEnHistoriaClinica(turno, filtroNormalizado);
+        
+        return coincideBasico || coincideDiagnostico || coincideHistoria;
       });
     }
 
@@ -208,8 +281,15 @@ export class MisTurnosComponent implements OnInit {
     return ['creado', 'aceptado'].includes(estado);
   }
 
+  // CAMBIO 1: Método unificado para ver diagnóstico (tanto paciente como especialista)
+  puedeVerDiagnostico(turno: any): boolean {
+    const estado = this.normalizarEstado(turno.estado);
+    return estado === 'finalizado' && !!(turno.comentario_especialista || turno.diagnostico);
+  }
+
+  // Mantenemos el método original para compatibilidad
   puedeVerResena(turno: any): boolean {
-    return !!(turno.comentario_especialista || turno.diagnostico);
+    return this.puedeVerDiagnostico(turno);
   }
 
   puedeCompletarEncuesta(turno: any): boolean {
@@ -247,12 +327,6 @@ export class MisTurnosComponent implements OnInit {
     if (!this.esEspecialista) return false;
     const estado = this.normalizarEstado(turno.estado);
     return estado === 'aceptado';
-  }
-
-  puedeVerDiagnostico(turno: any): boolean {
-    if (!this.esEspecialista) return false;
-    const estado = this.normalizarEstado(turno.estado);
-    return estado === 'finalizado' && !!(turno.comentario_especialista || turno.diagnostico);
   }
 
   puedeVerMotivoCancelacion(turno: any): boolean {
@@ -388,14 +462,15 @@ export class MisTurnosComponent implements OnInit {
     this.mostrarModalFinalizar = true;
   }
 
-  abrirModalResena(turno: any) {
-    this.turnoSeleccionado = turno;
-    this.mostrarModalResena = true;
-  }
-
+  // CAMBIO 2: Método unificado para abrir modal de diagnóstico
   abrirModalDiagnostico(turno: any) {
     this.turnoSeleccionado = turno;
     this.mostrarModalDiagnostico = true;
+  }
+
+  // Mantenemos el método original para compatibilidad
+  abrirModalResena(turno: any) {
+    this.abrirModalDiagnostico(turno);
   }
 
   abrirModalMotivoCancelacion(turno: any) {
@@ -436,53 +511,53 @@ export class MisTurnosComponent implements OnInit {
   }
 
   async confirmarFinalizacion() {
-  // Validar campos obligatorios
-  if (!this.resenaConsulta.trim() || !this.diagnostico.trim()) {
-    alert('Debe completar tanto la reseña como el diagnóstico');
-    return;
-  }
+    // Validar campos obligatorios
+    if (!this.resenaConsulta.trim() || !this.diagnostico.trim()) {
+      alert('Debe completar tanto la reseña como el diagnóstico');
+      return;
+    }
 
-  // Validar datos de historia clínica
-  if (!this.altura || !this.peso || !this.temperatura || !this.presion.trim()) {
-    alert('Debe completar todos los datos de historia clínica (altura, peso, temperatura y presión)');
-    return;
-  }
+    // Validar datos de historia clínica
+    if (!this.altura || !this.peso || !this.temperatura || !this.presion.trim()) {
+      alert('Debe completar todos los datos de historia clínica (altura, peso, temperatura y presión)');
+      return;
+    }
 
-  // Validar rangos de datos
-  if (this.altura < 50 || this.altura > 250) {
-    alert('La altura debe estar entre 50 y 250 cm');
-    return;
-  }
+    // Validar rangos de datos
+    if (this.altura < 50 || this.altura > 250) {
+      alert('La altura debe estar entre 50 y 250 cm');
+      return;
+    }
 
-  if (this.peso < 1 || this.peso > 500) {
-    alert('El peso debe estar entre 1 y 500 kg');
-    return;
-  }
+    if (this.peso < 1 || this.peso > 500) {
+      alert('El peso debe estar entre 1 y 500 kg');
+      return;
+    }
 
-  if (this.temperatura < 30 || this.temperatura > 45) {
-    alert('La temperatura debe estar entre 30 y 45°C');
-    return;
-  }
+    if (this.temperatura < 30 || this.temperatura > 45) {
+      alert('La temperatura debe estar entre 30 y 45°C');
+      return;
+    }
 
-  try {
-    await this.dbService.finalizarTurno({
-      turnoId: this.turnoSeleccionado.id,
-      resena: this.resenaConsulta,
-      diagnostico: this.diagnostico,
-      altura_cm: this.altura,
-      peso_kg: this.peso,
-      temperatura_c: this.temperatura,
-      presion_arterial: this.presion,
-      datos_dinamicos: this.datosDinamicos
-    });
-    
-    this.cerrarModales();
-    await this.cargarTurnos();
-  } catch (error) {
-    console.error('Error al finalizar turno:', error);
-    alert('Error al finalizar el turno. Inténtelo nuevamente.');
+    try {
+      await this.dbService.finalizarTurno({
+        turnoId: this.turnoSeleccionado.id,
+        resena: this.resenaConsulta,
+        diagnostico: this.diagnostico,
+        altura_cm: this.altura,
+        peso_kg: this.peso,
+        temperatura_c: this.temperatura,
+        presion_arterial: this.presion,
+        datos_dinamicos: this.datosDinamicos
+      });
+      
+      this.cerrarModales();
+      await this.cargarTurnos();
+    } catch (error) {
+      console.error('Error al finalizar turno:', error);
+      alert('Error al finalizar el turno. Inténtelo nuevamente.');
+    }
   }
-}
 
   cerrarModales() {
     this.mostrarModalCancelar = false;
@@ -536,5 +611,28 @@ export class MisTurnosComponent implements OnInit {
 
   obtenerEstrellasArray(puntaje: number): number[] {
     return Array(5).fill(0).map((_, i) => i + 1);
+  }
+
+  // CAMBIO 2: Métodos auxiliares para mostrar datos de historia clínica en el modal
+  obtenerDatosDinamicosComoObjeto(turno: any): any {
+    if (!turno.datos_dinamicos) return {};
+    
+    try {
+      return typeof turno.datos_dinamicos === 'string' 
+        ? JSON.parse(turno.datos_dinamicos) 
+        : turno.datos_dinamicos;
+    } catch (error) {
+      console.error('Error al parsear datos dinámicos:', error);
+      return {};
+    }
+  }
+
+  obtenerClavesDatosDinamicosTurno(turno: any): string[] {
+    const datos = this.obtenerDatosDinamicosComoObjeto(turno);
+    return Object.keys(datos);
+  }
+
+  tieneHistoriaClinica(turno: any): boolean {
+    return !!(turno.altura_cm || turno.peso_kg || turno.temperatura_c || turno.presion_arterial || turno.datos_dinamicos);
   }
 }

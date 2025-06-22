@@ -425,6 +425,12 @@ export class DatabaseService {
     return `${año}-${mes}-${dia}`;
   };
 
+  // Función auxiliar interna: Crear fecha local evitando problemas de zona horaria
+  const crearFechaLocal = (fechaCompleta: string): Date => {
+    const [año, mes, dia] = fechaCompleta.split('-').map(Number);
+    return new Date(año, mes - 1, dia); // mes - 1 porque Date usa 0-11 para meses
+  };
+
   // Función auxiliar interna: Verificar disponibilidad de una fecha específica
   const verificarDisponibilidadFecha = async (
     especialistaId: number,
@@ -432,7 +438,8 @@ export class DatabaseService {
     especialidad: string
   ): Promise<boolean> => {
     try {
-      const fechaObj = new Date(fechaCompleta);
+      // CORRECIÓN CRÍTICA: Usar función que evita problemas de zona horaria
+      const fechaObj = crearFechaLocal(fechaCompleta);
       const diaSemana = obtenerNombreDia(fechaObj.getDay());
 
       console.log(`Verificando fecha ${fechaCompleta} (${diaSemana}) para especialidad ${especialidad}`);
@@ -533,72 +540,69 @@ export class DatabaseService {
     }
   };
 
-  // Obtener horarios del especialista para esa especialidad
-  const { data: horarios, error } = await this.sb.supabase
-    .from('horarios_especialistas')
-    .select('dia')
-    .eq('usuario_id', especialistaId)
-    .eq('especialidad', especialidad);
+  try {
+    // Obtener los horarios del especialista para la especialidad específica
+    const { data: horarios, error } = await this.sb.supabase
+      .from('horarios_especialistas')
+      .select('dia, hora_inicio, hora_final')
+      .eq('usuario_id', especialistaId)
+      .eq('especialidad', especialidad);
 
-  console.log('Horarios obtenidos de la BD:', horarios);
+    console.log('Horarios obtenidos de la BD:', horarios);
 
-  if (error) {
-    console.error('Error al obtener días disponibles:', error);
-    throw error;
-  }
+    if (error || !horarios || horarios.length === 0) {
+      console.log('No se encontraron horarios para este especialista y especialidad');
+      return [];
+    }
 
-  if (!horarios || horarios.length === 0) {
-    console.log('No se encontraron horarios para el especialista');
+    // Obtener días únicos en los que trabaja
+    const diasDisponibles = [...new Set(horarios.map(h => h.dia))];
+    console.log('Días únicos encontrados:', diasDisponibles);
+
+    const fechasDisponibles: string[] = [];
+    const hoy = new Date();
+    
+    console.log('Generando fechas para los próximos 15 días...');
+
+    // Generar fechas para los próximos 15 días
+    for (let i = 1; i <= 15; i++) {
+      const fecha = new Date(hoy);
+      fecha.setDate(hoy.getDate() + i);
+      
+      const fechaDisplay = formatearFechaDisplay(fecha);
+      const fechaCompleta = formatearFechaCompleta(fecha);
+      const diaSemana = obtenerNombreDia(fecha.getDay());
+      
+      console.log(`Día ${i}: ${fechaDisplay} es ${diaSemana}`);
+      
+      // Verificar si el especialista trabaja ese día
+      if (diasDisponibles.includes(diaSemana)) {
+        console.log(`${diaSemana} está en los días disponibles, verificando disponibilidad...`);
+        
+        const tieneEspacio = await verificarDisponibilidadFecha(
+          especialistaId,
+          fechaCompleta,
+          especialidad
+        );
+        
+        if (tieneEspacio) {
+          fechasDisponibles.push(fechaDisplay);
+          console.log(`✅ Fecha con espacio: ${fechaDisplay}`);
+        } else {
+          console.log(`❌ Fecha sin espacio: ${fechaDisplay}`);
+        }
+      } else {
+        console.log(`${diaSemana} NO está en los días disponibles`);
+      }
+    }
+
+    console.log('Fechas finales disponibles:', fechasDisponibles);
+    return fechasDisponibles;
+
+  } catch (error) {
+    console.error('Error obteniendo días disponibles:', error);
     return [];
   }
-
-  // Obtener días únicos
-  const diasSet = new Set(horarios.map((h) => h.dia));
-  const diasDisponibles = Array.from(diasSet);
-  
-  console.log('Días únicos encontrados:', diasDisponibles);
-
-  // Generar fechas para los próximos 15 días que coincidan con los días disponibles
-  const fechasDisponibles: string[] = [];
-  const hoy = new Date();
-
-  console.log('Generando fechas para los próximos 15 días...');
-
-  for (let i = 1; i <= 15; i++) {
-    const fecha = new Date(hoy);
-    fecha.setDate(hoy.getDate() + i);
-
-    const diaSemana = obtenerNombreDia(fecha.getDay());
-    
-    console.log(`Día ${i}: ${formatearFechaDisplay(fecha)} es ${diaSemana}`);
-
-    // Solo procesar días que coincidan con los horarios del especialista
-    if (diasDisponibles.includes(diaSemana)) {
-      console.log(`${diaSemana} está en los días disponibles, verificando disponibilidad...`);
-      
-      const fechaFormatoCompleto = formatearFechaCompleta(fecha); // YYYY-MM-DD para BD
-      const fechaFormatoDisplay = formatearFechaDisplay(fecha); // DD/MM para mostrar
-
-      // Verificar disponibilidad usando formato completo
-      const tieneEspacio = await verificarDisponibilidadFecha(
-        especialistaId,
-        fechaFormatoCompleto,
-        especialidad
-      );
-
-      if (tieneEspacio) {
-        console.log(`✅ Fecha agregada: ${fechaFormatoDisplay}`);
-        fechasDisponibles.push(fechaFormatoDisplay); // Devolvemos formato display
-      } else {
-        console.log(`❌ Fecha sin espacio: ${fechaFormatoDisplay}`);
-      }
-    } else {
-      console.log(`${diaSemana} NO está en los días disponibles`);
-    }
-  }
-
-  console.log('Fechas finales disponibles:', fechasDisponibles);
-  return fechasDisponibles;
 }
 
   async obtenerHorariosDisponibles(
@@ -800,107 +804,6 @@ export class DatabaseService {
     return data || [];
   }
 
-// 1. OBTENER TURNOS DEL PACIENTE
-async obtenerTurnosPaciente(pacienteId: number): Promise<any[]> {
-  const { data, error } = await this.sb.supabase
-    .from('turnos')
-    .select(`
-      *,
-      especialista:especialista_id (
-        nombre,
-        apellido,
-        especialidades,
-        imagen_perfil_1
-      )
-    `)
-    .eq('paciente_id', pacienteId)
-    .order('fecha', { ascending: false })
-    .order('hora', { ascending: false });
-
-  if (error) {
-    console.error('Error al obtener turnos del paciente:', error);
-    throw error;
-  }
-
-  return data || [];
-}
-
-// 2. OBTENER TURNOS DEL ESPECIALISTA
-async obtenerTurnosEspecialista(especialistaId: number): Promise<any[]> {
-  const { data, error } = await this.sb.supabase
-    .from('turnos')
-    .select(`
-      *,
-      paciente:paciente_id (
-        nombre,
-        apellido,
-        obra_social,
-        imagen_perfil_1
-      )
-    `)
-    .eq('especialista_id', especialistaId)
-    .order('fecha', { ascending: false })
-    .order('hora', { ascending: false });
-
-  if (error) {
-    console.error('Error al obtener turnos del especialista:', error);
-    throw error;
-  }
-
-  return data || [];
-}
-
-// 3. FILTRAR TURNOS PACIENTE (por especialidad o especialista)
-async filtrarTurnosPaciente(pacienteId: number, filtro: string): Promise<any[]> {
-  const { data, error } = await this.sb.supabase
-    .from('turnos')
-    .select(`
-      *,
-      especialista:especialista_id (
-        nombre,
-        apellido,
-        especialidades,
-        imagen_perfil_1
-      )
-    `)
-    .eq('paciente_id', pacienteId)
-    .or(`especialidad.ilike.%${filtro}%,especialista.nombre.ilike.%${filtro}%,especialista.apellido.ilike.%${filtro}%`)
-    .order('fecha', { ascending: false })
-    .order('hora', { ascending: false });
-
-  if (error) {
-    console.error('Error al filtrar turnos del paciente:', error);
-    throw error;
-  }
-
-  return data || [];
-}
-
-// 4. FILTRAR TURNOS ESPECIALISTA (por especialidad o paciente)
-async filtrarTurnosEspecialista(especialistaId: number, filtro: string): Promise<any[]> {
-  const { data, error } = await this.sb.supabase
-    .from('turnos')
-    .select(`
-      *,
-      paciente:paciente_id (
-        nombre,
-        apellido,
-        obra_social,
-        imagen_perfil_1
-      )
-    `)
-    .eq('especialista_id', especialistaId)
-    .or(`especialidad.ilike.%${filtro}%,paciente.nombre.ilike.%${filtro}%,paciente.apellido.ilike.%${filtro}%`)
-    .order('fecha', { ascending: false })
-    .order('hora', { ascending: false });
-
-  if (error) {
-    console.error('Error al filtrar turnos del especialista:', error);
-    throw error;
-  }
-
-  return data || [];
-}
 
 // 5. CANCELAR TURNO (paciente o especialista)
 async cancelarTurno(turnoId: number, comentarioCancelacion: string): Promise<void> {
@@ -955,6 +858,7 @@ async aceptarTurno(turnoId: number): Promise<void> {
   console.log('Turno aceptado exitosamente:', data);
 }
 
+// 8. FINALIZAR TURNO (solo especialista)
 async finalizarTurno(datosFinalizacion: {
   turnoId: number;
   resena: string;
@@ -1031,7 +935,7 @@ async calificarAtencion(turnoId: number, puntaje: number, comentarioAtencion: st
 }
 
 // 11. OBTENER TURNO POR ID (para mostrar detalles)
-async obtenerTurnoPorId(turnoId: number): Promise<any> {
+async obtenerTurnoCompleto(turnoId: number): Promise<any> {
   const { data, error } = await this.sb.supabase
     .from('turnos')
     .select(`
@@ -1054,31 +958,46 @@ async obtenerTurnoPorId(turnoId: number): Promise<any> {
     .single();
 
   if (error) {
-    console.error('Error al obtener turno:', error);
+    console.error('Error al obtener turno completo:', error);
     throw error;
   }
 
   return data;
 }
-// OBTENER TURNOS DEL PACIENTE CON DETALLES COMPLETOS
-async obtenerTurnosPacienteConDetalles(pacienteId: number): Promise<any[]> {
-  const { data, error } = await this.sb.supabase
+
+async obtenerTurnosConDetalles(tipoUsuario: 'paciente' | 'especialista', usuarioId: number): Promise<any[]> {
+  let query = this.sb.supabase
     .from('turnos')
     .select(`
       *,
+      paciente:paciente_id (
+        nombre,
+        apellido,
+        obra_social,
+        imagen_perfil_1,
+        imagen_perfil_2
+      ),
       especialista:especialista_id (
         nombre,
         apellido,
         especialidades,
         imagen_perfil_1
       )
-    `)
-    .eq('paciente_id', pacienteId)
+    `);
+
+  // Aplicar filtro según el tipo de usuario
+  if (tipoUsuario === 'paciente') {
+    query = query.eq('paciente_id', usuarioId);
+  } else {
+    query = query.eq('especialista_id', usuarioId);
+  }
+
+  const { data, error } = await query
     .order('fecha', { ascending: false })
     .order('hora', { ascending: false });
 
   if (error) {
-    console.error('Error al obtener turnos del paciente con detalles:', error);
+    console.error(`Error al obtener turnos del ${tipoUsuario} con detalles:`, error);
     throw error;
   }
 

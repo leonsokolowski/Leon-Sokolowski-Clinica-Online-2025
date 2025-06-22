@@ -141,14 +141,14 @@
               Cancelar
             </button>
 
-            <!-- Ver reseña -->
+            <!-- Ver diagnostico -->
             <button 
-              *ngIf="puedeVerResena(turno)" 
-              (click)="abrirModalResena(turno)"
-              class="btn btn-ver-resena"
-              title="Ver reseña"
+              *ngIf="puedeVerDiagnostico(turno)" 
+              (click)="abrirModalDiagnostico(turno)"
+              class="btn btn-ver-diagnostico"
+              title="Ver diagnóstico"
             >
-              Ver Reseña
+              Ver Diagnóstico
             </button>
 
             <!-- Completar encuesta -->
@@ -499,52 +499,74 @@
   </div>
 </div>
 
-    <!-- Modal Ver Reseña (para paciente) -->
-    <div *ngIf="mostrarModalResena" class="modal-overlay" (click)="cerrarModales()">
-      <div class="modal" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>Reseña del Turno</h3>
-          <button (click)="cerrarModales()" class="btn-cerrar">✕</button>
-        </div>
-        <div class="modal-body">
-          <p><strong>Especialista:</strong> Dr. {{ turnoSeleccionado?.especialista?.nombre }} {{ turnoSeleccionado?.especialista?.apellido }}</p>
-          <p><strong>Fecha:</strong> {{ formatearFecha(turnoSeleccionado?.fecha) }} - {{ formatearHora(turnoSeleccionado?.hora) }}</p>
-          
-          <div *ngIf="turnoSeleccionado?.comentario_especialista" class="form-group">
-            <label>Reseña de la consulta:</label>
-            <div class="resena-texto">{{ turnoSeleccionado.comentario_especialista }}</div>
-          </div>
-          
-          <div *ngIf="turnoSeleccionado?.diagnostico" class="form-group">
-            <label>Diagnóstico:</label>
-            <div class="resena-texto">{{ turnoSeleccionado.diagnostico }}</div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button (click)="cerrarModales()" class="btn btn-primario">Cerrar</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal Ver Diagnóstico (para especialista) -->
+    <!-- Modal Ver Diagnóstico (unificado para pacientes y especialistas) -->
     <div *ngIf="mostrarModalDiagnostico" class="modal-overlay" (click)="cerrarModales()">
-      <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal modal-diagnostico-completo" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Diagnóstico del Turno</h3>
+          <h3>Información Completa del Turno</h3>
           <button (click)="cerrarModales()" class="btn-cerrar">✕</button>
         </div>
         <div class="modal-body">
-          <p><strong>Paciente:</strong> {{ turnoSeleccionado?.paciente?.nombre }} {{ turnoSeleccionado?.paciente?.apellido }}</p>
-          <p><strong>Fecha:</strong> {{ formatearFecha(turnoSeleccionado?.fecha) }} - {{ formatearHora(turnoSeleccionado?.hora) }}</p>
-          
-          <div *ngIf="turnoSeleccionado?.comentario_especialista" class="form-group">
-            <label>Reseña de la consulta:</label>
-            <div class="resena-texto">{{ turnoSeleccionado.comentario_especialista }}</div>
+          <!-- Información básica del turno -->
+          <div class="info-basica">
+            <p *ngIf="esPaciente"><strong>Especialista:</strong> Dr. {{ turnoSeleccionado?.especialista?.nombre }} {{ turnoSeleccionado?.especialista?.apellido }}</p>
+            <p *ngIf="esEspecialista"><strong>Paciente:</strong> {{ turnoSeleccionado?.paciente?.nombre }} {{ turnoSeleccionado?.paciente?.apellido }}</p>
+            <p><strong>Especialidad:</strong> {{ turnoSeleccionado?.especialidad }}</p>
+            <p><strong>Fecha:</strong> {{ formatearFecha(turnoSeleccionado?.fecha) }} - {{ formatearHora(turnoSeleccionado?.hora) }}</p>
           </div>
           
-          <div *ngIf="turnoSeleccionado?.diagnostico" class="form-group">
-            <label>Diagnóstico:</label>
-            <div class="resena-texto">{{ turnoSeleccionado.diagnostico }}</div>
+          <!-- Reseña y Diagnóstico -->
+          <div class="seccion-diagnostico">
+            <h4 class="titulo-seccion-modal">Consulta Médica</h4>
+            
+            <div *ngIf="turnoSeleccionado?.comentario_especialista" class="form-group">
+              <label>Reseña de la consulta:</label>
+              <div class="texto-diagnostico">{{ turnoSeleccionado.comentario_especialista }}</div>
+            </div>
+            
+            <div *ngIf="turnoSeleccionado?.diagnostico" class="form-group">
+              <label>Diagnóstico:</label>
+              <div class="texto-diagnostico">{{ turnoSeleccionado.diagnostico }}</div>
+            </div>
+          </div>
+
+          <!-- Historia Clínica -->
+          <div *ngIf="tieneHistoriaClinica(turnoSeleccionado)" class="seccion-historia-clinica">
+            <h4 class="titulo-seccion-modal">Historia Clínica</h4>
+            
+            <!-- Datos Fijos -->
+            <div class="datos-fijos-modal">
+              <h5 class="subtitulo-seccion-modal">Datos Fijos</h5>
+              <div class="datos-grid">
+                <div *ngIf="turnoSeleccionado?.altura_cm" class="dato-item">
+                  <span class="dato-label">Altura:</span>
+                  <span class="dato-valor">{{ turnoSeleccionado.altura_cm }} cm</span>
+                </div>
+                <div *ngIf="turnoSeleccionado?.peso_kg" class="dato-item">
+                  <span class="dato-label">Peso:</span>
+                  <span class="dato-valor">{{ turnoSeleccionado.peso_kg }} kg</span>
+                </div>
+                <div *ngIf="turnoSeleccionado?.temperatura_c" class="dato-item">
+                  <span class="dato-label">Temperatura:</span>
+                  <span class="dato-valor">{{ turnoSeleccionado.temperatura_c }}°C</span>
+                </div>
+                <div *ngIf="turnoSeleccionado?.presion_arterial" class="dato-item">
+                  <span class="dato-label">Presión Arterial:</span>
+                  <span class="dato-valor">{{ turnoSeleccionado.presion_arterial }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Datos Dinámicos -->
+            <div *ngIf="obtenerClavesDatosDinamicosTurno(turnoSeleccionado).length > 0" class="datos-dinamicos-modal">
+              <h5 class="subtitulo-seccion-modal">Datos Específicos</h5>
+              <div class="datos-grid">
+                <div *ngFor="let clave of obtenerClavesDatosDinamicosTurno(turnoSeleccionado)" class="dato-item">
+                  <span class="dato-label">{{ clave }}:</span>
+                  <span class="dato-valor">{{ obtenerDatosDinamicosComoObjeto(turnoSeleccionado)[clave] }}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
