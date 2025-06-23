@@ -14,7 +14,7 @@
   </div>
 
   <!-- Historia Clínica Content -->
-  <div *ngIf="!loading && !error && paciente" class="historia-content">
+  <div *ngIf="!loading && !error && paciente" class="historia-content" #pdfContent>
     
     <!-- Header con información del paciente -->
     <div class="paciente-header">
@@ -48,6 +48,19 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- Botón de descarga PDF -->
+      <div class="acciones-header">
+        <button 
+          class="btn-descargar-pdf" 
+          (click)="descargarPDF()" 
+          [disabled]="generandoPDF"
+          title="Descargar Historia Clínica en PDF">
+          <i class="fas fa-file-pdf" *ngIf="!generandoPDF"></i>
+          <i class="fas fa-spinner fa-spin" *ngIf="generandoPDF"></i>
+          <span>{{ generandoPDF ? 'Generando PDF...' : 'Descargar PDF' }}</span>
+        </button>
       </div>
     </div>
 

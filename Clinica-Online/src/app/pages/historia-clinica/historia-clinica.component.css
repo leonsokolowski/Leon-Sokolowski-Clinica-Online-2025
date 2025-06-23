@@ -57,6 +57,7 @@
   padding: 32px;
   margin-bottom: 24px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  position: relative;
 }
 
 .paciente-info {
@@ -547,6 +548,68 @@
   border-radius: 20px;
   font-size: 14px;
   font-weight: 500;
+}
+.acciones-header {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  gap: 10px;
+}
+
+.btn-descargar-pdf {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+}
+
+.btn-descargar-pdf:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c0392b, #a93226);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+}
+
+.btn-descargar-pdf:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-descargar-pdf i {
+  font-size: 16px;
+}
+
+.btn-descargar-pdf .fa-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsivo para pantallas pequeñas */
+@media (max-width: 768px) {
+  .acciones-header {
+    position: static;
+    margin-top: 15px;
+    justify-content: center;
+  }
+  
+  .btn-descargar-pdf {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* Responsive design */

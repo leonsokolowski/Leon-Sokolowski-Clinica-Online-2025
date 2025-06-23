@@ -1,1 +1,107 @@
-<p>seccion-pacientes works!</p>
+<div class="seccion-pacientes-container">
+  <!-- Header de la sección -->
+  <div class="seccion-header">
+    <div class="titulo-seccion">
+      <h1>
+        <i class="fas fa-users"></i>
+        Mis Pacientes
+      </h1>
+      <p class="subtitulo">Pacientes que he atendido al menos una vez</p>
+    </div>
+  </div>
+
+  <!-- Loading State --> 
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Cargando pacientes...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-container">
+    <div class="error-message">
+      <i class="fas fa-exclamation-triangle"></i>
+      <p>{{ error }}</p>
+    </div>
+  </div>
+
+  <!-- Lista de pacientes -->
+  <div *ngIf="!loading && !error" class="pacientes-content">
+    
+    <!-- Sin pacientes -->
+    <div *ngIf="pacientesAtendidos.length === 0" class="no-pacientes">
+      <div class="no-pacientes-content">
+        <i class="fas fa-user-injured"></i>
+        <h3>No hay pacientes registrados</h3>
+        <p>Aún no has atendido ningún paciente con turnos finalizados.</p>
+      </div>
+    </div>
+
+    <!-- Grid de pacientes -->
+    <div *ngIf="pacientesAtendidos.length > 0" class="pacientes-grid">
+      <div class="estadisticas-header">
+        <div class="contador-pacientes">
+          <span class="badge-contador">{{ pacientesAtendidos.length }} paciente{{ pacientesAtendidos.length !== 1 ? 's' : '' }} atendido{{ pacientesAtendidos.length !== 1 ? 's' : '' }}</span>
+        </div>
+      </div>
+
+      <div class="pacientes-lista">
+        <div *ngFor="let paciente of pacientesAtendidos; let i = index" class="paciente-card">
+          
+          <!-- Avatar y datos básicos -->
+          <div class="paciente-info">
+            <div class="paciente-avatar">
+              <img [src]="paciente.imagen_perfil_1" 
+                   [alt]="paciente.nombre + ' ' + paciente.apellido"
+                   onerror="this.src='assets/default-avatar.png'">
+            </div>
+            
+            <div class="paciente-datos">
+              <h3 class="paciente-nombre">{{ paciente.nombre }} {{ paciente.apellido }}</h3>
+              
+              <div class="datos-paciente">
+                <div class="dato-item">
+                  <i class="fas fa-id-card"></i>
+                  <span class="dato-label">DNI:</span>
+                  <span class="dato-valor">{{ paciente.dni }}</span>
+                </div>
+                
+                <div class="dato-item">
+                  <i class="fas fa-birthday-cake"></i>
+                  <span class="dato-label">Edad:</span>
+                  <span class="dato-valor">{{ paciente.edad }} años</span>
+                </div>
+                
+                <div class="dato-item">
+                  <i class="fas fa-hospital"></i>
+                  <span class="dato-label">Obra Social:</span>
+                  <span class="dato-valor">{{ paciente.obra_social }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Información de contacto -->
+          <div class="paciente-contacto">
+            <div class="contacto-item">
+              <i class="fas fa-envelope"></i>
+              <span>{{ paciente.email }}</span>
+            </div>
+          </div>
+
+          <!-- Acciones -->
+          <div class="paciente-acciones">
+            <button 
+              class="btn-historia-clinica"
+              (click)="verHistoriaClinica(paciente)"
+              title="Ver Historia Clínica">
+              <i class="fas fa-file-medical-alt"></i>
+              <span>Ver Historia Clínica</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
