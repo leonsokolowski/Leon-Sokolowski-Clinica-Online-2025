@@ -128,23 +128,7 @@ export class MisTurnosComponent implements OnInit {
     this.cargando = false;
   }
 }
-async recargarDatosTurno(turnoId: number) {
-  try {
-    // Cambiar obtenerTurnoCompleto por el nuevo método
-    const turnoCompleto = await this.dbService.obtenerTurnoCompleto(turnoId);
-    
-    if (turnoCompleto) {
-      // Actualizar el turno en la lista
-      const index = this.turnos.findIndex(t => t.id === turnoId);
-      if (index !== -1) {
-        this.turnos[index] = turnoCompleto;
-        this.aplicarFiltros();
-      }
-    }
-  } catch (error) {
-    console.error('Error al recargar datos del turno:', error);
-  }
-}
+
 
   // Método para normalizar texto (sin tildes y en minúsculas)
   private normalizarTexto(texto: string): string {

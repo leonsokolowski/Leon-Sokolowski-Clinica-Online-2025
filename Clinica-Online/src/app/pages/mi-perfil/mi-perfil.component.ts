@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router, RouterOutlet } from '@angular/router';
 import { Usuario, Especialista, Paciente } from '../../clases/usuario';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
@@ -24,7 +25,7 @@ interface NuevoHorario {
 @Component({
   selector: 'app-mi-perfil',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterOutlet],
   templateUrl: './mi-perfil.component.html',
   styleUrls: ['./mi-perfil.component.css']
 })
@@ -32,6 +33,7 @@ export class MiPerfilComponent implements OnInit {
   
   authService = inject(AuthService);
   databaseService = inject(DatabaseService);
+  router = inject(Router);
   
   usuario: Usuario | null = null;
   esEspecialista: boolean = false;
@@ -69,6 +71,14 @@ export class MiPerfilComponent implements OnInit {
       return (this.usuario as Paciente).imagen_perfil_2;
     }
     return undefined;
+  }
+
+  // Método para navegar a la historia clínica (solo para pacientes)
+  verHistoriaClinica() {
+    if (this.esPaciente) {
+      // Navegar a la ruta hija
+      this.router.navigate(['mi-perfil/historia-clinica']);
+    }
   }
 
   ngOnInit() {
@@ -295,7 +305,6 @@ export class MiPerfilComponent implements OnInit {
       this.cargando = false;
     }
   }
-
 
   editarHorarios() {
     this.modoEdicion = false;

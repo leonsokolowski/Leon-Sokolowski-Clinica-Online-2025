@@ -1,0 +1,617 @@
+/* Container principal */
+.historia-clinica-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #f8fafc;
+  min-height: 100vh;
+}
+
+/* Estados de carga y error */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-container {
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #dc2626;
+  font-size: 16px;
+}
+
+/* Header del paciente */
+.paciente-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.paciente-info {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.paciente-avatar img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.paciente-datos .titulo-principal {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  opacity: 0.9;
+}
+
+.nombre-paciente {
+  margin: 0 0 16px 0;
+  font-size: 32px;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.datos-basicos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.dato-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 8px 16px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.dato-label {
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.dato-valor {
+  font-weight: 600;
+}
+
+/* Sección de turnos */
+.turnos-section {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.section-header h3 {
+  margin: 0;
+  font-size: 24px;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.contador-turnos .badge {
+  background: #3b82f6;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Estado sin turnos */
+.no-turnos {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.no-turnos-content {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.no-turnos-content i {
+  font-size: 64px;
+  color: #cbd5e1;
+  margin-bottom: 16px;
+}
+
+.no-turnos-content h4 {
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.no-turnos-content p {
+  color: #94a3b8;
+  line-height: 1.6;
+}
+
+/* Cards de turnos */
+.turnos-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.turno-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.turno-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+}
+
+.turno-card:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Header del turno */
+.turno-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.fecha-hora-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.fecha-hora {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fecha, .hora {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.fecha i, .hora i {
+  color: #3b82f6;
+  width: 16px;
+}
+
+.especialidad-especialista {
+  text-align: right;
+}
+
+.badge-especialidad {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.especialista-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.especialista-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e2e8f0;
+}
+
+.especialista-datos {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.especialista-nombre {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 14px;
+}
+
+.especialista-titulo {
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* Contenido del turno */
+.turno-contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Sección principal */
+.seccion-principal {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.diagnostico-observaciones {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.campo-clinico {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 20px;
+  border-left: 4px solid #3b82f6;
+}
+
+.campo-clinico.diagnostico {
+  border-left-color: #10b981;
+}
+
+.campo-clinico.observaciones {
+  border-left-color: #f59e0b;
+}
+
+.campo-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.campo-header h4 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.campo-header i {
+  color: #3b82f6;
+  font-size: 18px;
+}
+
+.campo-content p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+/* Datos médicos en dos columnas */
+.datos-medicos-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.datos-vitales-card,
+.datos-dinamicos-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.card-header h4 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.card-header i {
+  color: #ef4444;
+  font-size: 18px;
+}
+
+.datos-dinamicos-card .card-header i {
+  color: #8b5cf6;
+}
+
+/* Vitales grid */
+.vitales-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.vital-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.vital-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 16px;
+}
+
+.vital-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.vital-label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.vital-valor {
+  font-size: 16px;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+/* Datos dinámicos */
+.dinamicos-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dinamico-item {
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.dinamico-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dinamico-label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dinamico-valor {
+  font-size: 14px;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+/* Footer del turno */
+.turno-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.calificacion-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.calificacion-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.calificacion-header i {
+  color: #fbbf24;
+}
+
+.estrellas {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.estrellas .fa-star {
+  color: #e2e8f0;
+  font-size: 18px;
+  transition: color 0.2s ease;
+}
+
+.estrellas .fa-star.active {
+  color: #fbbf24;
+}
+
+.puntaje-numero {
+  margin-left: 8px;
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.encuesta-container {
+  display: flex;
+  align-items: center;
+}
+
+.encuesta-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #10b981;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .historia-clinica-container {
+    padding: 16px;
+  }
+  
+  .paciente-header {
+    padding: 24px;
+  }
+  
+  .paciente-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+  
+  .datos-basicos {
+    justify-content: center;
+    gap: 16px;
+  }
+  
+  .turno-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .especialidad-especialista {
+    text-align: left;
+  }
+  
+  .especialista-info {
+    justify-content: flex-start;
+  }
+  
+  .especialista-datos {
+    align-items: flex-start;
+  }
+  
+  .datos-medicos-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .turno-footer {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 480px) {
+  .nombre-paciente {
+    font-size: 24px;
+  }
+  
+  .datos-basicos {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+}

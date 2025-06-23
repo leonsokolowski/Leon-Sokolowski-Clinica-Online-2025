@@ -75,6 +75,14 @@
           </div>
         </div>
       </div>
+
+      <!-- Botón para acceder a Historia Clínica (solo para pacientes) -->
+      <div class="acciones-paciente" *ngIf="esPaciente">
+        <button class="btn-historia-clinica" (click)="verHistoriaClinica()">
+          <i class="fas fa-clipboard-list"></i>
+          Ver Mi Historia Clínica
+        </button>
+      </div>
     </div>
 
     <!-- Sección de horarios (solo para especialistas) -->
@@ -181,5 +189,8 @@
     <div *ngIf="esEspecialista && !usuario?.habilitado" class="no-habilitado">
       <p>Su cuenta está pendiente de habilitación. Una vez habilitada podrá gestionar sus horarios.</p>
     </div>
+
+    <!-- Router outlet para rutas hijas (Historia Clínica) -->
+    <router-outlet></router-outlet>
   </div>
 </div>

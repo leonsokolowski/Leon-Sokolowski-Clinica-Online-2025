@@ -12,6 +12,8 @@ import { MiPerfilComponent } from './pages/mi-perfil/mi-perfil.component';
 import { SolicitarTurnoComponent } from './pages/solicitar-turno/solicitar-turno.component';
 import { MisTurnosComponent } from './pages/mis-turnos/mis-turnos.component';
 import { TurnosComponent } from './pages/turnos/turnos.component';
+import { HistoriaClinicaComponent } from './pages/historia-clinica/historia-clinica.component';
+import { SeccionPacientesComponent } from './pages/seccion-pacientes/seccion-pacientes.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -43,9 +45,37 @@ export const routes: Routes = [
     component: AdministracionEspecialistasComponent,
     title: 'Administración Especialistas',
   },
-  { path: 'mi-perfil', component: MiPerfilComponent, title: 'Mi perfil' },
+  { 
+    path: 'mi-perfil', 
+    component: MiPerfilComponent, 
+    title: 'Mi perfil',
+    children: [
+      {
+        path: 'historia-clinica',
+        component: HistoriaClinicaComponent,
+        title: 'Mi Historia Clínica'
+      }
+    ]
+  },
   { path: 'solicitar-turno', component: SolicitarTurnoComponent, title: 'Solicitar Turno' },
   { path: 'mis-turnos', component: MisTurnosComponent, title: 'Mis Turnos' },
   { path: 'turnos', component: TurnosComponent, title: 'Turnos' },
+  { 
+    path: 'seccion-pacientes', 
+    component: SeccionPacientesComponent, 
+    title: 'Sección Pacientes' 
+  },
+  // Rutas independientes para administradores y especialistas
+  { 
+    path: 'historia-clinica/:pacienteId', 
+    component: HistoriaClinicaComponent, 
+    title: 'Historia Clínica' 
+  },
+  // Mantener esta ruta como alternativa (ya no es necesaria pero por compatibilidad)
+  { 
+    path: 'mi-historia-clinica', 
+    component: HistoriaClinicaComponent, 
+    title: 'Mi Historia Clínica' 
+  },
   { path: '**', component: ErrorComponent, title: 'ERROR' },
 ];

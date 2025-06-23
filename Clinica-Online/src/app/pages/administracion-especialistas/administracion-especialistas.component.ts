@@ -1,5 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { Usuario, Paciente, Especialista } from '../../clases/usuario';
 import { DatabaseService } from '../../services/database.service';
 import { AuthService } from '../../services/auth.service';
@@ -14,6 +15,7 @@ export class AdministracionEspecialistasComponent implements OnInit {
   
   private db = inject(DatabaseService);
   private auth = inject(AuthService);
+  private router = inject(Router);
   
   usuarios: Usuario[] = [];
   usuariosFiltrados: Usuario[] = [];
@@ -75,6 +77,15 @@ export class AdministracionEspecialistasComponent implements OnInit {
   cambiarVista(vista: 'pacientes' | 'especialistas') {
     this.vistaActual = vista;
     this.filtrarUsuarios();
+  }
+
+  // NUEVO: Método para navegar a la historia clínica
+  verHistoriaClinica(usuario: Usuario) {
+    if (usuario.perfil === 'paciente' && usuario.id) {
+      this.router.navigate(['/historia-clinica', usuario.id]);
+    } else {
+      this.mostrarError('No se puede acceder a la historia clínica de este usuario');
+    }
   }
 
   async toggleHabilitacionEspecialista(usuario: Usuario) {

@@ -1,0 +1,244 @@
+<div class="historia-clinica-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Cargando historia clínica...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-container">
+    <div class="error-message">
+      <i class="fas fa-exclamation-triangle"></i>
+      <p>{{ error }}</p>
+    </div>
+  </div>
+
+  <!-- Historia Clínica Content -->
+  <div *ngIf="!loading && !error && paciente" class="historia-content">
+    
+    <!-- Header con información del paciente -->
+    <div class="paciente-header">
+      <div class="paciente-info">
+        <div class="paciente-avatar">
+          <img [src]="paciente.imagen_perfil_1" [alt]="paciente.nombre + ' ' + paciente.apellido" 
+               onerror="this.src='assets/default-avatar.png'">
+        </div>
+        
+        <div class="paciente-datos">
+          <h1 class="titulo-principal">
+            <i class="fas fa-file-medical"></i>
+            Historia Clínica
+          </h1>
+          <h2 class="nombre-paciente">{{ paciente.nombre }} {{ paciente.apellido }}</h2>
+          <div class="datos-basicos">
+            <div class="dato-item">
+              <i class="fas fa-id-card"></i>
+              <span class="dato-label">DNI:</span>
+              <span class="dato-valor">{{ paciente.dni }}</span>
+            </div>
+            <div class="dato-item">
+              <i class="fas fa-birthday-cake"></i>
+              <span class="dato-label">Edad:</span>
+              <span class="dato-valor">{{ paciente.edad }} años</span>
+            </div>
+            <div class="dato-item">
+              <i class="fas fa-hospital"></i>
+              <span class="dato-label">Obra Social:</span>
+              <span class="dato-valor">{{ paciente.obra_social }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de atenciones -->
+    <div class="turnos-section">
+      <div class="section-header">
+        <h3>
+          <i class="fas fa-clipboard-list"></i>
+          Historial de Atenciones
+        </h3>
+        <div class="contador-turnos">
+          <span class="badge">{{ turnos.length }} atenciones</span>
+        </div>
+      </div>
+
+      <!-- Sin turnos -->
+      <div *ngIf="turnos.length === 0" class="no-turnos">
+        <div class="no-turnos-content">
+          <i class="fas fa-calendar-times"></i>
+          <h4>Sin atenciones registradas</h4>
+          <p>Este paciente aún no tiene turnos finalizados en su historia clínica.</p>
+        </div>
+      </div>
+
+      <!-- Lista de turnos -->
+      <div *ngIf="turnos.length > 0" class="turnos-lista">
+        <div *ngFor="let turno of turnos; let i = index" class="turno-card">
+          
+          <!-- Header del turno -->
+          <div class="turno-header">
+            <div class="fecha-hora-container">
+              <div class="fecha-hora">
+                <div class="fecha">
+                  <i class="fas fa-calendar-alt"></i>
+                  <span>{{ formatearFecha(turno.fecha) }}</span>
+                </div>
+                <div class="hora">
+                  <i class="fas fa-clock"></i>
+                  <span>{{ formatearHora(turno.hora) }}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="especialidad-especialista">
+              <div class="especialidad">
+                <span class="badge-especialidad">{{ turno.especialidad }}</span>
+              </div>
+              <div class="especialista-info">
+                <img [src]="turno.especialista.imagen_perfil_1" 
+                     [alt]="turno.especialista.nombre"
+                     class="especialista-avatar"
+                     onerror="this.src='assets/default-doctor.png'">
+                <div class="especialista-datos">
+                  <span class="especialista-nombre">Dr. {{ turno.especialista.nombre }} {{ turno.especialista.apellido }}</span>
+                  <span class="especialista-titulo">Especialista</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contenido del turno -->
+          <div class="turno-contenido">
+            
+            <!-- Sección principal: Diagnóstico y Observaciones -->
+            <div class="seccion-principal">
+              <div class="diagnostico-observaciones">
+                <!-- Diagnóstico -->
+                <div class="campo-clinico diagnostico" *ngIf="turno.diagnostico">
+                  <div class="campo-header">
+                    <i class="fas fa-stethoscope"></i>
+                    <h4>Diagnóstico</h4>
+                  </div>
+                  <div class="campo-content">
+                    <p>{{ turno.diagnostico }}</p>
+                  </div>
+                </div>
+
+                <!-- Observaciones del especialista -->
+                <div class="campo-clinico observaciones" *ngIf="turno.comentario_especialista">
+                  <div class="campo-header">
+                    <i class="fas fa-comment-medical"></i>
+                    <h4>Observaciones del Especialista</h4>
+                  </div>
+                  <div class="campo-content">
+                    <p>{{ turno.comentario_especialista }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Datos Vitales y Adicionales en dos columnas -->
+            <div class="datos-medicos-container">
+              
+              <!-- Datos vitales -->
+              <div class="datos-vitales-card">
+                <div class="card-header">
+                  <i class="fas fa-heartbeat"></i>
+                  <h4>Datos Vitales</h4>
+                </div>
+                
+                <div class="vitales-grid">
+                  <div class="vital-item" *ngIf="turno.altura_cm">
+                    <div class="vital-icon">
+                      <i class="fas fa-ruler-vertical"></i>
+                    </div>
+                    <div class="vital-info">
+                      <span class="vital-label">Altura</span>
+                      <span class="vital-valor">{{ turno.altura_cm }} cm</span>
+                    </div>
+                  </div>
+                  
+                  <div class="vital-item" *ngIf="turno.peso_kg">
+                    <div class="vital-icon">
+                      <i class="fas fa-weight"></i>
+                    </div>
+                    <div class="vital-info">
+                      <span class="vital-label">Peso</span>
+                      <span class="vital-valor">{{ turno.peso_kg }} kg</span>
+                    </div>
+                  </div>
+                  
+                  <div class="vital-item" *ngIf="turno.temperatura_c">
+                    <div class="vital-icon">
+                      <i class="fas fa-thermometer-half"></i>
+                    </div>
+                    <div class="vital-info">
+                      <span class="vital-label">Temperatura</span>
+                      <span class="vital-valor">{{ turno.temperatura_c }}°C</span>
+                    </div>
+                  </div>
+                  
+                  <div class="vital-item" *ngIf="turno.presion_arterial">
+                    <div class="vital-icon">
+                      <i class="fas fa-tint"></i>
+                    </div>
+                    <div class="vital-info">
+                      <span class="vital-label">Presión Arterial</span>
+                      <span class="vital-valor">{{ turno.presion_arterial }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Datos dinámicos -->
+              <div class="datos-dinamicos-card" *ngIf="obtenerDatosDinamicos(turno).length > 0">
+                <div class="card-header">
+                  <i class="fas fa-notes-medical"></i>
+                  <h4>Datos Adicionales</h4>
+                </div>
+                
+                <div class="dinamicos-grid">
+                  <div class="dinamico-item" *ngFor="let dato of obtenerDatosDinamicos(turno)">
+                    <div class="dinamico-info">
+                      <span class="dinamico-label">{{ dato.clave }}</span>
+                      <span class="dinamico-valor">{{ dato.valor }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer del turno: Calificación y Encuesta -->
+            <div class="turno-footer" *ngIf="turno.puntaje || turno.encuesta">
+              
+              <!-- Calificación -->
+              <div class="calificacion-container" *ngIf="turno.puntaje">
+                <div class="calificacion-header">
+                  <i class="fas fa-star"></i>
+                  <span>Calificación de la atención</span>
+                </div>
+                <div class="estrellas">
+                  <i *ngFor="let star of [1,2,3,4,5]" 
+                     class="fas fa-star"
+                     [class.active]="star <= turno.puntaje"></i>
+                  <span class="puntaje-numero">{{ turno.puntaje }}/5</span>
+                </div>
+              </div>
+
+              <!-- Encuesta -->
+              <div class="encuesta-container" *ngIf="turno.encuesta">
+                <div class="encuesta-badge">
+                  <i class="fas fa-clipboard-check"></i>
+                  <span>Encuesta completada</span>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

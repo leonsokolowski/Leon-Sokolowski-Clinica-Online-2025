@@ -62,6 +62,12 @@
           <td>{{getPacienteObraSocial(usuario)}}</td>
           <td class="celda-acciones">
             <button 
+              class="btn-historia-clinica"
+              (click)="verHistoriaClinica(usuario)"
+              title="Ver Historia Clínica">
+              📋
+            </button>
+            <button 
               class="btn-eliminar"
               (click)="abrirModalEliminar(usuario)"
               title="Eliminar usuario">

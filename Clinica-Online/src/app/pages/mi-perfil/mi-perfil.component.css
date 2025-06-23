@@ -85,6 +85,7 @@
   min-height: 250px;
 }
 
+/* Tamaño base para imágenes de perfil */
 .imagen-perfil {
   width: 150px;
   height: 150px;
@@ -93,7 +94,15 @@
   border: 2px solid #ddd;
 }
 
-/* Imágenes con altura completa para pacientes y admin */
+/* TODAS las imágenes en usuario-multiple tendrán el mismo tamaño */
+.imagenes-perfil.usuario-multiple .imagen-perfil {
+  width: 180px !important;
+  height: 250px !important;
+  min-height: 250px !important;
+  max-height: 250px !important;
+}
+
+/* Clase grande para otros casos */
 .imagen-perfil.grande {
   width: 180px;
   height: 100%;
@@ -355,6 +364,36 @@
   color: #856404;
 }
 
+.acciones-paciente {
+  margin-top: 20px;
+  padding: 20px;
+  border-top: 1px solid #eee;
+}
+
+.btn-historia-clinica {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-historia-clinica:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-historia-clinica i {
+  font-size: 18px;
+}
+
 @media (max-width: 768px) {
   .info-personal,
   .info-personal.especialista {
@@ -373,7 +412,7 @@
   }
   
   .info-personal.especialista .imagen-perfil,
-  .imagen-perfil.grande {
+  .imagenes-perfil.usuario-multiple .imagen-perfil {
     width: 180px;
     height: 180px;
     min-height: auto;
