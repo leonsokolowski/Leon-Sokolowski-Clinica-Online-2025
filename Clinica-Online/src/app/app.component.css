@@ -1,5 +1,3 @@
-/* app.component.css - Versión optimizada */
-
 /* Estilos globales para la aplicación */
 * {
   margin: 0;
@@ -21,7 +19,7 @@ body {
 
 /* Sidebar - Barra lateral */
 .sidebar {
-  width: 80px; /* Volvemos al ancho original */
+  width: 80px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(15px);
   border-right: 1px solid rgba(255,255,255,0.2);
@@ -86,7 +84,7 @@ body {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 0.8rem 0.6rem; /* Padding optimizado */
+  padding: 0.8rem 0.6rem;
   border: none;
   border-radius: 12px;
   font-size: 0.9rem;
@@ -112,10 +110,10 @@ body {
   flex-shrink: 0;
 }
 
-.btn-icon svg {
-  width: 22px;
-  height: 22px;
-  fill: currentColor;
+/* Font Awesome icons styling */
+.btn-icon i {
+  font-size: 20px;
+  color: inherit;
 }
 
 .btn-text {
@@ -160,6 +158,39 @@ body {
   background: linear-gradient(135deg, #508AA8 0%, #9DD1F1 100%);
 }
 
+/* Botón Perfil */
+.btn-profile {
+  background: linear-gradient(135deg, #66B2FF 0%, #4A90E2 100%);
+  color: white;
+}
+
+.btn-profile:hover {
+  box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+  background: linear-gradient(135deg, #4A90E2 0%, #66B2FF 100%);
+}
+
+/* Botones de Turnos */
+.btn-appointment, .btn-my-appointments, .btn-all-appointments {
+  background: linear-gradient(135deg, #5CB85C 0%, #449D44 100%);
+  color: white;
+}
+
+.btn-appointment:hover, .btn-my-appointments:hover, .btn-all-appointments:hover {
+  box-shadow: 0 4px 15px rgba(68, 157, 68, 0.3);
+  background: linear-gradient(135deg, #449D44 0%, #5CB85C 100%);
+}
+
+/* Botón Pacientes */
+.btn-patients {
+  background: linear-gradient(135deg, #F0AD4E 0%, #EC971F 100%);
+  color: white;
+}
+
+.btn-patients:hover {
+  box-shadow: 0 4px 15px rgba(236, 151, 31, 0.3);
+  background: linear-gradient(135deg, #EC971F 0%, #F0AD4E 100%);
+}
+
 /* Botón Administración */
 .btn-admin {
   background: linear-gradient(135deg, #508AA8 0%, #031927 100%);
@@ -185,7 +216,7 @@ body {
 
 /* Contenido principal */
 .main-content {
-  margin-left: 80px; /* Con sidebar */
+  margin-left: 80px;
   width: calc(100% - 80px);
   transition: margin-left 0.3s ease, width 0.3s ease;
   min-height: 100vh;
@@ -230,6 +261,8 @@ body {
 .nav-btn:nth-child(1) { animation-delay: 0.1s; }
 .nav-btn:nth-child(2) { animation-delay: 0.2s; }
 .nav-btn:nth-child(3) { animation-delay: 0.3s; }
+.nav-btn:nth-child(4) { animation-delay: 0.4s; }
+.nav-btn:nth-child(5) { animation-delay: 0.5s; }
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -247,7 +280,6 @@ body {
     padding: 1rem;
   }
   
-  /* Sin sidebar en responsive */
   .main-content:only-child {
     margin-left: 0;
     width: 100%;
@@ -263,9 +295,8 @@ body {
     height: 20px;
   }
   
-  .btn-icon svg {
-    width: 20px;
-    height: 20px;
+  .btn-icon i {
+    font-size: 16px;
   }
 }
 
@@ -284,7 +315,6 @@ body {
     padding: 0.5rem;
   }
   
-  /* Sin sidebar en móvil */
   .main-content:only-child {
     margin-left: 0;
     width: 100%;
@@ -299,9 +329,8 @@ body {
     height: 18px;
   }
   
-  .btn-icon svg {
-    width: 18px;
-    height: 18px;
+  .btn-icon i {
+    font-size: 14px;
   }
 }
 

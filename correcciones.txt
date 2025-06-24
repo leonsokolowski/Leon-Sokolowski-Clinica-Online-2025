@@ -7,7 +7,7 @@ CORRECCIONES SPRINT 3
 Sección Pacientes,	"para los especialistas. Solo deberá mostrar los usuarios que el
 especialista haya atendido al menos 1 vez."
 ...
-Sección usuarios	"solamente para el perfil Administrador, poder dedscargar un excel general con los datos de todos los
+Sección usuarios	"solamente para el perfil Administrador, poder descargar un excel general con los datos de todos los
 usuarios."
 ...
 Mi perfil	"Para los usuarios paciente, poder descargar un pdf con toda su historia clínica. El PDF tiene que tener
@@ -15,3 +15,6 @@ logo de la clínica, título del informe y fecha de emisión."
 ...
 Animaciones	"Se debe agregar al menos 2, como mínimo, animaciones de transición entre componentes al navegar
 la aplicación."
+
+
+npm install react-router-dom

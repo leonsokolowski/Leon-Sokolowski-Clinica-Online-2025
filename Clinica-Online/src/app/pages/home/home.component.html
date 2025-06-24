@@ -1,18 +1,22 @@
-<button routerLink="/mi-perfil">Mi perfil</button>
-@switch (this.perfil) {
-    @case ("admin") 
-    {
-        <button routerLink="/solicitar-turno">Solicitar turno</button>
-        <button routerLink="/turnos">Turnos</button>
-    }
-    @case ("paciente") 
-    {
-        <button routerLink="/solicitar-turno">Solicitar turno</button>
-        <button routerLink="/mis-turnos">Mis turnos</button>
-    }   
-    @case ("especialista") 
-    {
-        <button routerLink="/mis-turnos">Mis turnos</button>
-        <button routerLink="/seccion-pacientes">Sección Pacientes</button>
-    }
-}
+<div class="contenedor-home">
+  <!-- Header de bienvenida simplificado -->
+  <div class="encabezado-bienvenida" @fadeIn>
+    <h1 class="titulo-bienvenida">
+      {{this.nombre}} BIENVENIDO/A A
+    </h1>
+    <h2 class="titulo-clinica">
+      CLINICA ONLINE
+    </h2>
+  </div>
+
+  <!-- Contenedor de botones principales -->
+  <div class="contenedor-botones" @fadeInUp>
+    <button 
+      *ngFor="let boton of obtenerConfiguracionBotones(); trackBy: seguimientoPorRuta"
+      class="boton-principal"
+      [routerLink]="boton.ruta">
+      <i [class]="boton.icono"></i>
+      {{boton.texto}}
+    </button>
+  </div>
+</div>
