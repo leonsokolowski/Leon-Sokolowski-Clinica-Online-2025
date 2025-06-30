@@ -78,6 +78,13 @@ export class AppComponent implements OnInit {
       iconClass: 'fas fa-cogs',
       cssClass: 'btn-admin',
       allowedProfiles: ['admin']
+    },
+    {
+      route: '/estadisticas',
+      text: 'Estadísticas',
+      iconClass: 'fas fa-chart-bar',
+      cssClass: 'btn-statistics',
+      allowedProfiles: ['admin']
     }
   ];
 

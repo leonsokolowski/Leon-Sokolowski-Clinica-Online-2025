@@ -16,5 +16,5 @@ logo de la clínica, título del informe y fecha de emisión."
 Animaciones	"Se debe agregar al menos 2, como mínimo, animaciones de transición entre componentes al navegar
 la aplicación."
 
-
-npm install react-router-dom
+npm install chart.js jspdf html2canvas
+npm install @types/chart.js --save-dev

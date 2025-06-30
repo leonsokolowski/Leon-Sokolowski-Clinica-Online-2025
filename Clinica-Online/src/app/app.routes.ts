@@ -87,5 +87,11 @@ export const routes: Routes = [
     title: 'Historia Clínica'
   },
 
+  {
+    path: 'estadisticas',
+    loadComponent: () => import('./pages/estadisticas/estadisticas.component').then(m => m.EstadisticasComponent),
+    title: 'Estadísticas'
+  },
+
   { path: '**', component: ErrorComponent, title: 'ERROR' }
 ];

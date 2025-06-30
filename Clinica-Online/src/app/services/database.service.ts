@@ -1041,4 +1041,149 @@ async obtenerTurnosConDetalles(tipoUsuario: 'paciente' | 'especialista', usuario
 
   return data || [];
 }
+
+// nuevos metodos
+async registrarLogIngreso(usuarioId: number, email: string): Promise<void> {
+  const { data, error } = await this.sb.supabase
+    .from('logs_ingreso')
+    .insert({
+      usuario_id: usuarioId,
+      email: email,
+      fecha_ingreso: new Date().toISOString(),
+      timestamp: new Date().toISOString()
+    });
+
+  if (error) {
+    console.error('Error al registrar log de ingreso:', error);
+    throw error;
+  }
+
+  console.log('Log de ingreso registrado exitosamente:', data);
+}
+
+async obtenerLogsIngreso(fechaInicio?: string, fechaFin?: string): Promise<any[]> {
+  let query = this.sb.supabase
+    .from('logs_ingreso')
+    .select(`
+      *,
+      usuario:usuario_id (
+        nombre,
+        apellido,
+        email,
+        perfil
+      )
+    `);
+
+  if (fechaInicio && fechaFin) {
+    query = query
+      .gte('fecha_ingreso', fechaInicio)
+      .lte('fecha_ingreso', fechaFin);
+  }
+
+  const { data, error } = await query
+    .order('fecha_ingreso', { ascending: false });
+
+  if (error) {
+    console.error('Error al obtener logs de ingreso:', error);
+    throw error;
+  }
+
+  return data || [];
+}
+
+// Para estadísticas de turnos por especialidad
+async obtenerTurnosPorEspecialidad(fechaInicio?: string, fechaFin?: string): Promise<any[]> {
+  let query = this.sb.supabase
+    .from('turnos')
+    .select('especialidad, estado, fecha');
+
+  if (fechaInicio && fechaFin) {
+    query = query
+      .gte('fecha', fechaInicio)
+      .lte('fecha', fechaFin);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Error al obtener turnos por especialidad:', error);
+    throw error;
+  }
+
+  return data || [];
+}
+
+// Para estadísticas de turnos por día
+async obtenerTurnosPorDia(fechaInicio?: string, fechaFin?: string): Promise<any[]> {
+  let query = this.sb.supabase
+    .from('turnos')
+    .select('fecha, estado, especialidad');
+
+  if (fechaInicio && fechaFin) {
+    query = query
+      .gte('fecha', fechaInicio)
+      .lte('fecha', fechaFin);
+  }
+
+  const { data, error } = await query
+    .order('fecha', { ascending: true });
+
+  if (error) {
+    console.error('Error al obtener turnos por día:', error);
+    throw error;
+  }
+
+  return data || [];
+}
+
+// Para turnos solicitados por médico en un lapso de tiempo
+async obtenerTurnosPorMedico(especialistaId: number, fechaInicio: string, fechaFin: string): Promise<any[]> {
+  const { data, error } = await this.sb.supabase
+    .from('turnos')
+    .select(`
+      *,
+      especialista:especialista_id (
+        nombre,
+        apellido,
+        especialidades
+      )
+    `)
+    .eq('especialista_id', especialistaId)
+    .gte('fecha', fechaInicio)
+    .lte('fecha', fechaFin)
+    .order('fecha', { ascending: true });
+
+  if (error) {
+    console.error('Error al obtener turnos por médico:', error);
+    throw error;
+  }
+
+  return data || [];
+}
+
+// Para turnos finalizados por médico en un lapso de tiempo
+async obtenerTurnosFinalizadosPorMedico(especialistaId: number, fechaInicio: string, fechaFin: string): Promise<any[]> {
+  const { data, error } = await this.sb.supabase
+    .from('turnos')
+    .select(`
+      *,
+      especialista:especialista_id (
+        nombre,
+        apellido,
+        especialidades
+      )
+    `)
+    .eq('especialista_id', especialistaId)
+    .eq('estado', 'finalizado')
+    .gte('fecha', fechaInicio)
+    .lte('fecha', fechaFin)
+    .order('fecha', { ascending: true });
+
+  if (error) {
+    console.error('Error al obtener turnos finalizados por médico:', error);
+    throw error;
+  }
+
+  return data || [];
+}
 }

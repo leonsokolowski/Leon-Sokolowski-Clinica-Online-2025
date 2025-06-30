@@ -191,6 +191,16 @@ body {
   background: linear-gradient(135deg, #EC971F 0%, #F0AD4E 100%);
 }
 
+.btn-statistics {
+  background: linear-gradient(135deg, #9B59B6 0%, #8E44AD 100%);
+  color: white;
+}
+
+.btn-statistics:hover {
+  box-shadow: 0 4px 15px rgba(142, 68, 173, 0.3);
+  background: linear-gradient(135deg, #8E44AD 0%, #9B59B6 100%);
+}
+
 /* Botón Administración */
 .btn-admin {
   background: linear-gradient(135deg, #508AA8 0%, #031927 100%);
