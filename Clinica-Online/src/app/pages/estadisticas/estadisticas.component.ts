@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import Chart from 'chart.js/auto';
 import jsPDF from 'jspdf';
 import { DatabaseService } from '../../services/database.service';
+import { FormsModule } from '@angular/forms';
 
 interface Turno {
   id: number;
@@ -30,7 +31,7 @@ interface LogIngreso {
 @Component({
   selector: 'app-estadisticas',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './estadisticas.component.html',
   styleUrl: './estadisticas.component.css'
 })
@@ -42,6 +43,9 @@ export class EstadisticasComponent implements OnInit {
   turnosPorMedico = signal<Record<string, number>>({});
   turnosFinalizados = signal<Record<string, number>>({});
   logsIngresoPorDia = signal<Record<string, number>>({});
+
+  filtroDesde: string = '2025-01-01';
+  filtroHasta: string = '2025-12-31'; 
 
   ngOnInit(): void {
     this.cargarDatos();
@@ -58,36 +62,35 @@ export class EstadisticasComponent implements OnInit {
       // Tipamos correctamente el resultado
       const turnos: Turno[] = turnosResp.data || [];
       const logs: LogIngreso[] = logsResp || [];
+      
+      console.log('Logs recibidos:', logs); // Debug
       this.logs.set(logs);
 
       // Agrupamos por especialidad y por día
       this.turnosPorEspecialidad.set(this.agrupar(turnos, 'especialidad'));
       this.turnosPorDia.set(this.agrupar(turnos, 'fecha'));
 
-      // Procesamos logs de ingreso por día - CORREGIDO: extraer solo la fecha
-      const logsConFechaSolo = logs.map(log => ({
-        ...log,
-        fecha_solo: this.extraerFecha(log.timestamp || log.fecha_ingreso)
-      }));
-      this.logsIngresoPorDia.set(this.agrupar(logsConFechaSolo, 'fecha_solo'));
-
-      // Filtro de fechas (puede venir de inputs en el futuro)
-      const fechaInicio = '2025-01-01';
-      const fechaFin = '2025-12-31';
 
       const enRango = turnos.filter((t: Turno) =>
-        t.fecha >= fechaInicio && t.fecha <= fechaFin
+        t.fecha >= this.filtroDesde && t.fecha <= this.filtroHasta
       );
 
-      // CORREGIDO: Agrupamos turnos por médico con nombres
+      // Agrupamos turnos por médico con nombres
       this.turnosPorMedico.set(await this.agruparPorMedicoConNombres(enRango));
 
-      // CORREGIDO: Agrupamos turnos finalizados por médico con nombres
+      // Agrupamos turnos finalizados por médico con nombres
       this.turnosFinalizados.set(
         await this.agruparPorMedicoConNombres(
           enRango.filter((t: Turno) => t.estado === 'finalizado')
         )
       );
+
+      const logsFiltrados = logs.filter(log => {
+        const fecha = this.extraerFecha(log.timestamp || log.fecha_ingreso);
+        return fecha >= this.filtroDesde && fecha <= this.filtroHasta;
+      });
+
+      this.logsIngresoPorDia.set(this.agruparLogsPorDiaMejorado(logsFiltrados));
 
       // Dibujamos los gráficos
       this.renderCharts();
@@ -96,13 +99,77 @@ export class EstadisticasComponent implements OnInit {
     }
   }
 
-  // NUEVO: Método para extraer solo la fecha de un timestamp
+  // Método mejorado para extraer solo la fecha de un timestamp
   extraerFecha(timestamp: string): string {
-    const fecha = new Date(timestamp);
-    return fecha.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+    if (!timestamp) return new Date().toISOString().split('T')[0];
+    
+    try {
+      const fecha = new Date(timestamp);
+      // Verificar si la fecha es válida
+      if (isNaN(fecha.getTime())) {
+        console.warn('Fecha inválida:', timestamp);
+        return new Date().toISOString().split('T')[0];
+      }
+      
+      return fecha.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+    } catch (error) {
+      console.error('Error al procesar fecha:', timestamp, error);
+      return new Date().toISOString().split('T')[0];
+    }
   }
 
-  // NUEVO: Método para agrupar turnos por médico con nombres
+  // Método mejorado para agrupar logs por día
+  agruparLogsPorDiaMejorado(logs: LogIngreso[]): Record<string, number> {
+  const agrupado: Record<string, number> = {};
+  
+  console.log('Procesando', logs.length, 'logs para agrupar por día');
+  
+  logs.forEach((log, index) => {
+    // ✅ CAMBIO: Siempre usar timestamp primero
+    const fechaCompleta = log.timestamp || log.fecha_ingreso;
+    
+    if (!fechaCompleta) {
+      console.warn(`Log ${index} sin fecha válida:`, log);
+      return;
+    }
+    
+    const fechaSolo = this.extraerFecha(fechaCompleta);
+    
+    console.log(`Log ${index}:`, { 
+      fechaCompleta, 
+      fechaSolo, 
+      usuario: log.usuario?.nombre 
+    });
+    
+    agrupado[fechaSolo] = (agrupado[fechaSolo] || 0) + 1;
+  });
+
+  console.log('Logs agrupados por día (resultado final):', agrupado);
+  
+  return agrupado; // ✅ CAMBIO: Remover completarDiasFaltantes() ya que puede confundir
+}
+
+  // Nuevo método para completar días faltantes entre fechas
+  completarDiasFaltantes(datos: Record<string, number>): Record<string, number> {
+    const fechas = Object.keys(datos).sort();
+    if (fechas.length === 0) return datos;
+
+    const fechaInicio = new Date(fechas[0]);
+    const fechaFin = new Date(fechas[fechas.length - 1]);
+    const resultado: Record<string, number> = {};
+
+    // Iterar día por día desde la primera hasta la última fecha
+    const fechaActual = new Date(fechaInicio);
+    while (fechaActual <= fechaFin) {
+      const fechaStr = fechaActual.toISOString().split('T')[0];
+      resultado[fechaStr] = datos[fechaStr] || 0;
+      fechaActual.setDate(fechaActual.getDate() + 1);
+    }
+
+    return resultado;
+  }
+
+  // Método para agrupar turnos por médico con nombres
   async agruparPorMedicoConNombres(turnos: Turno[]): Promise<Record<string, number>> {
     const agrupado: Record<string, number> = {};
     
@@ -200,7 +267,7 @@ export class EstadisticasComponent implements OnInit {
     const ctx = document.getElementById(id) as HTMLCanvasElement;
     if (!ctx) return;
 
-    // MEJORADO: Ordenar datos por fecha si es el gráfico de logs por día
+    // Ordenar datos por fecha si es el gráfico de logs por día o turnos por día
     let labels = Object.keys(datos);
     let valores = Object.values(datos);
 
@@ -251,54 +318,86 @@ export class EstadisticasComponent implements OnInit {
   }
 
   crearTablaLogs() {
-    const contenedor = document.getElementById('tablaLogs');
-    if (!contenedor) return;
+  const contenedor = document.getElementById('tablaLogs');
+  if (!contenedor) return;
 
-    const logs = this.logs();
-    if (logs.length === 0) {
-      contenedor.innerHTML = '<p>No hay logs de ingreso disponibles</p>';
-      return;
+  const logs = this.logs();
+  if (logs.length === 0) {
+    contenedor.innerHTML = '<p>No hay logs de ingreso disponibles</p>';
+    return;
+  }
+
+  let html = `
+    <div class="tabla-logs">
+      <h3>Últimos ingresos al sistema</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Perfil</th>
+            <th>Email</th>
+            <th>Fecha y Hora</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  // ✅ CAMBIO: Ordenar logs por timestamp antes de mostrar
+  const logsOrdenados = [...logs].sort((a, b) => {
+    const fechaA = new Date(a.timestamp || a.fecha_ingreso).getTime();
+    const fechaB = new Date(b.timestamp || b.fecha_ingreso).getTime();
+    return fechaB - fechaA; // Más recientes primero
+  });
+
+  logsOrdenados.slice(0, 20).forEach(log => {
+    // ✅ CAMBIO: Priorizar timestamp y formatear correctamente para Argentina
+    const fechaCompleta = log.timestamp || log.fecha_ingreso;
+    const fecha = new Date(fechaCompleta);
+    
+    // ✅ CAMBIO: Formatear explícitamente para Argentina (UTC-3)
+    const fechaHoraFormateada = fecha.toLocaleString('es-AR', {
+      timeZone: 'America/Argentina/Buenos_Aires',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+    
+    html += `
+      <tr>
+        <td>${log.usuario?.nombre || 'N/A'} ${log.usuario?.apellido || ''}</td>
+        <td><span class="badge badge-${log.usuario?.perfil || 'default'}">${log.usuario?.perfil || 'N/A'}</span></td>
+        <td>${log.email}</td>
+        <td>${fechaHoraFormateada}</td>
+      </tr>
+    `;
+  });
+
+  html += `
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  contenedor.innerHTML = html;
+}
+
+  agregarGraficoAPdf(doc: jsPDF, canvasId: string, yPos: number): number {
+    const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
+    if (!canvas) return yPos;
+
+    const imgData = canvas.toDataURL('image/png');
+
+    // Si estamos muy abajo en la hoja, agregar nueva página
+    if (yPos > 200) {
+      doc.addPage();
+      yPos = 20;
     }
 
-    let html = `
-      <div class="tabla-logs">
-        <h3>Últimos ingresos al sistema</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Usuario</th>
-              <th>Perfil</th>
-              <th>Email</th>
-              <th>Fecha</th>
-              <th>Hora</th>
-            </tr>
-          </thead>
-          <tbody>
-    `;
-
-    logs.slice(0, 20).forEach(log => {
-      const fecha = new Date(log.timestamp);
-      const fechaFormateada = fecha.toLocaleDateString('es-AR');
-      const horaFormateada = fecha.toLocaleTimeString('es-AR');
-      
-      html += `
-        <tr>
-          <td>${log.usuario?.nombre || 'N/A'} ${log.usuario?.apellido || ''}</td>
-          <td><span class="badge badge-${log.usuario?.perfil || 'default'}">${log.usuario?.perfil || 'N/A'}</span></td>
-          <td>${log.email}</td>
-          <td>${fechaFormateada}</td>
-          <td>${horaFormateada}</td>
-        </tr>
-      `;
-    });
-
-    html += `
-          </tbody>
-        </table>
-      </div>
-    `;
-
-    contenedor.innerHTML = html;
+    doc.addImage(imgData, 'PNG', 20, yPos, 170, 80); // ancho 170mm para casi todo el ancho de la página A4
+    return yPos + 90;
   }
 
   async descargarPDF() {
@@ -318,6 +417,7 @@ export class EstadisticasComponent implements OnInit {
     doc.setFontSize(14);
     doc.text('1. Turnos por especialidad:', 20, yPosition);
     yPosition += 10;
+    yPosition = this.agregarGraficoAPdf(doc, 'chartEspecialidad', yPosition);
 
     const especialidades = this.turnosPorEspecialidad();
     for (const esp in especialidades) {
@@ -341,8 +441,10 @@ export class EstadisticasComponent implements OnInit {
       yPosition += 8;
     }
     yPosition += 10;
+    yPosition = this.agregarGraficoAPdf(doc, 'chartPorDia', yPosition);
 
-    // 3. Turnos por médico - CORREGIDO: ya muestra nombres
+    
+    // 3. Turnos por médico
     doc.setFontSize(14);
     doc.text('3. Turnos solicitados por médico:', 20, yPosition);
     yPosition += 10;
@@ -354,8 +456,10 @@ export class EstadisticasComponent implements OnInit {
       yPosition += 8;
     }
     yPosition += 10;
+    yPosition = this.agregarGraficoAPdf(doc, 'chartMedico', yPosition);
 
-    // 4. Turnos finalizados por médico - CORREGIDO: ya muestra nombres
+
+    // 4. Turnos finalizados por médico
     doc.setFontSize(14);
     doc.text('4. Turnos finalizados por médico:', 20, yPosition);
     yPosition += 10;
@@ -367,8 +471,9 @@ export class EstadisticasComponent implements OnInit {
       yPosition += 8;
     }
     yPosition += 15;
+    yPosition = this.agregarGraficoAPdf(doc, 'chartFinalizados', yPosition);
 
-    // 5. Logs de ingreso por día - NUEVO: mostrar estadísticas por día
+    // 5. Logs de ingreso por día
     if (yPosition > 250) {
       doc.addPage();
       yPosition = 20;
@@ -387,6 +492,7 @@ export class EstadisticasComponent implements OnInit {
       yPosition += 8;
     }
     yPosition += 15;
+    yPosition = this.agregarGraficoAPdf(doc, 'chartLogsIngreso', yPosition);
 
     // 6. Últimos ingresos detallados
     if (yPosition > 250) {
@@ -405,7 +511,8 @@ export class EstadisticasComponent implements OnInit {
         yPosition = 20;
       }
 
-      const fecha = new Date(log.timestamp);
+      const fechaCompleta = log.timestamp || log.fecha_ingreso;
+      const fecha = new Date(fechaCompleta);
       const fechaHora = fecha.toLocaleString('es-AR');
       
       doc.setFontSize(10);

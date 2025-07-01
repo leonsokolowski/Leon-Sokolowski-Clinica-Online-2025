@@ -198,7 +198,10 @@ export class AuthService {
     }
   }
 
-  private async registrarIngreso(email: string, usuarioId?: number): Promise<void> {
+  // Cambios necesarios en auth.service.ts
+
+// ✅ CORRECCIÓN 1: Método registrarIngreso() (línea ~209)
+private async registrarIngreso(email: string, usuarioId?: number): Promise<void> {
   try {
     const ahora = new Date();
     
@@ -207,7 +210,7 @@ export class AuthService {
       .insert({
         usuario_id: usuarioId,
         email: email,
-        fecha_ingreso: ahora.toISOString().split('T')[0], // YYYY-MM-DD
+        fecha_ingreso: ahora.toISOString(), // ✅ CAMBIO: Quitar .split('T')[0]
         timestamp: ahora.toISOString(),
       });
 

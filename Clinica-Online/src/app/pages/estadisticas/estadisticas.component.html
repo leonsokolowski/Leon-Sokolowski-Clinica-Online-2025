@@ -18,16 +18,29 @@
       <canvas id="chartPorDia"></canvas>
     </div>
 
+    <div class="filtro-fecha">
+      <label>Desde:</label>
+      <input type="date" [(ngModel)]="filtroDesde" />
+      <label>Hasta:</label>
+      <input type="date" [(ngModel)]="filtroHasta" />
+      <button (click)="cargarDatos()">Aplicar</button>
+    </div>
     <!-- Gráfico de Turnos por Médico -->
     <div class="grafico-container">
       <canvas id="chartMedico"></canvas>
     </div>
-
     <!-- Gráfico de Turnos Finalizados -->
     <div class="grafico-container">
       <canvas id="chartFinalizados"></canvas>
     </div>
 
+    <div class="filtro-fecha">
+      <label>Desde:</label>
+      <input type="date" [(ngModel)]="filtroDesde" />
+      <label>Hasta:</label>
+      <input type="date" [(ngModel)]="filtroHasta" />
+      <button (click)="cargarDatos()">Aplicar</button>
+    </div>
     <!-- Nuevo: Gráfico de Ingresos por Día -->
     <div class="grafico-container">
       <canvas id="chartLogsIngreso"></canvas>

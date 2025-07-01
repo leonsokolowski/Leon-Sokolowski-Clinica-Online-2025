@@ -1118,34 +1118,16 @@ async getLogsIngresoConUsuarios(): Promise<any[]> {
         perfil
       )
     `)
-    .order('fecha_ingreso', { ascending: false })
-    .limit(50); // Limitamos a los últimos 50 ingresos
+    .order('timestamp', { ascending: false }) // Cambiado de fecha_ingreso a timestamp
+    .limit(100); // Aumentado el límite para obtener más registros
 
   if (error) {
     console.error('Error al obtener logs con usuarios:', error);
     return [];
   }
 
+  console.log('Datos obtenidos de logs_ingreso:', data); // Debug temporal
   return data || [];
-}
-
-// Método para insertar log de ingreso (usar cuando el usuario haga login)
-async insertarLogIngreso(usuarioId: number, email: string): Promise<void> {
-  const { data, error } = await this.sb.supabase
-    .from('logs_ingreso')
-    .insert({
-      usuario_id: usuarioId,
-      email: email,
-      fecha_ingreso: new Date().toISOString().split('T')[0], // Solo fecha
-      timestamp: new Date().toISOString() // Fecha y hora completa
-    });
-
-  if (error) {
-    console.error('Error al insertar log de ingreso:', error);
-    throw error;
-  }
-
-  console.log('Log de ingreso registrado:', data);
 }
 
 }
