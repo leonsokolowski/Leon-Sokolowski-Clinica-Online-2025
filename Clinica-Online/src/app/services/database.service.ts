@@ -24,6 +24,24 @@ export class DatabaseService {
 
     return data as Usuario | null;
   }
+
+  async obtenerNombreCompletoUsuarioPorId(id: number): Promise<string | null> {
+    const { data, error } = await this.sb.supabase
+      .from('usuarios')
+      .select('nombre, apellido')
+      .eq('id', id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error al obtener usuario:', error);
+      throw error;
+    }
+
+    if (!data) return null;
+
+    return `${data.nombre} ${data.apellido}`;
+  }
+  
   //Se usa en los registros
   async verificarUsuarioExistente(
     email: string,
@@ -1042,27 +1060,54 @@ async obtenerTurnosConDetalles(tipoUsuario: 'paciente' | 'especialista', usuario
   return data || [];
 }
 
-// nuevos metodos
-async registrarLogIngreso(usuarioId: number, email: string): Promise<void> {
-  const { data, error } = await this.sb.supabase
+// 1. Logs de ingreso
+getLogsIngreso() {
+  return this.sb.supabase
     .from('logs_ingreso')
-    .insert({
-      usuario_id: usuarioId,
-      email: email,
-      fecha_ingreso: new Date().toISOString(),
-      timestamp: new Date().toISOString()
-    });
-
-  if (error) {
-    console.error('Error al registrar log de ingreso:', error);
-    throw error;
-  }
-
-  console.log('Log de ingreso registrado exitosamente:', data);
+    .select('usuario_id, email, fecha_ingreso, timestamp');
 }
 
-async obtenerLogsIngreso(fechaInicio?: string, fechaFin?: string): Promise<any[]> {
-  let query = this.sb.supabase
+// 2. Turnos por especialidad
+getTurnosPorEspecialidad() {
+  return this.sb.supabase
+    .from('turnos')
+    .select('especialidad, count:id')
+}
+
+// 3. Turnos por día
+getTurnosPorDia() {
+  return this.sb.supabase
+    .from('turnos')
+    .select('fecha, count:id')
+}
+
+// 4. Turnos por médico en rango de fechas
+getTurnosPorMedico(fechaInicio: string, fechaFin: string) {
+  return this.sb.supabase
+    .from('turnos')
+    .select('especialista_id, count:id')
+    .gte('fecha', fechaInicio)
+    .lte('fecha', fechaFin)
+}
+
+// 5. Turnos finalizados por médico en rango de fechas
+getTurnosFinalizadosPorMedico(fechaInicio: string, fechaFin: string) {
+  return this.sb.supabase
+    .from('turnos')
+    .select('especialista_id, count:id')
+    .eq('estado', 'finalizado')
+    .gte('fecha', fechaInicio)
+    .lte('fecha', fechaFin)
+}
+
+getTodosLosTurnos() {
+  return this.sb.supabase
+    .from('turnos')
+    .select('id, fecha, estado, especialidad, especialista_id');
+}
+
+async getLogsIngresoConUsuarios(): Promise<any[]> {
+  const { data, error } = await this.sb.supabase
     .from('logs_ingreso')
     .select(`
       *,
@@ -1072,118 +1117,35 @@ async obtenerLogsIngreso(fechaInicio?: string, fechaFin?: string): Promise<any[]
         email,
         perfil
       )
-    `);
-
-  if (fechaInicio && fechaFin) {
-    query = query
-      .gte('fecha_ingreso', fechaInicio)
-      .lte('fecha_ingreso', fechaFin);
-  }
-
-  const { data, error } = await query
-    .order('fecha_ingreso', { ascending: false });
-
-  if (error) {
-    console.error('Error al obtener logs de ingreso:', error);
-    throw error;
-  }
-
-  return data || [];
-}
-
-// Para estadísticas de turnos por especialidad
-async obtenerTurnosPorEspecialidad(fechaInicio?: string, fechaFin?: string): Promise<any[]> {
-  let query = this.sb.supabase
-    .from('turnos')
-    .select('especialidad, estado, fecha');
-
-  if (fechaInicio && fechaFin) {
-    query = query
-      .gte('fecha', fechaInicio)
-      .lte('fecha', fechaFin);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error('Error al obtener turnos por especialidad:', error);
-    throw error;
-  }
-
-  return data || [];
-}
-
-// Para estadísticas de turnos por día
-async obtenerTurnosPorDia(fechaInicio?: string, fechaFin?: string): Promise<any[]> {
-  let query = this.sb.supabase
-    .from('turnos')
-    .select('fecha, estado, especialidad');
-
-  if (fechaInicio && fechaFin) {
-    query = query
-      .gte('fecha', fechaInicio)
-      .lte('fecha', fechaFin);
-  }
-
-  const { data, error } = await query
-    .order('fecha', { ascending: true });
-
-  if (error) {
-    console.error('Error al obtener turnos por día:', error);
-    throw error;
-  }
-
-  return data || [];
-}
-
-// Para turnos solicitados por médico en un lapso de tiempo
-async obtenerTurnosPorMedico(especialistaId: number, fechaInicio: string, fechaFin: string): Promise<any[]> {
-  const { data, error } = await this.sb.supabase
-    .from('turnos')
-    .select(`
-      *,
-      especialista:especialista_id (
-        nombre,
-        apellido,
-        especialidades
-      )
     `)
-    .eq('especialista_id', especialistaId)
-    .gte('fecha', fechaInicio)
-    .lte('fecha', fechaFin)
-    .order('fecha', { ascending: true });
+    .order('fecha_ingreso', { ascending: false })
+    .limit(50); // Limitamos a los últimos 50 ingresos
 
   if (error) {
-    console.error('Error al obtener turnos por médico:', error);
-    throw error;
+    console.error('Error al obtener logs con usuarios:', error);
+    return [];
   }
 
   return data || [];
 }
 
-// Para turnos finalizados por médico en un lapso de tiempo
-async obtenerTurnosFinalizadosPorMedico(especialistaId: number, fechaInicio: string, fechaFin: string): Promise<any[]> {
+// Método para insertar log de ingreso (usar cuando el usuario haga login)
+async insertarLogIngreso(usuarioId: number, email: string): Promise<void> {
   const { data, error } = await this.sb.supabase
-    .from('turnos')
-    .select(`
-      *,
-      especialista:especialista_id (
-        nombre,
-        apellido,
-        especialidades
-      )
-    `)
-    .eq('especialista_id', especialistaId)
-    .eq('estado', 'finalizado')
-    .gte('fecha', fechaInicio)
-    .lte('fecha', fechaFin)
-    .order('fecha', { ascending: true });
+    .from('logs_ingreso')
+    .insert({
+      usuario_id: usuarioId,
+      email: email,
+      fecha_ingreso: new Date().toISOString().split('T')[0], // Solo fecha
+      timestamp: new Date().toISOString() // Fecha y hora completa
+    });
 
   if (error) {
-    console.error('Error al obtener turnos finalizados por médico:', error);
+    console.error('Error al insertar log de ingreso:', error);
     throw error;
   }
 
-  return data || [];
+  console.log('Log de ingreso registrado:', data);
 }
+
 }

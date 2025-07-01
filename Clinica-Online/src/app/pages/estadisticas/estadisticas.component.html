@@ -1,1 +1,41 @@
-<p>estadisticas works!</p>
+<div class="estadisticas-container">
+  <div class="header">
+    <h2>Estadísticas de la Clínica</h2>
+    <button class="btn-descargar" (click)="descargarPDF()">
+      <i class="icon-download"></i>
+      Descargar PDF
+    </button>
+  </div>
+
+  <div class="graficos-grid">
+    <!-- Gráfico de Turnos por Especialidad -->
+    <div class="grafico-container">
+      <canvas id="chartEspecialidad"></canvas>
+    </div>
+
+    <!-- Gráfico de Turnos por Día -->
+    <div class="grafico-container">
+      <canvas id="chartPorDia"></canvas>
+    </div>
+
+    <!-- Gráfico de Turnos por Médico -->
+    <div class="grafico-container">
+      <canvas id="chartMedico"></canvas>
+    </div>
+
+    <!-- Gráfico de Turnos Finalizados -->
+    <div class="grafico-container">
+      <canvas id="chartFinalizados"></canvas>
+    </div>
+
+    <!-- Nuevo: Gráfico de Ingresos por Día -->
+    <div class="grafico-container">
+      <canvas id="chartLogsIngreso"></canvas>
+    </div>
+  </div>
+
+  <!-- Nueva: Tabla detallada de logs -->
+  <div class="logs-section">
+    <div id="tablaLogs"></div>
+  </div>
+</div>

@@ -198,33 +198,65 @@ export class AuthService {
     }
   }
 
+  private async registrarIngreso(email: string, usuarioId?: number): Promise<void> {
+  try {
+    const ahora = new Date();
+    
+    const { error } = await this.sb.supabase
+      .from('logs_ingreso')
+      .insert({
+        usuario_id: usuarioId,
+        email: email,
+        fecha_ingreso: ahora.toISOString().split('T')[0], // YYYY-MM-DD
+        timestamp: ahora.toISOString(),
+      });
+
+    if (error) {
+      console.error('Error al registrar ingreso:', error);
+      // No lanzar error para no interrumpir el login
+    }
+  } catch (error) {
+    console.error('Error al registrar ingreso:', error);
+  }
+}
+
   //Iniciar sesión
   async iniciarSesion(correo: string, contraseña: string) {
-    const { data, error } = await this.sb.supabase.auth.signInWithPassword({
-      email: correo, 
-      password: contraseña
-    });
-    
-    if (error) {
-      console.error('Error al iniciar sesión:', error);
-      return { data, error };
-    }
-
-    // Verificar si puede acceder al home después del login
-    if (data.user) {
-      const puedeAccederHome = await this.verificarAccesoHome(data.user.email!);
-      
-      if (puedeAccederHome) {
-        // Redirigir al home si puede acceder
-        setTimeout(() => {
-          this.router.navigateByUrl("/home");
-        }, 100);
-      }
-    }
-    
-    console.log('Inicio de sesión:', data, error);
+  const { data, error } = await this.sb.supabase.auth.signInWithPassword({
+    email: correo, 
+    password: contraseña
+  });
+  
+  if (error) {
+    console.error('Error al iniciar sesión:', error);
     return { data, error };
   }
+
+  // Verificar si puede acceder al home después del login
+  if (data.user) {
+    // NUEVO: Obtener datos completos del usuario para el log
+    const { data: userData } = await this.sb.supabase
+      .from('usuarios')
+      .select('id, email, perfil, habilitado')
+      .eq('email', data.user.email!)
+      .single();
+
+    // NUEVO: Registrar el ingreso
+    await this.registrarIngreso(data.user.email!, userData?.id);
+
+    const puedeAccederHome = await this.verificarAccesoHome(data.user.email!);
+    
+    if (puedeAccederHome) {
+      // Redirigir al home si puede acceder
+      setTimeout(() => {
+        this.router.navigateByUrl("/home");
+      }, 100);
+    }
+  }
+  
+  console.log('Inicio de sesión:', data, error);
+  return { data, error };
+}
 
   //Cerrar sesión
   async cerrarSesion() {
