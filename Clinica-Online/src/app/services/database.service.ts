@@ -991,36 +991,6 @@ async calificarAtencion(turnoId: number, puntaje: number, comentarioAtencion: st
   console.log('Atención calificada exitosamente:', data);
 }
 
-async obtenerTurnoCompleto(turnoId: number): Promise<any> {
-  const { data, error } = await this.sb.supabase
-    .from('turnos')
-    .select(`
-      *,
-      paciente:paciente_id (
-        nombre,
-        apellido,
-        obra_social,
-        imagen_perfil_1,
-        imagen_perfil_2
-      ),
-      especialista:especialista_id (
-        nombre,
-        apellido,
-        especialidades,
-        imagen_perfil_1
-      )
-    `)
-    .eq('id', turnoId)
-    .single();
-
-  if (error) {
-    console.error('Error al obtener turno completo:', error);
-    throw error;
-  }
-
-  return data;
-}
-
 async obtenerTurnosConDetalles(tipoUsuario: 'paciente' | 'especialista', usuarioId: number): Promise<any[]> {
   let query = this.sb.supabase
     .from('turnos')
@@ -1060,28 +1030,24 @@ async obtenerTurnosConDetalles(tipoUsuario: 'paciente' | 'especialista', usuario
   return data || [];
 }
 
-// 1. Logs de ingreso
 getLogsIngreso() {
   return this.sb.supabase
     .from('logs_ingreso')
     .select('usuario_id, email, fecha_ingreso, timestamp');
 }
 
-// 2. Turnos por especialidad
 getTurnosPorEspecialidad() {
   return this.sb.supabase
     .from('turnos')
     .select('especialidad, count:id')
 }
 
-// 3. Turnos por día
 getTurnosPorDia() {
   return this.sb.supabase
     .from('turnos')
     .select('fecha, count:id')
 }
 
-// 4. Turnos por médico en rango de fechas
 getTurnosPorMedico(fechaInicio: string, fechaFin: string) {
   return this.sb.supabase
     .from('turnos')
@@ -1090,7 +1056,6 @@ getTurnosPorMedico(fechaInicio: string, fechaFin: string) {
     .lte('fecha', fechaFin)
 }
 
-// 5. Turnos finalizados por médico en rango de fechas
 getTurnosFinalizadosPorMedico(fechaInicio: string, fechaFin: string) {
   return this.sb.supabase
     .from('turnos')
@@ -1118,15 +1083,15 @@ async getLogsIngresoConUsuarios(): Promise<any[]> {
         perfil
       )
     `)
-    .order('timestamp', { ascending: false }) // Cambiado de fecha_ingreso a timestamp
-    .limit(100); // Aumentado el límite para obtener más registros
+    .order('timestamp', { ascending: false }) 
+    .limit(100); 
 
   if (error) {
     console.error('Error al obtener logs con usuarios:', error);
     return [];
   }
 
-  console.log('Datos obtenidos de logs_ingreso:', data); // Debug temporal
+  console.log('Datos obtenidos de logs_ingreso:', data); 
   return data || [];
 }
 
