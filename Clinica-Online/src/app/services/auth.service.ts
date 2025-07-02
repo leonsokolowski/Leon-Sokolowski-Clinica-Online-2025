@@ -58,7 +58,7 @@ export class AuthService {
             
             if (puedeAccederHome) {
               //redigir al home
-              this.router.navigateByUrl("/home");
+              this.router.navigateByUrl("/loading");
             }
           }
         }
@@ -248,13 +248,7 @@ private async registrarIngreso(email: string, usuarioId?: number): Promise<void>
     await this.registrarIngreso(data.user.email!, userData?.id);
 
     const puedeAccederHome = await this.verificarAccesoHome(data.user.email!);
-    
-    if (puedeAccederHome) {
-      // Redirigir al home si puede acceder
-      setTimeout(() => {
-        this.router.navigateByUrl("/home");
-      }, 100);
-    }
+
   }
   
   console.log('Inicio de sesión:', data, error);

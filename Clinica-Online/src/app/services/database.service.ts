@@ -1103,7 +1103,7 @@ getTurnosFinalizadosPorMedico(fechaInicio: string, fechaFin: string) {
 getTodosLosTurnos() {
   return this.sb.supabase
     .from('turnos')
-    .select('id, fecha, estado, especialidad, especialista_id');
+    .select('id, fecha, estado, especialidad, especialista_id, created_at');
 }
 
 async getLogsIngresoConUsuarios(): Promise<any[]> {

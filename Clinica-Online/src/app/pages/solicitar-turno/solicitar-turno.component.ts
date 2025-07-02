@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { Especialista, Paciente, Usuario } from '../../clases/usuario';
 import { DatabaseService } from '../../services/database.service';
 import { AuthService } from '../../services/auth.service';
+import { HorarioFormatoPipe } from '../../pipes/horario-formato.pipe';
+import { FechaCompletaPipe } from '../../pipes/fecha-completa.pipe';
+import { HighlightHoverDirective } from '../../directives/highlight-hover.directive';
 
 interface TurnoInfo {
   especialidad: string;
@@ -15,7 +18,7 @@ interface TurnoInfo {
 @Component({
   selector: 'app-solicitar-turno',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, HorarioFormatoPipe, FechaCompletaPipe, HighlightHoverDirective],
   templateUrl: './solicitar-turno.component.html',
   styleUrls: ['./solicitar-turno.component.css'],
 })
@@ -352,79 +355,7 @@ export class SolicitarTurnoComponent implements OnInit {
       'assets/especialidades/default.png'
     );
   }
-
-  // Formatear fecha para mostrar
-  formatearFechaCompleta(fecha: string): string {
-    const [dia, mes] = fecha.split('/');
-    const meses = [
-      'Enero',
-      'Febrero',
-      'Marzo',
-      'Abril',
-      'Mayo',
-      'Junio',
-      'Julio',
-      'Agosto',
-      'Septiembre',
-      'Octubre',
-      'Noviembre',
-      'Diciembre',
-    ];
-    return `${dia} de ${meses[parseInt(mes) - 1]}`;
-  }
-
-  // Formatear horario para mostrar
-  formatearHorario(hora: string): string {
-    const [horas, minutos] = hora.split(':');
-    const horaNum = parseInt(horas);
-    const ampm = horaNum >= 12 ? 'PM' : 'AM';
-    const hora12 = horaNum % 12 || 12;
-    return `${hora12}:${minutos} ${ampm}`;
-  }
-
-  // Obtener nombre del día
-  private obtenerNombreDia(numeroDia: number): string {
-    const dias = [
-      'Domingo', // 0 - No laborable
-      'Lunes', // 1 - Laborable
-      'Martes', // 2 - Laborable
-      'Miércoles', // 3 - Laborable
-      'Jueves', // 4 - Laborable
-      'Viernes', // 5 - Laborable
-      'Sábado', // 6 - No laborable
-    ];
-    return dias[numeroDia];
-  }
-
-  // Formatear fecha DD/MM
-  private formatearFechaDisplay(fecha: Date): string {
-    const dia = fecha.getDate().toString().padStart(2, '0');
-    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
-    return `${dia}/${mes}`;
-  }
-
-  // Formatear fecha completa YYYY-MM-DD
-  private formatearFechaCompletaInterno(fecha: Date): string {
-    const año = fecha.getFullYear();
-    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
-    const dia = fecha.getDate().toString().padStart(2, '0');
-    return `${año}-${mes}-${dia}`;
-  }
-
-  // Convertir fecha display a completa
-  private convertirFechaDisplayACompleta(fechaDisplay: string): string {
-    const [dia, mes] = fechaDisplay.split('/').map(Number);
-    const año = new Date().getFullYear();
-
-    // Si el mes es menor al actual, asumir que es del próximo año
-    const mesActual = new Date().getMonth() + 1;
-    const añoFinal = mes < mesActual ? año + 1 : año;
-
-    return `${añoFinal}-${mes.toString().padStart(2, '0')}-${dia
-      .toString()
-      .padStart(2, '0')}`;
-  }
-
+  
   // Método para debug - mostrar todos los horarios del especialista
   async debugHorariosEspecialista(especialista: Especialista) {
     console.log('=== DEBUG HORARIOS ESPECIALISTA ===');

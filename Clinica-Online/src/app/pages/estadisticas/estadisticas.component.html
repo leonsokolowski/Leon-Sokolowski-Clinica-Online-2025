@@ -1,7 +1,7 @@
 <div class="estadisticas-container">
   <div class="header">
     <h2>Estadísticas de la Clínica</h2>
-    <button class="btn-descargar" (click)="descargarPDF()">
+    <button class="btn-descargar" mensajePDF (click)="descargarPDF()">
       <i class="icon-download"></i>
       Descargar PDF
     </button>
@@ -18,37 +18,66 @@
       <canvas id="chartPorDia"></canvas>
     </div>
 
+    <!-- Filtro de fechas centrado arriba -->
     <div class="filtro-fecha">
       <label>Desde:</label>
       <input type="date" [(ngModel)]="filtroDesde" />
       <label>Hasta:</label>
       <input type="date" [(ngModel)]="filtroHasta" />
-      <button (click)="cargarDatos()">Aplicar</button>
+      <button (click)="cargarDatos()">Aplicar Filtros</button>
     </div>
+    
     <!-- Gráfico de Turnos por Médico -->
     <div class="grafico-container">
       <canvas id="chartMedico"></canvas>
     </div>
+
     <!-- Gráfico de Turnos Finalizados -->
     <div class="grafico-container">
       <canvas id="chartFinalizados"></canvas>
     </div>
-
-    <div class="filtro-fecha">
-      <label>Desde:</label>
-      <input type="date" [(ngModel)]="filtroDesde" />
-      <label>Hasta:</label>
-      <input type="date" [(ngModel)]="filtroHasta" />
-      <button (click)="cargarDatos()">Aplicar</button>
-    </div>
-    <!-- Nuevo: Gráfico de Ingresos por Día -->
+    
+    <!-- Gráfico de Ingresos por Día -->
     <div class="grafico-container">
       <canvas id="chartLogsIngreso"></canvas>
     </div>
   </div>
 
-  <!-- Nueva: Tabla detallada de logs -->
+  <!-- Sección de logs mejorada -->
   <div class="logs-section">
-    <div id="tablaLogs"></div>
+    <div class="logs-header">
+      <h3>Últimos ingresos al sistema</h3>
+    </div>
+    <div class="tabla-container">
+      <table class="tabla-logs">
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Perfil</th>
+            <th>Email</th>
+            <th>Fecha y Hora</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Aquí van tus datos dinámicos -->
+          <!-- Ejemplo de filas para referencia -->
+          <tr *ngFor="let log of logsOrdenados.slice(0, 20)">
+            <td class="usuario-cell">{{ log.usuario.nombre || 'N/A' }} {{ log.usuario.apellido || '' }}</td>
+            <td>
+              <span class="badge" [ngClass]="{
+                'badge-admin': log.usuario.perfil.toLowerCase() === 'admin',
+                'badge-especialista': log.usuario.perfil.toLowerCase() === 'especialista',
+                'badge-paciente': log.usuario.perfil.toLowerCase() === 'paciente',
+                'badge-default': !log.usuario.perfil || !['admin', 'especialista', 'paciente'].includes(log.usuario.perfil.toLowerCase())
+              }">
+                {{ log.usuario.perfil || 'N/A' }}
+              </span>
+            </td>
+            <td class="email-cell">{{ log.email }}</td>
+            <td class="fecha-cell">{{ (log.timestamp || log.fecha_ingreso) | date:'dd/MM/yyyy, HH:mm:ss' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>

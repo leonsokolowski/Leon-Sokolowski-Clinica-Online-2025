@@ -5,11 +5,12 @@ import { Router } from '@angular/router';
 import { Paciente } from '../../clases/usuario';
 import { DatabaseService } from '../../services/database.service';
 import { AuthService } from '../../services/auth.service';
+import { DniFormatoPipe } from '../../pipes/dni-formato.pipe';
 
 @Component({
   selector: 'app-seccion-pacientes',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DniFormatoPipe],
   templateUrl: './seccion-pacientes.component.html',
   styleUrl: './seccion-pacientes.component.css'
 })

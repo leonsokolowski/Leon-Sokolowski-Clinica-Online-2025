@@ -5,6 +5,7 @@ import { Usuario, Especialista, Paciente } from '../../clases/usuario';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { DatabaseService } from '../../services/database.service';
+import { DniFormatoPipe } from '../../pipes/dni-formato.pipe';
 
 interface HorarioEspecialista {
   id?: number;
@@ -25,7 +26,7 @@ interface NuevoHorario {
 @Component({
   selector: 'app-mi-perfil',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterOutlet],
+  imports: [CommonModule, FormsModule, RouterOutlet, DniFormatoPipe],
   templateUrl: './mi-perfil.component.html',
   styleUrls: ['./mi-perfil.component.css']
 })

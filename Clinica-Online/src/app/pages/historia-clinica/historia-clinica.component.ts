@@ -7,11 +7,13 @@ import html2canvas from 'html2canvas';
 import { Paciente } from '../../clases/usuario';
 import { DatabaseService } from '../../services/database.service';
 import { AuthService } from '../../services/auth.service';
+import { DniFormatoPipe } from '../../pipes/dni-formato.pipe';
+import { MensajePDFDirective } from '../../directives/mensaje-pdf.directive';
 
 @Component({
   selector: 'app-historia-clinica',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DniFormatoPipe, MensajePDFDirective],
   templateUrl: './historia-clinica.component.html',
   styleUrl: './historia-clinica.component.css'
 })

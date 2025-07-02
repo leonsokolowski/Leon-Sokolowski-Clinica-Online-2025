@@ -2,11 +2,13 @@ import { Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
 import { LoginComponent } from './pages/login/login.component';
 import { ErrorComponent } from './pages/error/error.component';
+import { LoadingComponent } from './pages/loading/loading.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent, title: 'Ingreso' },
   { path: 'home', component: HomeComponent, title: 'Home' },
+  { path: 'loading', component: LoadingComponent, title: 'Loading' },
   
   // Módulo de Registro (Lazy Loading)
   {

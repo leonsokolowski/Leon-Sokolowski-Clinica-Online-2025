@@ -4,10 +4,12 @@ import { Router } from '@angular/router';
 import { Usuario, Paciente, Especialista } from '../../clases/usuario';
 import { DatabaseService } from '../../services/database.service';
 import { AuthService } from '../../services/auth.service';
+import { DniFormatoPipe } from '../../pipes/dni-formato.pipe';
+
 
 @Component({
   selector: 'app-administracion-especialistas',
-  imports: [CommonModule],
+  imports: [CommonModule, DniFormatoPipe, ],
   templateUrl: './administracion-especialistas.component.html',
   styleUrl: './administracion-especialistas.component.css'
 })

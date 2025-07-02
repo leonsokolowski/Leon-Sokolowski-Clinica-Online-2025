@@ -29,12 +29,12 @@
             <i class="fas fa-file-medical"></i>
             Historia Clínica
           </h1>
-          <h2 class="nombre-paciente">{{ paciente.nombre }} {{ paciente.apellido }}</h2>
+          <h2 class="nombre-paciente" >{{ paciente.nombre }} {{ paciente.apellido }}</h2>
           <div class="datos-basicos">
             <div class="dato-item">
               <i class="fas fa-id-card"></i>
               <span class="dato-label">DNI:</span>
-              <span class="dato-valor">{{ paciente.dni }}</span>
+              <span class="dato-valor">{{ paciente.dni | dniFormato }}</span>
             </div>
             <div class="dato-item">
               <i class="fas fa-birthday-cake"></i>
@@ -54,6 +54,7 @@
       <div class="acciones-header">
         <button 
           class="btn-descargar-pdf" 
+          mensajePDF
           (click)="descargarPDF()" 
           [disabled]="generandoPDF"
           title="Descargar Historia Clínica en PDF">

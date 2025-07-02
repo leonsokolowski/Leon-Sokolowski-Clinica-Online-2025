@@ -5,10 +5,11 @@ import { AuthService } from '../../services/auth.service';
 import { Usuario } from '../../clases/usuario';
 import { CommonModule } from '@angular/common';
 import { trigger, style, transition, animate } from '@angular/animations';
+import { SubrayadoDirective } from '../../directives/subrayado.directive';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, CommonModule],
+  imports: [RouterLink, CommonModule, SubrayadoDirective],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
   animations: [

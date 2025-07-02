@@ -601,13 +601,6 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.btn-aceptar:hover {
-  border-color: var(--primary-medium-blue);
-  background: rgba(80, 138, 168, 0.1);
-  color: var(--primary-medium-blue);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(80, 138, 168, 0.2);
-}
 
 .btn-aceptar:active {
   transform: translateY(1px);

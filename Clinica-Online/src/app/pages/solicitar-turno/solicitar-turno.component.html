@@ -6,6 +6,7 @@
     <button 
       *ngIf="pasoActual > 1 && pasoActual !== 6" 
       class="btn-volver"
+      appHighlightHover
       (click)="volverAtras()"
       [disabled]="cargandoEspecialistas || cargandoFechas || cargandoHorarios">
       ← Volver
@@ -155,7 +156,7 @@
     <h3>Selecciona un Horario</h3>
     <p class="info-seleccion">
       <strong>{{especialistaSeleccionado?.nombreCompleto}}</strong> - {{especialidadSeleccionada | titlecase}}<br>
-      <strong>Fecha:</strong> {{formatearFechaCompleta(fechaSeleccionada)}}
+      <strong>Fecha:</strong> {{fechaSeleccionada | fechaCompleta}}
     </p>
     
     <div class="loading" *ngIf="cargandoHorarios">
@@ -169,7 +170,7 @@
         class="btn-horario"
         (click)="seleccionarHorario(horario)"
         [disabled]="preparandoConfirmacion">
-        {{formatearHorario(horario)}}
+        {{horario | horarioFormato}}
       </button>
     </div>
 
@@ -212,7 +213,7 @@
         
         <div class="campo">
           <strong>Fecha:</strong> 
-          <span>{{formatearFechaCompleta(turnoInfo.fecha)}}, {{formatearHorario(turnoInfo.hora)}}</span>
+          <span>{{turnoInfo.fecha | fechaCompleta}}, {{turnoInfo.hora | horarioFormato}}</span>
         </div>
       </div>
       
@@ -272,12 +273,12 @@
           
           <div class="campo">
             <strong>Fecha y Hora:</strong> 
-            <span>{{formatearFechaCompleta(turnoInfo.fecha)}}, {{formatearHorario(turnoInfo.hora)}}</span>
+            <span>{{turnoInfo.fecha | fechaCompleta}}, {{turnoInfo.hora | horarioFormato}}</span>
           </div>
         </div>
       </div>
       
-      <button class="btn-aceptar" (click)="reiniciarFormulario()">
+      <button class="btn-aceptar" appHighlightHover (click)="reiniciarFormulario()">
         Aceptar
       </button>
     </div>

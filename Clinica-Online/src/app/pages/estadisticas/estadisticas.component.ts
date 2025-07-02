@@ -5,6 +5,7 @@ import Chart from 'chart.js/auto';
 import jsPDF from 'jspdf';
 import { DatabaseService } from '../../services/database.service';
 import { FormsModule } from '@angular/forms';
+import { MensajePDFDirective } from '../../directives/mensaje-pdf.directive';
 
 interface Turno {
   id: number;
@@ -12,6 +13,7 @@ interface Turno {
   estado: string;
   especialidad: string;
   especialista_id: string;
+  created_at : string;
 }
 
 interface LogIngreso {
@@ -31,7 +33,7 @@ interface LogIngreso {
 @Component({
   selector: 'app-estadisticas',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MensajePDFDirective],
   templateUrl: './estadisticas.component.html',
   styleUrl: './estadisticas.component.css'
 })
@@ -52,71 +54,140 @@ export class EstadisticasComponent implements OnInit {
   } 
 
   async cargarDatos() {
-    try {
-      // Pedimos los turnos y logs en paralelo
-      const [turnosResp, logsResp] = await Promise.all([
-        this.db.getTodosLosTurnos(),
-        this.db.getLogsIngresoConUsuarios()
-      ]);
+  try {
+    // Pedimos los turnos y logs en paralelo
+    const [turnosResp, logsResp] = await Promise.all([
+      this.db.getTodosLosTurnos(),
+      this.db.getLogsIngresoConUsuarios()
+    ]);
 
-      // Tipamos correctamente el resultado
-      const turnos: Turno[] = turnosResp.data || [];
-      const logs: LogIngreso[] = logsResp || [];
-      
-      console.log('Logs recibidos:', logs); // Debug
-      this.logs.set(logs);
+    // Tipamos correctamente el resultado
+    const turnos: Turno[] = turnosResp.data || [];
+    const logs: LogIngreso[] = logsResp || [];
+    
+    console.log('Logs recibidos:', logs); // Debug
+    this.logs.set(logs);
 
-      // Agrupamos por especialidad y por día
-      this.turnosPorEspecialidad.set(this.agrupar(turnos, 'especialidad'));
-      this.turnosPorDia.set(this.agrupar(turnos, 'fecha'));
+    // Agrupamos por especialidad y por día (SIN filtro de fecha)
+    this.turnosPorEspecialidad.set(this.agrupar(turnos, 'especialidad'));
+    this.turnosPorDia.set(this.agrupar(turnos, 'fecha'));
 
+    // ✅ TURNOS SOLICITADOS: Filtrar por created_at y agrupar por médico
+    this.turnosPorMedico.set(
+      await this.agruparTurnosSolicitadosPorMedico(turnos, this.filtroDesde, this.filtroHasta)
+    );
 
-      const enRango = turnos.filter((t: Turno) =>
-        t.fecha >= this.filtroDesde && t.fecha <= this.filtroHasta
-      );
+    // ✅ TURNOS FINALIZADOS: Filtrar por fecha y agrupar por médico
+    this.turnosFinalizados.set(
+      await this.agruparTurnosFinalizadosPorMedico(turnos, this.filtroDesde, this.filtroHasta)
+    );
 
-      // Agrupamos turnos por médico con nombres
-      this.turnosPorMedico.set(await this.agruparPorMedicoConNombres(enRango));
+    const logsFiltrados = logs.filter(log => {
+      const fecha = this.extraerFecha(log.timestamp || log.fecha_ingreso);
+      return fecha >= this.filtroDesde && fecha <= this.filtroHasta;
+    });
 
-      // Agrupamos turnos finalizados por médico con nombres
-      this.turnosFinalizados.set(
-        await this.agruparPorMedicoConNombres(
-          enRango.filter((t: Turno) => t.estado === 'finalizado')
-        )
-      );
+    this.logsIngresoPorDia.set(this.agruparLogsPorDiaMejorado(logsFiltrados));
 
-      const logsFiltrados = logs.filter(log => {
-        const fecha = this.extraerFecha(log.timestamp || log.fecha_ingreso);
-        return fecha >= this.filtroDesde && fecha <= this.filtroHasta;
-      });
-
-      this.logsIngresoPorDia.set(this.agruparLogsPorDiaMejorado(logsFiltrados));
-
-      // Dibujamos los gráficos
-      this.renderCharts();
-    } catch (error) {
-      console.error('Error cargando datos:', error);
-    }
+    // Dibujamos los gráficos
+    this.renderCharts();
+  } catch (error) {
+    console.error('Error cargando datos:', error);
   }
+}
+
+// ✅ Nuevo método específico para turnos SOLICITADOS (filtra por created_at)
+async agruparTurnosSolicitadosPorMedico(
+  turnos: Turno[], 
+  fechaDesde: string, 
+  fechaHasta: string
+): Promise<Record<string, number>> {
+  
+  console.log('=== DEBUG TURNOS SOLICITADOS ===');
+  console.log('Fecha desde:', fechaDesde);
+  console.log('Fecha hasta:', fechaHasta);
+  console.log('Total turnos recibidos:', turnos.length);
+  
+  // Mostrar algunos ejemplos de created_at
+  turnos.slice(0, 5).forEach((turno, index) => {
+    const fechaCreacion = this.extraerFecha(turno.created_at);
+    console.log(`Turno ${index + 1}:`, {
+      id: turno.id,
+      created_at_original: turno.created_at,
+      created_at_extraido: fechaCreacion,
+      cumple_filtro: fechaCreacion >= fechaDesde && fechaCreacion <= fechaHasta
+    });
+  });
+
+  // Filtrar por created_at (fecha de solicitud)
+  const turnosFiltrados = turnos.filter((t: Turno) => {
+    const fechaCreacion = this.extraerFecha(t.created_at);
+    const cumpleFiltro = fechaCreacion >= fechaDesde && fechaCreacion <= fechaHasta;
+    return cumpleFiltro;
+  });
+
+  console.log(`Turnos solicitados filtrados: ${turnosFiltrados.length}`);
+  console.log('=== FIN DEBUG ===');
+  
+  return await this.agruparPorMedicoConNombres(turnosFiltrados);
+}
+
+// ✅ Nuevo método específico para turnos FINALIZADOS (filtra por fecha)
+async agruparTurnosFinalizadosPorMedico(
+  turnos: Turno[], 
+  fechaDesde: string, 
+  fechaHasta: string
+): Promise<Record<string, number>> {
+  
+  // Filtrar por fecha (fecha de realización) Y estado finalizado
+  const turnosFiltrados = turnos.filter((t: Turno) => 
+    t.estado === 'finalizado' && 
+    t.fecha >= fechaDesde && 
+    t.fecha <= fechaHasta
+  );
+
+  console.log(`Turnos finalizados filtrados por fecha: ${turnosFiltrados.length}`);
+  
+  return await this.agruparPorMedicoConNombres(turnosFiltrados);
+}
 
   // Método mejorado para extraer solo la fecha de un timestamp
   extraerFecha(timestamp: string): string {
-    if (!timestamp) return new Date().toISOString().split('T')[0];
-    
-    try {
-      const fecha = new Date(timestamp);
-      // Verificar si la fecha es válida
-      if (isNaN(fecha.getTime())) {
-        console.warn('Fecha inválida:', timestamp);
-        return new Date().toISOString().split('T')[0];
-      }
-      
-      return fecha.toISOString().split('T')[0]; // Formato YYYY-MM-DD
-    } catch (error) {
-      console.error('Error al procesar fecha:', timestamp, error);
-      return new Date().toISOString().split('T')[0];
-    }
+  if (!timestamp) {
+    console.warn('Timestamp vacío, usando fecha actual');
+    // Usar fecha actual en zona horaria argentina
+    const fechaArgentina = new Date().toLocaleDateString('en-CA', {
+      timeZone: 'America/Argentina/Buenos_Aires'
+    });
+    return fechaArgentina;
   }
+  
+  try {
+    const fecha = new Date(timestamp);
+    // Verificar si la fecha es válida
+    if (isNaN(fecha.getTime())) {
+      console.warn('Fecha inválida:', timestamp);
+      const fechaArgentina = new Date().toLocaleDateString('en-CA', {
+        timeZone: 'America/Argentina/Buenos_Aires'
+      });
+      return fechaArgentina;
+    }
+    
+    // ✅ CAMBIO PRINCIPAL: Usar zona horaria de Argentina
+    const fechaExtraida = fecha.toLocaleDateString('en-CA', {
+      timeZone: 'America/Argentina/Buenos_Aires'
+    }); // Formato YYYY-MM-DD en zona horaria argentina
+    
+    console.log(`Fecha extraída (Argentina): ${timestamp} -> ${fechaExtraida}`);
+    return fechaExtraida;
+  } catch (error) {
+    console.error('Error al procesar fecha:', timestamp, error);
+    const fechaArgentina = new Date().toLocaleDateString('en-CA', {
+      timeZone: 'America/Argentina/Buenos_Aires'
+    });
+    return fechaArgentina;
+  }
+}
 
   // Método mejorado para agrupar logs por día
   agruparLogsPorDiaMejorado(logs: LogIngreso[]): Record<string, number> {
@@ -211,43 +282,45 @@ export class EstadisticasComponent implements OnInit {
     // Limpiar gráficos existentes
     this.limpiarGraficos();
 
+    // 🍰 Gráfico de torta para especialidades
     this.crearGrafico(
       'chartEspecialidad',
       'Turnos por especialidad',
       this.turnosPorEspecialidad(),
-      'skyblue'
+      'pie'
     );
 
+    // 📈 Gráfico de línea para turnos por día
     this.crearGrafico(
       'chartPorDia',
       'Turnos por día',
       this.turnosPorDia(),
-      'green'
+      'line'
     );
 
+    // 📊 Gráfico de barras para turnos por médico
     this.crearGrafico(
       'chartMedico',
       'Turnos solicitados por médico',
       this.turnosPorMedico(),
-      'orange'
+      'bar'
     );
 
+    // 📊 Gráfico de barras para turnos finalizados
     this.crearGrafico(
       'chartFinalizados',
       'Turnos finalizados por médico',
       this.turnosFinalizados(),
-      'purple'
+      'bar'
     );
 
+    // 📈 Gráfico de línea para ingresos por día
     this.crearGrafico(
       'chartLogsIngreso',
       'Ingresos al sistema por día',
       this.logsIngresoPorDia(),
-      '#3B82F6'
+      'line'
     );
-
-    // Crear tabla de logs detallada
-    this.crearTablaLogs();
   }
 
   limpiarGraficos() {
@@ -263,16 +336,16 @@ export class EstadisticasComponent implements OnInit {
     });
   }
 
-  crearGrafico(id: string, titulo: string, datos: Record<string, number>, color: string) {
+  // ✨ Método renovado para crear diferentes tipos de gráficos
+  crearGrafico(id: string, titulo: string, datos: Record<string, number>, tipoGrafico: 'bar' | 'pie' | 'line') {
     const ctx = document.getElementById(id) as HTMLCanvasElement;
     if (!ctx) return;
 
-    // Ordenar datos por fecha si es el gráfico de logs por día o turnos por día
     let labels = Object.keys(datos);
     let valores = Object.values(datos);
 
-    if (id === 'chartLogsIngreso' || id === 'chartPorDia') {
-      // Ordenar fechas cronológicamente
+    // Ordenar datos por fecha si es gráfico de línea (temporal)
+    if (tipoGrafico === 'line') {
       const datosOrdenados = labels
         .map(fecha => ({ fecha, valor: datos[fecha] }))
         .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
@@ -281,40 +354,92 @@ export class EstadisticasComponent implements OnInit {
       valores = datosOrdenados.map(item => item.valor);
     }
 
-    new Chart(ctx, {
-      type: 'bar',
+    // Configuración específica según el tipo de gráfico
+    const configuracion: any = {
+      type: tipoGrafico,
       data: {
         labels: labels,
         datasets: [{
           label: titulo,
           data: valores,
-          backgroundColor: color,
-          borderColor: color,
-          borderWidth: 1
+          borderWidth: tipoGrafico === 'line' ? 3 : 1
         }]
       },
       options: {
         responsive: true,
         plugins: {
-          legend: { display: false },
-          title: { display: true, text: titulo }
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              stepSize: 1
-            }
+          legend: { 
+            display: tipoGrafico === 'pie', // Solo mostrar leyenda en gráfico de torta
+            position: tipoGrafico === 'pie' ? 'right' : 'top'
           },
-          x: {
-            ticks: {
-              maxRotation: 45,
-              minRotation: 0
-            }
+          title: { 
+            display: true, 
+            text: titulo,
+            font: { size: 16, weight: 'bold' }
           }
         }
       }
-    });
+    };
+
+    // Configuraciones específicas por tipo
+    if (tipoGrafico === 'pie') {
+      // 🍰 Configuración para gráfico de torta
+      const colores = [
+        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+        '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+      ];
+      
+      configuracion.data.datasets[0].backgroundColor = colores.slice(0, labels.length);
+      configuracion.data.datasets[0].borderColor = '#ffffff';
+      configuracion.data.datasets[0].borderWidth = 2;
+      
+    } else if (tipoGrafico === 'line') {
+      // 📈 Configuración para gráfico de línea
+      configuracion.data.datasets[0].borderColor = id === 'chartPorDia' ? '#10B981' : '#3B82F6';
+      configuracion.data.datasets[0].backgroundColor = id === 'chartPorDia' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)';
+      configuracion.data.datasets[0].fill = true;
+      configuracion.data.datasets[0].tension = 0.4; // Línea suavizada
+      configuracion.data.datasets[0].pointRadius = 6;
+      configuracion.data.datasets[0].pointHoverRadius = 8;
+      configuracion.data.datasets[0].pointBackgroundColor = id === 'chartPorDia' ? '#10B981' : '#3B82F6';
+      
+      // Escalas para gráficos de línea
+      configuracion.options.scales = {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 1 },
+          grid: { color: 'rgba(0,0,0,0.1)' }
+        },
+        x: {
+          ticks: {
+            maxRotation: 45,
+            minRotation: 0
+          },
+          grid: { color: 'rgba(0,0,0,0.1)' }
+        }
+      };
+      
+    } else {
+      // 📊 Configuración para gráfico de barras
+      const color = id === 'chartMedico' ? '#F59E0B' : '#8B5CF6';
+      configuracion.data.datasets[0].backgroundColor = color;
+      configuracion.data.datasets[0].borderColor = color;
+      
+      configuracion.options.scales = {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 1 }
+        },
+        x: {
+          ticks: {
+            maxRotation: 45,
+            minRotation: 0
+          }
+        }
+      };
+    }
+
+    new Chart(ctx, configuracion);
   }
 
   crearTablaLogs() {
@@ -531,5 +656,13 @@ export class EstadisticasComponent implements OnInit {
     }
 
     doc.save(`estadisticas-clinica-${new Date().toISOString().split('T')[0]}.pdf`);
+  }
+
+    get logsOrdenados(): LogIngreso[] {
+    return [...this.logs()].sort((a, b) => {
+      const fechaA = new Date(a.timestamp || a.fecha_ingreso).getTime();
+      const fechaB = new Date(b.timestamp || b.fecha_ingreso).getTime();
+      return fechaB - fechaA; // Más recientes primero
+    });
   }
 }

@@ -141,45 +141,46 @@ export class MisTurnosComponent implements OnInit {
 
   // Método para buscar en datos de historia clínica
   private buscarEnHistoriaClinica(turno: any, filtroNormalizado: string): boolean {
-    if (!turno) return false;
-    
-    // Buscar en datos estáticos de historia clínica
-    const datosEstaticos = [
-      turno.altura_cm?.toString() || '',
-      turno.peso_kg?.toString() || '',
-      turno.temperatura_c?.toString() || '',
-      turno.presion_arterial || ''
-    ];
-    
-    // Verificar si algún dato estático coincide
-    const coincideEstatico = datosEstaticos.some(dato => 
-      this.normalizarTexto(dato).includes(filtroNormalizado)
-    );
-    
-    if (coincideEstatico) return true;
-    
-    // Buscar en datos dinámicos (solo valores, no claves)
-    if (turno.datos_dinamicos) {
-      try {
-        const datosDinamicos = typeof turno.datos_dinamicos === 'string' 
-          ? JSON.parse(turno.datos_dinamicos) 
-          : turno.datos_dinamicos;
+  if (!turno) return false;
+  
+  // Buscar en datos estáticos de historia clínica
+  const datosEstaticos = [
+    turno.altura_cm?.toString() || '',
+    turno.peso_kg?.toString() || '',
+    turno.temperatura_c?.toString() || '',
+    turno.presion_arterial || ''
+  ];
+  
+  // Verificar si algún dato estático coincide
+  const coincideEstatico = datosEstaticos.some(dato => 
+    this.normalizarTexto(dato).includes(filtroNormalizado)
+  );
+  
+  if (coincideEstatico) return true;
+  
+  // Buscar en datos dinámicos (ahora en claves/keys, no en valores)
+  if (turno.datos_dinamicos) {
+    try {
+      const datosDinamicos = typeof turno.datos_dinamicos === 'string' 
+        ? JSON.parse(turno.datos_dinamicos) 
+        : turno.datos_dinamicos;
+      
+      if (datosDinamicos && typeof datosDinamicos === 'object') {
+        // CAMBIO: Ahora filtramos por las claves (keys) en lugar de los valores (values)
+        const clavesDinamicas = Object.keys(datosDinamicos);
+        const coincideDinamico = clavesDinamicas.some(clave => 
+          this.normalizarTexto(clave || '').includes(filtroNormalizado)
+        );
         
-        if (datosDinamicos && typeof datosDinamicos === 'object') {
-          const valoresDinamicos = Object.values(datosDinamicos);
-          const coincideDinamico = valoresDinamicos.some(valor => 
-            this.normalizarTexto(valor?.toString() || '').includes(filtroNormalizado)
-          );
-          
-          if (coincideDinamico) return true;
-        }
-      } catch (error) {
-        console.error('Error al parsear datos dinámicos:', error);
+        if (coincideDinamico) return true;
       }
+    } catch (error) {
+      console.error('Error al parsear datos dinámicos:', error);
     }
-    
-    return false;
   }
+  
+  return false;
+}
 
   aplicarFiltros() {
     let turnosFiltrados = [...this.turnos];
